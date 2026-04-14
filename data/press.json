@@ -1,0 +1,22 @@
+[
+  {
+    "id": "press-001",
+    "title": "Gunnen recibe el Sol Repsol 2024",
+    "slug": "gunnen-sol-repsol-2024",
+    "excerpt": "El restaurante Gunnen ha sido galardonado con el prestigioso Sol Repsol, reconocimiento a la excelencia gastronómica en España.",
+    "content": "El restaurante Gunnen, ubicado en el corazón de Galicia, ha recibido el Sol Repsol 2024, uno de los reconocimientos más prestigiosos de la gastronomía española.\n\nEste galardón reconoce la trayectoria del equipo de Gunnen, su apuesta por el producto local y de temporada, y su cocina de autor comprometida con el aprovechamiento alimentario.\n\nDesde sus inicios, Gunnen ha destacado por su filosofía de \"Alegría Compartida\", ofreciendo una experiencia gastronómica única en un espacio íntimo de solo 3 mesas.",
+    "publishedAt": "2024-11-15T10:00:00Z",
+    "published": true,
+    "coverImage": ""
+  },
+  {
+    "id": "press-002",
+    "title": "La cocina de temporada de Gunnen: un homenaje al producto gallego",
+    "slug": "cocina-temporada-producto-gallego",
+    "excerpt": "El menú Tempo de Gunnen es un recorrido por los mejores productos de Galicia, tratados con técnica y sensibilidad.",
+    "content": "En Gunnen creemos en la cocina honesta, la que respeta el producto y lo trata con la técnica justa. Nuestro menú Tempo es un reflejo de esta filosofía.\n\nCada plato cuenta una historia: la del agricultor que cultivó esa verdura, la del pescador que faeó esa merluza al amanecer, la de la bodeguera que cuida sus viñas con mimo.\n\nGalicia es una tierra extraordinaria para la gastronomía, y en Gunnen queremos ser su mejor embajador.",
+    "publishedAt": "2025-01-20T10:00:00Z",
+    "published": true,
+    "coverImage": ""
+  }
+]

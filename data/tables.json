@@ -1,0 +1,26 @@
+[
+  {
+    "id": "table-1",
+    "name": "Gunnen 1",
+    "capacity": 5,
+    "available": true,
+    "notes": "",
+    "createdAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "table-2",
+    "name": "Gunnen 2",
+    "capacity": 5,
+    "available": true,
+    "notes": "",
+    "createdAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "table-3",
+    "name": "Gunnen 3",
+    "capacity": 5,
+    "available": true,
+    "notes": "",
+    "createdAt": "2024-01-01T00:00:00.000Z"
+  }
+]

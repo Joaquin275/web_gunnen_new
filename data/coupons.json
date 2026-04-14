@@ -1,0 +1,14 @@
+[
+  {
+    "id": "coup-001",
+    "code": "BIENVENIDA10",
+    "type": "PERCENTAGE",
+    "value": 10,
+    "description": "10% de descuento en tu primera reserva",
+    "maxUses": 50,
+    "usedCount": 3,
+    "expiresAt": "2026-12-31T23:59:59Z",
+    "active": true,
+    "createdAt": "2026-01-01T00:00:00Z"
+  }
+]

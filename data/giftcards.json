@@ -1,0 +1,30 @@
+[
+  {
+    "id": "gc-001",
+    "code": "GUNNEN-XMAS-2024",
+    "amount": 200,
+    "buyerName": "Pedro Álvarez",
+    "buyerEmail": "pedro@email.com",
+    "recipientName": "Ana Álvarez",
+    "recipientEmail": "ana@email.com",
+    "message": "¡Feliz Navidad! Disfruta de una experiencia única en Gunnen",
+    "status": "ACTIVE",
+    "sendDate": "2024-12-25",
+    "redeemedAt": null,
+    "createdAt": "2024-12-20T10:00:00Z"
+  },
+  {
+    "id": "gc-002",
+    "code": "GUNNEN-ANIV-0125",
+    "amount": 100,
+    "buyerName": "Rosa Méndez",
+    "buyerEmail": "rosa@email.com",
+    "recipientName": "Rosa Méndez",
+    "recipientEmail": "rosa@email.com",
+    "message": "Un capricho para mí",
+    "status": "REDEEMED",
+    "sendDate": "2025-01-10",
+    "redeemedAt": "2025-02-01T20:00:00Z",
+    "createdAt": "2025-01-08T12:00:00Z"
+  }
+]

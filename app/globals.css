@@ -1,0 +1,152 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --font-cormorant: 'Cormorant Garamond', Georgia, serif;
+    --font-inter: 'Inter', system-ui, sans-serif;
+  }
+
+  html {
+    @apply antialiased;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans;
+    font-feature-settings: 'rlig' 1, 'calt' 1;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-serif;
+  }
+}
+
+@layer components {
+  /* Botón primario minimalista */
+  .btn-primary {
+    @apply inline-block px-8 py-3 text-sm tracking-wider uppercase;
+    @apply bg-primary text-white;
+    @apply transition-all duration-200 ease-out;
+    @apply hover:bg-primary-light;
+    @apply focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2;
+    @apply disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  /* Botón secundario con borde */
+  .btn-secondary {
+    @apply inline-block px-8 py-3 text-sm tracking-wider uppercase;
+    @apply border border-primary text-primary;
+    @apply transition-all duration-200 ease-out;
+    @apply hover:bg-primary hover:text-white;
+    @apply focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2;
+    @apply disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  /* Link minimalista con underline sutil */
+  .link-subtle {
+    @apply inline-block relative;
+    @apply after:content-[''] after:absolute after:bottom-0 after:left-0;
+    @apply after:w-full after:h-px after:bg-current;
+    @apply after:origin-bottom-right after:scale-x-0;
+    @apply after:transition-transform after:duration-200 after:ease-out;
+    @apply hover:after:origin-bottom-left hover:after:scale-x-100;
+  }
+
+  /* Input premium */
+  .input-premium {
+    @apply w-full px-0 py-3 text-base;
+    @apply bg-transparent border-0 border-b border-gray-300;
+    @apply transition-colors duration-200;
+    @apply focus:outline-none focus:border-primary;
+    @apply placeholder:text-gray-400;
+  }
+
+  /* Separador horizontal fino */
+  .divider {
+    @apply w-full h-px bg-gray-200;
+  }
+
+  /* Contenedor de sección con padding vertical */
+  .section-container {
+    @apply py-section px-4 sm:px-6 md:px-12 lg:px-24;
+  }
+
+  /* Grid editorial para contenido */
+  .editorial-grid {
+    @apply grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-12;
+  }
+
+  /* Animaciones de entrada */
+  .animate-on-scroll {
+    @apply opacity-0 translate-y-8;
+    @apply transition-all duration-700 ease-out;
+  }
+
+  .animate-on-scroll.is-visible {
+    @apply opacity-100 translate-y-0;
+  }
+}
+
+@layer utilities {
+  /* Utilidades de texto */
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  /* Gradiente sutil para hero */
+  .hero-gradient {
+    background: linear-gradient(
+      180deg,
+      rgba(250, 250, 249, 0) 0%,
+      rgba(250, 250, 249, 0.8) 100%
+    );
+  }
+
+  /* Overlay oscuro para imágenes */
+  .overlay-dark {
+    @apply absolute inset-0 bg-black/30;
+  }
+}
+
+/* Scroll suave y estilizado */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-gray-100;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-gray-300 rounded;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-gray-400;
+}
+
+/* Selection styling */
+::selection {
+  @apply bg-accent/20 text-primary;
+}
+
+::-moz-selection {
+  @apply bg-accent/20 text-primary;
+}
+
+/* Animación Ken Burns para el carrusel del Hero */
+@keyframes kenburns {
+  0% {
+    transform: scale(1);
+  }
+  100% {
+    transform: scale(1.1);
+  }
+}
+
+.kenburns-animation {
+  animation: kenburns 20s ease-out infinite alternate;
+}

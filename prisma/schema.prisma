@@ -1,0 +1,320 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============ AUTH & ADMIN ============
+
+model UserAdmin {
+  id            String   @id @default(cuid())
+  email         String   @unique
+  passwordHash  String
+  name          String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@map("user_admins")
+}
+
+// ============ AVAILABILITY ============
+
+model AvailabilityDay {
+  id            String      @id @default(cuid())
+  date          DateTime    @db.Date
+  isOpen        Boolean     @default(true)
+  capacity      Int         @default(40)
+  notes         String?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  
+  timeSlots     TimeSlot[]
+
+  @@unique([date])
+  @@index([date])
+  @@map("availability_days")
+}
+
+model TimeSlot {
+  id                String          @id @default(cuid())
+  availabilityDayId String
+  availabilityDay   AvailabilityDay @relation(fields: [availabilityDayId], references: [id], onDelete: Cascade)
+  
+  time              String          // Format: "13:00", "20:30"
+  capacity          Int             @default(10)
+  minPeople         Int             @default(1)
+  maxPeople         Int             @default(8)
+  depositPerPerson  Decimal         @default(50) @db.Decimal(10, 2)
+  isActive          Boolean         @default(true)
+  
+  reservations      Reservation[]
+  
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+
+  @@index([availabilityDayId])
+  @@map("time_slots")
+}
+
+// ============ RESERVATIONS ============
+
+enum ReservationStatus {
+  PENDING_PAYMENT
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+  NO_SHOW
+}
+
+enum PaymentStatus {
+  PENDING
+  PROCESSING
+  SUCCEEDED
+  FAILED
+  REFUNDED
+  PARTIALLY_REFUNDED
+}
+
+enum PaymentMethod {
+  CARD
+  SEPA_DEBIT
+}
+
+model Reservation {
+  id                String            @id @default(cuid())
+  
+  // Timing
+  timeSlotId        String
+  timeSlot          TimeSlot          @relation(fields: [timeSlotId], references: [id])
+  reservationDate   DateTime          @db.Date
+  reservationTime   String            // "13:00"
+  
+  // Guest info
+  firstName         String
+  lastName          String
+  email             String
+  phone             String
+  numberOfPeople    Int
+  
+  // Additional info
+  observations      String?           @db.Text
+  allergens         String[]
+  allergenNotes     String?           @db.Text
+  
+  // Coupon
+  couponId          String?
+  coupon            Coupon?           @relation(fields: [couponId], references: [id])
+  couponDiscount    Decimal?          @db.Decimal(10, 2)
+  
+  // Gift card
+  giftCardId        String?
+  giftCard          GiftCard?         @relation(fields: [giftCardId], references: [id])
+  
+  // Amounts
+  estimatedTotal    Decimal           @db.Decimal(10, 2)
+  depositAmount     Decimal           @db.Decimal(10, 2)
+  finalAmount       Decimal?          @db.Decimal(10, 2)
+  
+  // Status
+  status            ReservationStatus @default(PENDING_PAYMENT)
+  
+  // Cancellation
+  cancelledAt       DateTime?
+  cancellationNotes String?           @db.Text
+  refundAmount      Decimal?          @db.Decimal(10, 2)
+  refundStatus      String?           // "full", "partial", "none"
+  
+  // Payment
+  payment           Payment?
+  
+  // Metadata
+  confirmedAt       DateTime?
+  completedAt       DateTime?
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+
+  @@index([email])
+  @@index([reservationDate])
+  @@index([timeSlotId])
+  @@index([status])
+  @@map("reservations")
+}
+
+model Payment {
+  id                    String        @id @default(cuid())
+  
+  reservationId         String        @unique
+  reservation           Reservation   @relation(fields: [reservationId], references: [id], onDelete: Cascade)
+  
+  amount                Decimal       @db.Decimal(10, 2)
+  currency              String        @default("eur")
+  
+  paymentMethod         PaymentMethod
+  status                PaymentStatus @default(PENDING)
+  
+  // Stripe
+  stripePaymentIntentId String?       @unique
+  stripeCustomerId      String?
+  stripeMandateId       String?       // For SEPA
+  
+  // Metadata
+  metadata              Json?
+  errorMessage          String?       @db.Text
+  
+  createdAt             DateTime      @default(now())
+  updatedAt             DateTime      @updatedAt
+
+  @@index([stripePaymentIntentId])
+  @@map("payments")
+}
+
+// ============ COUPONS ============
+
+enum CouponType {
+  PERCENTAGE
+  FIXED_AMOUNT
+}
+
+model Coupon {
+  id            String      @id @default(cuid())
+  code          String      @unique
+  description   String?
+  
+  type          CouponType
+  value         Decimal     @db.Decimal(10, 2)
+  
+  isActive      Boolean     @default(true)
+  maxUses       Int?
+  usedCount     Int         @default(0)
+  
+  validFrom     DateTime?
+  validUntil    DateTime?
+  
+  minAmount     Decimal?    @db.Decimal(10, 2)
+  
+  reservations  Reservation[]
+  
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  @@map("coupons")
+}
+
+// ============ GIFT CARDS ============
+
+enum GiftCardStatus {
+  PENDING_PAYMENT
+  ACTIVE
+  REDEEMED
+  EXPIRED
+  CANCELLED
+}
+
+model GiftCard {
+  id                String          @id @default(cuid())
+  code              String          @unique
+  
+  amount            Decimal         @db.Decimal(10, 2)
+  remainingAmount   Decimal         @db.Decimal(10, 2)
+  
+  status            GiftCardStatus  @default(PENDING_PAYMENT)
+  
+  // Purchaser info
+  purchaserName     String
+  purchaserEmail    String
+  
+  // Recipient info
+  recipientName     String?
+  recipientEmail    String
+  message           String?         @db.Text
+  sendDate          DateTime        @db.Date
+  
+  // Payment
+  stripePaymentIntentId String?     @unique
+  paidAt            DateTime?
+  
+  // Redemption
+  redeemedAt        DateTime?
+  reservations      Reservation[]
+  
+  // Expiration
+  expiresAt         DateTime
+  
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+
+  @@index([code])
+  @@index([recipientEmail])
+  @@map("gift_cards")
+}
+
+// ============ PRESS / BLOG ============
+
+model PressPost {
+  id            String    @id @default(cuid())
+  slug          String    @unique
+  
+  title         String
+  excerpt       String    @db.Text
+  content       String    @db.Text
+  coverImage    String?
+  
+  publishedAt   DateTime  @default(now())
+  isPublished   Boolean   @default(true)
+  
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([slug])
+  @@index([publishedAt])
+  @@map("press_posts")
+}
+
+// ============ CANCEL POLICY ============
+
+model CancelPolicyRule {
+  id                String   @id @default(cuid())
+  
+  minHoursBefore    Int      // Minimum hours before reservation
+  maxHoursBefore    Int?     // Maximum hours (null = infinity)
+  refundPercentage  Int      // 0-100
+  
+  description       String?
+  isActive          Boolean  @default(true)
+  priority          Int      @default(0) // Higher priority = checked first
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@map("cancel_policy_rules")
+}
+
+// ============ SETTINGS ============
+
+model Settings {
+  id                    String   @id @default(cuid())
+  key                   String   @unique
+  value                 String   @db.Text
+  description           String?
+  
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@map("settings")
+}
+
+// Settings keys:
+// - deposit_mode: "PER_PERSON" | "FIXED_TOTAL"
+// - deposit_per_person: "50.00"
+// - deposit_percentage: "30"
+// - accent_color: "#8b7355"
+// - max_people_per_reservation: "10"
+// - min_people_per_reservation: "1"
+// - restaurant_capacity: "40"
+// - booking_advance_days: "60"
