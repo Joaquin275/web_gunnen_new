@@ -51,8 +51,9 @@ const menusData: Record<string, any> = {
   },
 };
 
-export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
-  const menu = menusData[params.slug];
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params;
+  const menu = menusData[slug];
   if (!menu) {
     return { title: "Menú no encontrado" };
   }
@@ -62,8 +63,9 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   };
 }
 
-export default function MenuDetailPage({ params }: { params: { slug: string } }) {
-  const menu = menusData[params.slug];
+export default async function MenuDetailPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  const menu = menusData[slug];
 
   if (!menu) {
     notFound();

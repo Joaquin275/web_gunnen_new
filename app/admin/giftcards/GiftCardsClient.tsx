@@ -229,7 +229,7 @@ export default function GiftCardsClient({ initialGiftCards }: { initialGiftCards
                       De: <strong>{g.buyerName}</strong>
                       {g.recipientName !== g.buyerName && <> → Para: <strong>{g.recipientName}</strong> ({g.recipientEmail})</>}
                     </p>
-                    {g.message && <p className="text-sm text-gray-400 italic mt-1">"{g.message}"</p>}
+                    {g.message && <p className="text-sm text-gray-400 italic mt-1">&ldquo;{g.message}&rdquo;</p>}
                     <p className="text-xs text-gray-400 mt-1">
                       Creado: {new Date(g.createdAt).toLocaleDateString("es-ES")}
                       {g.redeemedAt && ` · Canjeado: ${new Date(g.redeemedAt).toLocaleDateString("es-ES")}`}

@@ -3,8 +3,9 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import CancelButton from "./CancelButton";
 
-export default function ReservationDetailPage({ params }: { params: { id: string } }) {
-  const r = reservationsDb.findById(params.id);
+export default async function ReservationDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const r = reservationsDb.findById(id);
   if (!r) notFound();
 
   const statusMap: Record<string, { label: string; cls: string }> = {
@@ -89,7 +90,7 @@ export default function ReservationDetailPage({ params }: { params: { id: string
             <p className="font-medium text-red-800">Cancelar reserva</p>
             <p className="text-sm text-red-600">La reserva quedará marcada como cancelada</p>
           </div>
-          <CancelButton id={r.id} />
+          <CancelButton id={id} />
         </div>
       )}
     </div>

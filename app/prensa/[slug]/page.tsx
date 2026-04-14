@@ -3,14 +3,16 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { pressDb } from "@/lib/db-json";
 
-export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
-  const post = pressDb.findBySlug(params.slug);
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params;
+  const post = pressDb.findBySlug(slug);
   if (!post) return { title: "Artículo no encontrado" };
   return { title: `${post.title} — Gunnen`, description: post.excerpt };
 }
 
-export default function PressDetailPage({ params }: { params: { slug: string } }) {
-  const post = pressDb.findBySlug(params.slug);
+export default async function PressDetailPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  const post = pressDb.findBySlug(slug);
   if (!post || !post.published) notFound();
 
   return (
