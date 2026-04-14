@@ -42,7 +42,7 @@ export async function GET(request: Request) {
     // Reservas confirmadas para esta fecha
     const allReservations = reservationsDb.findAll();
     const dateReservations = allReservations.filter((r) => {
-      const rDate = (r.date ?? "").split("T")[0];
+      const rDate = (r.reservationDate ?? "").split("T")[0];
       return (
         rDate === dateParam &&
         (r.status === "CONFIRMED" || r.status === "PENDING_PAYMENT")
@@ -51,7 +51,7 @@ export async function GET(request: Request) {
 
     // Cada franja = 1 mesa; si ya hay reserva en ese horario → ocupada
     const timeSlots = slots.map((time) => {
-      const occupied = dateReservations.filter((r) => r.time === time).length;
+      const occupied = dateReservations.filter((r) => r.reservationTime === time).length;
       const available = occupied > 0 ? 0 : 1; // 1 mesa por franja
 
       return {

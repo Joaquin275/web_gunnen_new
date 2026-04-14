@@ -30,10 +30,9 @@ export type ReservationStatus = "PENDING_PAYMENT" | "CONFIRMED" | "CANCELLED";
 
 export interface Reservation {
   id: string;
-  date: string;
-  time: string;
-  people: number;
-  menuId: string;
+  reservationDate: string;
+  reservationTime: string;
+  numberOfPeople: number;
   menuName: string;
   menuPrice: number;
   depositAmount: number;
@@ -43,8 +42,9 @@ export interface Reservation {
   phone: string;
   observations: string;
   allergens: string[];
+  allergenNotes: string;
+  couponCode: string;
   status: ReservationStatus;
-  paymentStatus: string;
   createdAt: string;
 }
 
@@ -58,7 +58,7 @@ export const reservationsDb = {
     readFile<Reservation>("reservations.json").find((r) => r.id === id) ?? null,
 
   findByDate: (date: string): Reservation[] =>
-    readFile<Reservation>("reservations.json").filter((r) => r.date === date),
+    readFile<Reservation>("reservations.json").filter((r) => r.reservationDate === date),
 
   create: (data: Omit<Reservation, "id" | "createdAt">): Reservation => {
     const all = readFile<Reservation>("reservations.json");
@@ -83,7 +83,7 @@ export const reservationsDb = {
   countToday: (): number => {
     const today = new Date().toISOString().split("T")[0];
     return readFile<Reservation>("reservations.json").filter(
-      (r) => r.date === today && r.status !== "CANCELLED"
+      (r) => r.reservationDate === today && r.status !== "CANCELLED"
     ).length;
   },
 

@@ -52,7 +52,7 @@ export default function AdminDashboard() {
               <div key={r.id} className="px-6 py-4 flex items-center justify-between">
                 <div>
                   <p className="font-medium">{r.firstName} {r.lastName}</p>
-                  <p className="text-sm text-gray-500">{r.date} · {r.time} · {r.people} personas · {r.menuName}</p>
+                  <p className="text-sm text-gray-500">{r.reservationDate} · {r.reservationTime} · {r.numberOfPeople} personas · {r.menuName}</p>
                 </div>
                 <div className="flex items-center gap-3">
                   <span className="text-sm font-medium">{r.depositAmount.toFixed(2)}€</span>

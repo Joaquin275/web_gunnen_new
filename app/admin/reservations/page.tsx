@@ -43,15 +43,15 @@ export default function AdminReservationsPage() {
                   return (
                     <tr key={r.id} className="hover:bg-gray-50 transition-colors">
                       <td className="px-4 py-3 whitespace-nowrap">
-                        <span className="font-medium">{r.date}</span>
-                        <span className="text-gray-400 ml-2">{r.time}</span>
+                        <span className="font-medium">{r.reservationDate}</span>
+                        <span className="text-gray-400 ml-2">{r.reservationTime}</span>
                       </td>
                       <td className="px-4 py-3">
                         <p className="font-medium">{r.firstName} {r.lastName}</p>
                         <p className="text-gray-400 text-xs">{r.email}</p>
                       </td>
                       <td className="px-4 py-3 text-gray-600">{r.menuName}</td>
-                      <td className="px-4 py-3 text-center">{r.people}</td>
+                      <td className="px-4 py-3 text-center">{r.numberOfPeople}</td>
                       <td className="px-4 py-3 text-right font-medium">{r.depositAmount.toFixed(2)}€</td>
                       <td className="px-4 py-3 text-center">
                         <span className={`text-xs px-2 py-1 tracking-wider uppercase ${cls}`}>

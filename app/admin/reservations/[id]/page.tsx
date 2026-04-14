@@ -49,23 +49,23 @@ export default async function ReservationDetailPage({ params }: { params: Promis
           <h2 className="text-xs tracking-wider uppercase text-gray-500 mb-4">Detalles</h2>
           <div>
             <p className="text-xs text-gray-400">Fecha y hora</p>
-            <p className="font-medium">{r.date} · {r.time}</p>
+            <p className="font-medium">{r.reservationDate} · {r.reservationTime}</p>
           </div>
           <div>
             <p className="text-xs text-gray-400">Personas</p>
-            <p>{r.people}</p>
+            <p>{r.numberOfPeople}</p>
           </div>
           <div>
             <p className="text-xs text-gray-400">Menú</p>
-            <p>{r.menuName} · {r.menuPrice}€/persona</p>
+            <p>{r.menuName || "—"} {r.menuPrice ? `· ${r.menuPrice}€/persona` : ""}</p>
           </div>
           <div>
-            <p className="text-xs text-gray-400">Señal pagada</p>
+            <p className="text-xs text-gray-400">Señal</p>
             <p className="font-medium text-green-700">{r.depositAmount.toFixed(2)}€</p>
           </div>
           <div>
             <p className="text-xs text-gray-400">Resta pagar en local</p>
-            <p className="font-medium">{((r.menuPrice * r.people) - r.depositAmount).toFixed(2)}€</p>
+            <p className="font-medium">{((r.menuPrice * r.numberOfPeople) - r.depositAmount).toFixed(2)}€</p>
           </div>
         </div>
 

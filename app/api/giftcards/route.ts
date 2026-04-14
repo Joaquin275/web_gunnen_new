@@ -1,87 +1,42 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { giftCardsDb } from "@/lib/db-json";
 
-// Generar código único para el bono
-function generateGiftCardCode(): string {
-  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // Sin caracteres confusos
+function generateCode(): string {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
   let code = "GUNNEN-";
-  
-  for (let i = 0; i < 4; i++) {
-    code += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  
+  for (let i = 0; i < 4; i++) code += chars.charAt(Math.floor(Math.random() * chars.length));
   code += "-";
-  
-  for (let i = 0; i < 4; i++) {
-    code += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  
+  for (let i = 0; i < 4; i++) code += chars.charAt(Math.floor(Math.random() * chars.length));
   return code;
 }
 
 export async function POST(request: Request) {
   try {
     const data = await request.json();
-
-    const {
-      amount,
-      purchaserName,
-      purchaserEmail,
-      recipientName,
-      recipientEmail,
-      message,
-      sendDate,
-    } = data;
+    const { amount, purchaserName, purchaserEmail, recipientName, recipientEmail, message, sendDate } = data;
 
     if (!amount || amount < 50 || amount > 500) {
-      return NextResponse.json(
-        { error: "Importe inválido" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Importe inválido (50€–500€)" }, { status: 400 });
     }
 
-    // Generar código único
-    let code = generateGiftCardCode();
-    let attempts = 0;
-    while (attempts < 10) {
-      const existing = await prisma.giftCard.findUnique({
-        where: { code },
-      });
-      if (!existing) break;
-      code = generateGiftCardCode();
-      attempts++;
-    }
+    const code = generateCode();
 
-    // Calcular fecha de expiración (12 meses desde emisión)
-    const expiresAt = new Date();
-    expiresAt.setFullYear(expiresAt.getFullYear() + 1);
-
-    // Crear bono regalo
-    const giftCard = await prisma.giftCard.create({
-      data: {
-        code,
-        amount,
-        remainingAmount: amount,
-        status: "PENDING_PAYMENT",
-        purchaserName,
-        purchaserEmail,
-        recipientName,
-        recipientEmail,
-        message,
-        sendDate: new Date(sendDate),
-        expiresAt,
-      },
+    const giftCard = giftCardsDb.create({
+      code,
+      amount: Number(amount),
+      buyerName: purchaserName || "—",
+      buyerEmail: purchaserEmail || "—",
+      recipientName: recipientName || "—",
+      recipientEmail: recipientEmail || purchaserEmail || "—",
+      message: message || "",
+      status: "ACTIVE",
+      sendDate: sendDate || new Date().toISOString().split("T")[0],
+      redeemedAt: null,
     });
 
-    return NextResponse.json({
-      giftCardId: giftCard.id,
-      code: giftCard.code,
-    });
-  } catch (error: any) {
-    console.error("Error creating gift card:", error);
-    return NextResponse.json(
-      { error: error.message || "Error creando bono regalo" },
-      { status: 500 }
-    );
+    return NextResponse.json({ giftCardId: giftCard.id, code: giftCard.code });
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : "Error creando bono regalo";
+    return NextResponse.json({ error: msg }, { status: 500 });
   }
 }
