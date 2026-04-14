@@ -16,6 +16,15 @@ const navigation = [
 export default function Header() {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  // Detectar scroll para cambiar fondo del header
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 80);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   // Bloquear scroll del body cuando el menú está abierto
   useEffect(() => {
@@ -26,10 +35,18 @@ export default function Header() {
   // Cerrar menú al navegar
   useEffect(() => { setMenuOpen(false); }, [pathname]);
 
+  // En páginas que no son el home el header siempre es blanco
+  const isHome = pathname === "/";
+  const isWhite = scrolled || !isHome;
+
   return (
     <>
       {/* ─── BARRA SUPERIOR ─── */}
-      <header className="fixed top-0 left-0 right-0 z-50">
+      <header
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+          isWhite ? "bg-white shadow-sm" : "bg-transparent"
+        }`}
+      >
         <nav className="flex items-center justify-between px-5 md:px-10 py-3">
 
           {/* Logos */}
@@ -37,9 +54,9 @@ export default function Header() {
             <img
               src="/images/logo/gunnen-logo.svg"
               alt="Gunnen"
-              className="h-10 sm:h-14 md:h-16 w-auto drop-shadow-md"
+              className="h-10 sm:h-14 md:h-16 w-auto"
             />
-            <div className="border-l border-white/40 pl-2 sm:pl-3">
+            <div className={`border-l pl-2 sm:pl-3 transition-colors duration-300 ${isWhite ? "border-gray-200" : "border-white/40"}`}>
               <img
                 src="/images/logo/premio-sol-repsol.jpg"
                 alt="Premio Sol Repsol"
@@ -52,8 +69,11 @@ export default function Header() {
           <div className="flex items-center gap-3">
             <Link
               href="/reservas"
-              className="hidden sm:inline-block px-5 py-2 text-xs tracking-widest uppercase font-medium
-                         bg-white text-primary hover:bg-gray-100 transition-colors shadow-md"
+              className={`hidden sm:inline-block px-5 py-2 text-xs tracking-widest uppercase font-medium transition-colors duration-300 ${
+                isWhite
+                  ? "bg-primary text-white hover:bg-primary/80"
+                  : "bg-white text-primary hover:bg-gray-100 shadow-md"
+              }`}
             >
               Reservar
             </Link>
@@ -64,9 +84,9 @@ export default function Header() {
               aria-label="Abrir menú"
               className="flex flex-col justify-center items-center gap-[5px] w-10 h-10 focus:outline-none"
             >
-              <span className="block w-7 h-[1.5px] bg-white drop-shadow" />
-              <span className="block w-7 h-[1.5px] bg-white drop-shadow" />
-              <span className="block w-5 h-[1.5px] bg-white drop-shadow self-start" />
+              <span className={`block w-7 h-[1.5px] transition-colors duration-300 ${isWhite ? "bg-primary" : "bg-white drop-shadow"}`} />
+              <span className={`block w-7 h-[1.5px] transition-colors duration-300 ${isWhite ? "bg-primary" : "bg-white drop-shadow"}`} />
+              <span className={`block w-5 h-[1.5px] transition-colors duration-300 self-start ${isWhite ? "bg-primary" : "bg-white drop-shadow"}`} />
             </button>
           </div>
         </nav>

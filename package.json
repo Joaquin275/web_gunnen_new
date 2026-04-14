@@ -9,9 +9,9 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@prisma/client": "^6.2.0",
-    "@stripe/stripe-js": "^4.8.0",
+    "@prisma/client": "^5.22.0",
     "@stripe/react-stripe-js": "^2.8.1",
+    "@stripe/stripe-js": "^4.8.0",
     "bcryptjs": "^2.4.3",
     "next": "15.2.0",
     "next-auth": "^4.24.10",
@@ -29,7 +29,7 @@
     "eslint": "^9",
     "eslint-config-next": "15.2.0",
     "postcss": "^8",
-    "prisma": "^6.2.0",
+    "prisma": "^5.22.0",
     "tailwindcss": "^3.4.1",
     "typescript": "^5"
   }
