@@ -13,7 +13,7 @@
     "@stripe/react-stripe-js": "^2.8.1",
     "@stripe/stripe-js": "^4.8.0",
     "bcryptjs": "^2.4.3",
-    "next": "15.2.0",
+    "next": "15.2.8",
     "next-auth": "^4.24.10",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
