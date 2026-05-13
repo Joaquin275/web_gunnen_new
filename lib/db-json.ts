@@ -28,6 +28,15 @@ function generateId(prefix: string): string {
 
 export type ReservationStatus = "PENDING_PAYMENT" | "CONFIRMED" | "CANCELLED";
 
+/** Estado de la operación en Redsys */
+export type RedsysStatus =
+  | "NONE"           // Sin pago
+  | "PENDING"        // Enviado a Redsys, esperando respuesta
+  | "PREAUTHORIZED"  // Retención activa (TransactionType=1 aprobado)
+  | "CAPTURED"       // Preautorización confirmada/cobrada (TransactionType=3)
+  | "REJECTED"       // Rechazado por banco
+  | "REFUNDED";      // Preautorización anulada
+
 export interface Reservation {
   id: string;
   reservationDate: string;
@@ -35,7 +44,8 @@ export interface Reservation {
   numberOfPeople: number;
   menuName: string;
   menuPrice: number;
-  depositAmount: number;
+  estimatedTotal: number;    // Total estimado (menuPrice × numberOfPeople)
+  depositAmount: number;     // 30% del estimado en euros
   firstName: string;
   lastName: string;
   email: string;
@@ -45,6 +55,12 @@ export interface Reservation {
   allergenNotes: string;
   couponCode: string;
   status: ReservationStatus;
+  // ── Campos Redsys / TPV Virtual ─────────────────────────────────────────
+  redsysOrder: string;       // Ds_Order enviado a Redsys (único por transacción)
+  redsysStatus: RedsysStatus; // Estado de la operación en el TPV
+  redsysAuthCode: string;    // Ds_AuthorisationCode devuelto por Redsys
+  redsysResponse: string;    // Ds_Response (código de respuesta del banco)
+  redsysCapturedAt: string;  // Fecha/hora de captura si se confirma preautorización
   createdAt: string;
 }
 
