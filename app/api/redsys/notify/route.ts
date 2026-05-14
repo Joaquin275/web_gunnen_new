@@ -1,11 +1,13 @@
 /**
  * POST /api/redsys/notify — MerchantURL
- * Redsys llama aquí servidor-a-servidor tras procesar el pago.
+ * Redsys llama aquí servidor-a-servidor tras procesar la preautorización.
+ * Valida la firma, actualiza la reserva y envía el email correspondiente.
  */
 
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { decodeMerchantParams, verifyRedsysSignature, isRedsysApproved } from "@/lib/redsys";
+import { sendReservationConfirmation, sendReservationRejected } from "@/lib/email";
 
 export async function POST(request: NextRequest) {
   try {
@@ -50,7 +52,7 @@ export async function POST(request: NextRequest) {
 
     const approved = isRedsysApproved(dsResponse);
 
-    await prisma.reservation.update({
+    const updated = await prisma.reservation.update({
       where: { id: reservation.id },
       data: {
         status: approved ? "CONFIRMED" : "CANCELLED",
@@ -61,7 +63,33 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    console.log(`[Redsys Notify] orden=${order} | aprobado=${approved} | resp=${dsResponse}`);
+    // ── Enviar email según resultado ────────────────────────────────────────
+    const emailData = {
+      reservationId: updated.id,
+      email: updated.email,
+      firstName: updated.firstName,
+      lastName: updated.lastName,
+      reservationDate: updated.reservationDate,
+      reservationTime: updated.reservationTime,
+      numberOfPeople: updated.numberOfPeople,
+      menuName: updated.menuName ?? undefined,
+      estimatedTotal: Number(updated.estimatedTotal),
+      depositAmount: Number(updated.depositAmount),
+      redsysOrder: updated.redsysOrder ?? undefined,
+    };
+
+    if (approved) {
+      await sendReservationConfirmation(emailData).catch((e) =>
+        console.error("[Redsys Notify] Error enviando email confirmación:", e)
+      );
+      console.log(`[Redsys Notify] ✅ Preautorización OK | orden=${order} | reserva=${reservation.id}`);
+    } else {
+      await sendReservationRejected(emailData).catch((e) =>
+        console.error("[Redsys Notify] Error enviando email rechazo:", e)
+      );
+      console.log(`[Redsys Notify] ❌ Rechazado | orden=${order} | respuesta=${dsResponse}`);
+    }
+
     return new Response("OK", { status: 200 });
   } catch (error) {
     console.error("[Redsys Notify] Error:", error);
