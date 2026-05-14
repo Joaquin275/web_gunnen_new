@@ -144,6 +144,9 @@ model Reservation {
   refundAmount      Decimal?          @db.Decimal(10, 2)
   refundStatus      String?
   
+  // Payment (relación opcional, no usada con Redsys)
+  payment           Payment?
+
   // Metadata
   confirmedAt       DateTime?
   completedAt       DateTime?
