@@ -13,7 +13,7 @@
  *  6. Redsys redirige a /reservas/ok o /reservas/ko.
  */
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import type { ReservationState } from "@/app/reservas/page";
 
 interface Step5DetailsProps {
@@ -32,13 +32,19 @@ export default function Step5Details({ reservationData, onBack }: Step5DetailsPr
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Datos del formulario Redsys (se rellenan antes del auto-envío)
   const [redsysData, setRedsysData] = useState<{
     url: string;
     Ds_SignatureVersion: string;
     Ds_MerchantParameters: string;
     Ds_Signature: string;
   } | null>(null);
+
+  // Auto-envía el formulario oculto en cuanto redsysData esté en el DOM
+  useEffect(() => {
+    if (redsysData && redsysFormRef.current) {
+      redsysFormRef.current.submit();
+    }
+  }, [redsysData]);
 
   const [formData, setFormData] = useState({
     firstName: "",
@@ -110,6 +116,12 @@ export default function Step5Details({ reservationData, onBack }: Step5DetailsPr
       return;
     }
 
+    // Validar que hay importe antes de ir a Redsys
+    if (reservationData.menuPrice <= 0) {
+      setError("No se ha podido calcular el importe. Vuelve atrás y selecciona un menú.");
+      return;
+    }
+
     setIsProcessing(true);
     setError(null);
 
@@ -136,15 +148,8 @@ export default function Step5Details({ reservationData, onBack }: Step5DetailsPr
 
       const { redsysForm } = await res.json();
 
-      // ── Paso 2: inyectar datos en el formulario oculto y enviarlo ──────
+      // ── Paso 2: guardar datos — useEffect se encarga del submit ────────
       setRedsysData(redsysForm);
-
-      // Esperamos al siguiente ciclo de render para que el form esté montado
-      setTimeout(() => {
-        if (redsysFormRef.current) {
-          redsysFormRef.current.submit();
-        }
-      }, 100);
     } catch (err: unknown) {
       const msg =
         err instanceof Error ? err.message : "Error procesando la reserva";
@@ -163,21 +168,9 @@ export default function Step5Details({ reservationData, onBack }: Step5DetailsPr
           action={redsysData.url}
           style={{ display: "none" }}
         >
-          <input
-            type="hidden"
-            name="Ds_SignatureVersion"
-            value={redsysData.Ds_SignatureVersion}
-          />
-          <input
-            type="hidden"
-            name="Ds_MerchantParameters"
-            value={redsysData.Ds_MerchantParameters}
-          />
-          <input
-            type="hidden"
-            name="Ds_Signature"
-            value={redsysData.Ds_Signature}
-          />
+          <input type="hidden" name="Ds_SignatureVersion" value={redsysData.Ds_SignatureVersion} readOnly />
+          <input type="hidden" name="Ds_MerchantParameters" value={redsysData.Ds_MerchantParameters} readOnly />
+          <input type="hidden" name="Ds_Signature" value={redsysData.Ds_Signature} readOnly />
         </form>
       )}
 

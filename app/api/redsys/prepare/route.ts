@@ -35,10 +35,18 @@ export async function POST(request: Request) {
     }
 
     const people = numberOfPeople || 2;
-    const price = menuPrice || 0;
+    const price = Number(menuPrice) || 0;
     const estimatedTotal = price * people;
     const depositEuros = estimatedTotal * 0.3;
     const amountCents = calcDeposit30pctCents(estimatedTotal);
+
+    if (amountCents <= 0) {
+      return NextResponse.json(
+        { error: "El importe de la retención no puede ser 0. Selecciona un menú." },
+        { status: 400 }
+      );
+    }
+
     const redsysOrder = generateRedsysOrder();
 
     const reservation = await prisma.reservation.create({
