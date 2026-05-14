@@ -1,4 +1,4 @@
-import { reservationsDb } from "@/lib/db-json";
+import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import CancelButton from "./CancelButton";
@@ -6,7 +6,7 @@ import CaptureButton from "./CaptureButton";
 
 export default async function ReservationDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const r = reservationsDb.findById(id);
+  const r = await prisma.reservation.findUnique({ where: { id } });
   if (!r) notFound();
 
   const statusMap: Record<string, { label: string; cls: string }> = {
@@ -76,11 +76,11 @@ export default async function ReservationDetailPage({ params }: { params: Promis
           </div>
           <div>
             <p className="text-xs text-gray-400">Total estimado</p>
-            <p className="font-medium">{(r.estimatedTotal ?? r.menuPrice * r.numberOfPeople).toFixed(2)}€</p>
+            <p className="font-medium">{Number(r.estimatedTotal).toFixed(2)}€</p>
           </div>
           <div>
             <p className="text-xs text-gray-400">Retención Redsys (30%)</p>
-            <p className="font-medium text-blue-700">{r.depositAmount?.toFixed(2)}€</p>
+            <p className="font-medium text-blue-700">{Number(r.depositAmount).toFixed(2)}€</p>
           </div>
         </div>
 
@@ -111,7 +111,7 @@ export default async function ReservationDetailPage({ params }: { params: Promis
             {r.redsysCapturedAt && (
               <div>
                 <p className="text-xs text-gray-400">Capturado el</p>
-                <p>{new Date(r.redsysCapturedAt).toLocaleString("es-ES")}</p>
+                <p>{r.redsysCapturedAt.toLocaleString("es-ES")}</p>
               </div>
             )}
           </div>
@@ -137,7 +137,7 @@ export default async function ReservationDetailPage({ params }: { params: Promis
           <div>
             <p className="font-medium text-amber-900">Cobrar garantía (no-show / cancelación tardía)</p>
             <p className="text-sm text-amber-800">
-              Confirma la preautorización para cobrar el 30% retenido ({r.depositAmount?.toFixed(2)}€).
+              Confirma la preautorización para cobrar el 30% retenido ({Number(r.depositAmount).toFixed(2)}€).
               Úsalo solo si el cliente no se presentó o canceló fuera de plazo.
             </p>
           </div>
@@ -150,7 +150,7 @@ export default async function ReservationDetailPage({ params }: { params: Promis
         <div className="bg-red-50 border border-red-200 p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
             <p className="font-medium text-red-800">Cancelar reserva</p>
-            <p className="text-sm text-red-600">La reserva quedará marcada como cancelada y la retención se liberará</p>
+            <p className="text-sm text-red-600">La reserva quedará marcada como cancelada</p>
           </div>
           <CancelButton id={id} />
         </div>

@@ -1,4 +1,4 @@
-import { reservationsDb } from "@/lib/db-json";
+import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 
 function statusLabel(status: string) {
@@ -7,8 +7,10 @@ function statusLabel(status: string) {
   return { label: "Pendiente pago", cls: "bg-amber-100 text-amber-700" };
 }
 
-export default function AdminReservationsPage() {
-  const reservations = reservationsDb.findAll();
+export default async function AdminReservationsPage() {
+  const reservations = await prisma.reservation.findMany({
+    orderBy: { createdAt: "desc" },
+  });
 
   return (
     <div className="space-y-6">
@@ -19,7 +21,6 @@ export default function AdminReservationsPage() {
         </div>
       </div>
 
-      {/* Tabla */}
       <div className="bg-white border border-gray-200 overflow-hidden">
         {reservations.length === 0 ? (
           <p className="px-6 py-12 text-center text-gray-400">No hay reservas aún</p>
@@ -32,37 +33,42 @@ export default function AdminReservationsPage() {
                   <th className="px-4 py-3 text-left text-xs tracking-wider uppercase text-gray-500">Cliente</th>
                   <th className="px-4 py-3 text-left text-xs tracking-wider uppercase text-gray-500">Menú</th>
                   <th className="px-4 py-3 text-center text-xs tracking-wider uppercase text-gray-500">Personas</th>
-                  <th className="px-4 py-3 text-right text-xs tracking-wider uppercase text-gray-500">Señal</th>
+                  <th className="px-4 py-3 text-right text-xs tracking-wider uppercase text-gray-500">Retención</th>
                   <th className="px-4 py-3 text-center text-xs tracking-wider uppercase text-gray-500">Estado</th>
+                  <th className="px-4 py-3 text-center text-xs tracking-wider uppercase text-gray-500">Redsys</th>
                   <th className="px-4 py-3 text-center text-xs tracking-wider uppercase text-gray-500">Acciones</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
                 {reservations.map((r) => {
                   const { label, cls } = statusLabel(r.status);
+                  const redsysCls =
+                    r.redsysStatus === "PREAUTHORIZED" ? "text-blue-700" :
+                    r.redsysStatus === "CAPTURED" ? "text-green-700" :
+                    r.redsysStatus === "REJECTED" ? "text-red-600" : "text-gray-400";
                   return (
                     <tr key={r.id} className="hover:bg-gray-50 transition-colors">
                       <td className="px-4 py-3 whitespace-nowrap">
-                        <span className="font-medium">{r.reservationDate}</span>
+                        <span className="font-medium">
+                          {new Date(r.reservationDate).toLocaleDateString("es-ES", { day: "2-digit", month: "2-digit", year: "numeric" })}
+                        </span>
                         <span className="text-gray-400 ml-2">{r.reservationTime}</span>
                       </td>
                       <td className="px-4 py-3">
                         <p className="font-medium">{r.firstName} {r.lastName}</p>
                         <p className="text-gray-400 text-xs">{r.email}</p>
                       </td>
-                      <td className="px-4 py-3 text-gray-600">{r.menuName}</td>
+                      <td className="px-4 py-3 text-gray-600">{r.menuName || "—"}</td>
                       <td className="px-4 py-3 text-center">{r.numberOfPeople}</td>
-                      <td className="px-4 py-3 text-right font-medium">{r.depositAmount.toFixed(2)}€</td>
+                      <td className="px-4 py-3 text-right font-medium">{Number(r.depositAmount).toFixed(2)}€</td>
                       <td className="px-4 py-3 text-center">
-                        <span className={`text-xs px-2 py-1 tracking-wider uppercase ${cls}`}>
-                          {label}
-                        </span>
+                        <span className={`text-xs px-2 py-1 tracking-wider uppercase ${cls}`}>{label}</span>
+                      </td>
+                      <td className={`px-4 py-3 text-center text-xs font-medium ${redsysCls}`}>
+                        {r.redsysStatus || "—"}
                       </td>
                       <td className="px-4 py-3 text-center">
-                        <Link
-                          href={`/admin/reservations/${r.id}`}
-                          className="text-xs tracking-wider uppercase text-gray-500 hover:text-primary"
-                        >
+                        <Link href={`/admin/reservations/${r.id}`} className="text-xs tracking-wider uppercase text-gray-500 hover:text-primary">
                           Ver →
                         </Link>
                       </td>

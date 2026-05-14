@@ -92,10 +92,10 @@ model Reservation {
   id                String            @id @default(cuid())
   
   // Timing
-  timeSlotId        String
-  timeSlot          TimeSlot          @relation(fields: [timeSlotId], references: [id])
+  timeSlotId        String?
+  timeSlot          TimeSlot?         @relation(fields: [timeSlotId], references: [id])
   reservationDate   DateTime          @db.Date
-  reservationTime   String            // "13:00"
+  reservationTime   String
   
   // Guest info
   firstName         String
@@ -104,12 +104,17 @@ model Reservation {
   phone             String
   numberOfPeople    Int
   
+  // Menu
+  menuName          String?
+  menuPrice         Decimal?          @db.Decimal(10, 2)
+  
   // Additional info
   observations      String?           @db.Text
   allergens         String[]
   allergenNotes     String?           @db.Text
   
-  // Coupon
+  // Coupon (simple string)
+  couponCode        String?
   couponId          String?
   coupon            Coupon?           @relation(fields: [couponId], references: [id])
   couponDiscount    Decimal?          @db.Decimal(10, 2)
@@ -119,21 +124,25 @@ model Reservation {
   giftCard          GiftCard?         @relation(fields: [giftCardId], references: [id])
   
   // Amounts
-  estimatedTotal    Decimal           @db.Decimal(10, 2)
-  depositAmount     Decimal           @db.Decimal(10, 2)
+  estimatedTotal    Decimal           @default(0) @db.Decimal(10, 2)
+  depositAmount     Decimal           @default(0) @db.Decimal(10, 2)
   finalAmount       Decimal?          @db.Decimal(10, 2)
   
   // Status
   status            ReservationStatus @default(PENDING_PAYMENT)
   
+  // Redsys / TPV Virtual Sabadell
+  redsysOrder       String?           @unique   // Ds_Order enviado al TPV
+  redsysStatus      String?           @default("NONE") // NONE|PENDING|PREAUTHORIZED|CAPTURED|REJECTED
+  redsysAuthCode    String?           // Ds_AuthorisationCode
+  redsysResponse    String?           // Ds_Response (código banco)
+  redsysCapturedAt  DateTime?         // Fecha captura preautorización
+  
   // Cancellation
   cancelledAt       DateTime?
   cancellationNotes String?           @db.Text
   refundAmount      Decimal?          @db.Decimal(10, 2)
-  refundStatus      String?           // "full", "partial", "none"
-  
-  // Payment
-  payment           Payment?
+  refundStatus      String?
   
   // Metadata
   confirmedAt       DateTime?
@@ -143,8 +152,8 @@ model Reservation {
 
   @@index([email])
   @@index([reservationDate])
-  @@index([timeSlotId])
   @@index([status])
+  @@index([redsysOrder])
   @@map("reservations")
 }
 
@@ -157,7 +166,7 @@ model Payment {
   amount                Decimal       @db.Decimal(10, 2)
   currency              String        @default("eur")
   
-  paymentMethod         PaymentMethod
+  paymentMethod         PaymentMethod?
   status                PaymentStatus @default(PENDING)
   
   // Stripe

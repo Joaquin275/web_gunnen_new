@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { reservationsDb } from "@/lib/db-json";
+import { prisma } from "@/lib/prisma";
 
 export async function GET(
   _request: Request,
@@ -7,7 +7,7 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
-    const reservation = reservationsDb.findById(id);
+    const reservation = await prisma.reservation.findUnique({ where: { id } });
     if (!reservation) {
       return NextResponse.json({ error: "Reserva no encontrada" }, { status: 404 });
     }

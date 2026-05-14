@@ -1,13 +1,23 @@
-import { reservationsDb, giftCardsDb, pressDb } from "@/lib/db-json";
+import { prisma } from "@/lib/prisma";
+import { giftCardsDb, pressDb } from "@/lib/db-json";
 import Link from "next/link";
 
-export default function AdminDashboard() {
-  const totalReservations = reservationsDb.countTotal();
-  const todayReservations = reservationsDb.countToday();
-  const pendingReservations = reservationsDb.countPending();
+export default async function AdminDashboard() {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const tomorrow = new Date(today);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+
+  const [totalReservations, todayReservations, pendingReservations, recentReservations] =
+    await Promise.all([
+      prisma.reservation.count(),
+      prisma.reservation.count({ where: { reservationDate: { gte: today, lt: tomorrow } } }),
+      prisma.reservation.count({ where: { status: "PENDING_PAYMENT" } }),
+      prisma.reservation.findMany({ orderBy: { createdAt: "desc" }, take: 5 }),
+    ]);
+
   const activeGiftCards = giftCardsDb.countActive();
   const totalPress = pressDb.findAll().length;
-  const recentReservations = reservationsDb.findAll().slice(0, 5);
 
   return (
     <div className="space-y-8">
@@ -52,10 +62,12 @@ export default function AdminDashboard() {
               <div key={r.id} className="px-6 py-4 flex items-center justify-between">
                 <div>
                   <p className="font-medium">{r.firstName} {r.lastName}</p>
-                  <p className="text-sm text-gray-500">{r.reservationDate} · {r.reservationTime} · {r.numberOfPeople} personas · {r.menuName}</p>
+                  <p className="text-sm text-gray-500">
+                    {new Date(r.reservationDate).toLocaleDateString("es-ES")} · {r.reservationTime} · {r.numberOfPeople} personas · {r.menuName || "—"}
+                  </p>
                 </div>
                 <div className="flex items-center gap-3">
-                  <span className="text-sm font-medium">{r.depositAmount.toFixed(2)}€</span>
+                  <span className="text-sm font-medium">{Number(r.depositAmount).toFixed(2)}€</span>
                   <span className={`text-xs px-2 py-1 tracking-wider uppercase ${
                     r.status === "CONFIRMED"
                       ? "bg-green-100 text-green-700"
