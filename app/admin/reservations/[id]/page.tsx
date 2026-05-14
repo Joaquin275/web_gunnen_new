@@ -64,7 +64,9 @@ export default async function ReservationDetailPage({ params }: { params: Promis
           <h2 className="text-xs tracking-wider uppercase text-gray-500 mb-4">Detalles</h2>
           <div>
             <p className="text-xs text-gray-400">Fecha y hora</p>
-            <p className="font-medium">{r.reservationDate} · {r.reservationTime}</p>
+            <p className="font-medium">
+              {new Date(r.reservationDate).toLocaleDateString("es-ES", { day: "2-digit", month: "2-digit", year: "numeric" })} · {r.reservationTime}
+            </p>
           </div>
           <div>
             <p className="text-xs text-gray-400">Personas</p>

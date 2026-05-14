@@ -81,9 +81,7 @@ function ReservaOkContent() {
                   <div className="flex justify-between pb-3 border-b border-gray-200">
                     <span className="text-gray-500">Fecha</span>
                     <span className="font-medium">
-                      {new Date(
-                        reservation.reservationDate + "T00:00:00"
-                      ).toLocaleDateString("es-ES", {
+                      {new Date(reservation.reservationDate).toLocaleDateString("es-ES", {
                         weekday: "long",
                         day: "numeric",
                         month: "long",
