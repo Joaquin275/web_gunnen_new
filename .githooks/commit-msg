@@ -1,0 +1,5 @@
+#!/bin/sh
+# Elimina el trailer de Cursor IDE para evitar bloqueos en Vercel Hobby Plan.
+# Cursor agrega automaticamente "Co-authored-by: Cursor <cursoragent@cursor.com>"
+# en cada commit, lo cual Vercel interpreta como un colaborador sin permisos.
+grep -v "Co-authored-by: Cursor <cursoragent@cursor.com>" "$1" > "$1.tmp" && mv "$1.tmp" "$1"
