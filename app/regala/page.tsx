@@ -3,32 +3,53 @@
 import { useState } from "react";
 import GiftCardForm from "@/components/giftcards/GiftCardForm";
 
-const suggestedAmounts = [100, 150, 200];
+interface MenuOption {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  courses: string;
+  tag?: string;
+}
+
+const MENU_OPTIONS: MenuOption[] = [
+  {
+    id: "tempo",
+    name: "Menú TEMPO",
+    description: "2 Snacks · 8 platos · 2 postres · Pan · Petit fours",
+    price: 100,
+    courses: "12 momentos gastronómicos",
+  },
+  {
+    id: "tempo-maridaje",
+    name: "Menú TEMPO con Maridaje",
+    description: "2 Snacks · 8 platos · 2 postres · Pan · Petit fours + Maridaje de vinos",
+    price: 156,
+    courses: "12 momentos + maridaje",
+    tag: "Recomendado",
+  },
+  {
+    id: "impulso",
+    name: "Menú IMPULSO",
+    description: "2 Snacks · 6 platos · 1 postre · Pan · Petit fours",
+    price: 80,
+    courses: "9 momentos gastronómicos",
+  },
+  {
+    id: "impulso-maridaje",
+    name: "Menú IMPULSO con Maridaje",
+    description: "2 Snacks · 6 platos · 1 postre · Pan · Petit fours + Maridaje de vinos",
+    price: 128,
+    courses: "9 momentos + maridaje",
+  },
+];
 
 export default function RegalaPage() {
-  const [selectedAmount, setSelectedAmount] = useState<number>(100);
-  const [customAmount, setCustomAmount] = useState<string>("");
-  const [step, setStep] = useState<"amount" | "form">("amount");
-
-  const handleAmountSelect = (amount: number) => {
-    setSelectedAmount(amount);
-    setCustomAmount("");
-  };
-
-  const handleCustomAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setCustomAmount(value);
-    const numValue = parseFloat(value);
-    if (!isNaN(numValue) && numValue > 0) {
-      setSelectedAmount(numValue);
-    }
-  };
+  const [selectedMenu, setSelectedMenu] = useState<MenuOption | null>(null);
+  const [step, setStep] = useState<"select" | "form">("select");
 
   const handleContinue = () => {
-    if (selectedAmount < 50 || selectedAmount > 500) {
-      alert("El importe debe estar entre 50€ y 500€");
-      return;
-    }
+    if (!selectedMenu) return;
     setStep("form");
   };
 
@@ -36,73 +57,76 @@ export default function RegalaPage() {
     <div className="pt-20 min-h-screen bg-gray-50">
       <div className="section-container">
         <div className="max-w-4xl mx-auto">
+
           {/* Hero */}
           <div className="text-center mb-12">
+            <p className="text-xs tracking-widest uppercase text-gray-400 mb-4">Bono Regalo</p>
             <h1 className="text-display font-serif font-light mb-6">Regala una experiencia</h1>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
-              Nuestros bonos regalo son la forma perfecta de compartir momentos únicos. Válidos durante 12 meses desde su emisión.
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
+              Elige el menú que quieres regalar. El destinatario recibirá su bono por email con el código y todos los detalles.
             </p>
           </div>
 
           <div className="bg-white p-8 md:p-12">
-            {step === "amount" && (
-              <div>
-                <h2 className="text-3xl font-serif font-light mb-8">Seleccione el importe</h2>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-                  {suggestedAmounts.map((amount) => (
+            {step === "select" && (
+              <div>
+                <h2 className="text-2xl font-serif font-light mb-2">Selecciona el menú a regalar</h2>
+                <p className="text-sm text-gray-500 mb-8">Precio por persona · Válido 12 meses desde la emisión</p>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-10">
+                  {MENU_OPTIONS.map((menu) => (
                     <button
-                      key={amount}
-                      onClick={() => handleAmountSelect(amount)}
-                      className={`p-8 border-2 transition-all ${
-                        selectedAmount === amount && !customAmount
-                          ? "border-primary bg-primary text-white"
-                          : "border-gray-300 hover:border-primary hover:bg-gray-50"
+                      key={menu.id}
+                      onClick={() => setSelectedMenu(menu)}
+                      className={`relative text-left p-7 border-2 transition-all duration-200 ${
+                        selectedMenu?.id === menu.id
+                          ? "border-primary bg-primary/5"
+                          : "border-gray-200 hover:border-gray-400"
                       }`}
                     >
-                      <div className="text-4xl font-serif font-light mb-2">{amount}€</div>
-                      <div className="text-sm tracking-wider uppercase opacity-75">
-                        {amount === 100 && "Bono inicial"}
-                        {amount === 150 && "Bono premium"}
-                        {amount === 200 && "Experiencia completa"}
-                      </div>
+                      {menu.tag && (
+                        <span className="absolute top-4 right-4 text-xs tracking-widest uppercase bg-primary text-white px-3 py-1">
+                          {menu.tag}
+                        </span>
+                      )}
+
+                      {/* Selector visual */}
+                      <span
+                        className={`inline-flex items-center justify-center w-5 h-5 rounded-full border-2 mr-3 mb-4 transition-colors ${
+                          selectedMenu?.id === menu.id
+                            ? "border-primary bg-primary"
+                            : "border-gray-300"
+                        }`}
+                      >
+                        {selectedMenu?.id === menu.id && (
+                          <span className="w-2 h-2 rounded-full bg-white" />
+                        )}
+                      </span>
+
+                      <p className="text-xs tracking-widest uppercase text-gray-400 mb-1">{menu.courses}</p>
+                      <h3 className="text-xl font-serif font-light mb-2">{menu.name}</h3>
+                      <p className="text-sm text-gray-500 mb-5 leading-relaxed">{menu.description}</p>
+                      <p className="text-3xl font-serif font-light text-primary">{menu.price}€</p>
+                      <p className="text-xs text-gray-400 mt-1">por persona</p>
                     </button>
                   ))}
                 </div>
 
-                <div className="mb-8">
-                  <label className="block text-sm tracking-wider uppercase text-gray-600 mb-2">
-                    O introduce un importe personalizado
-                  </label>
-                  <div className="relative">
-                    <input
-                      type="number"
-                      min="50"
-                      max="500"
-                      step="10"
-                      value={customAmount}
-                      onChange={handleCustomAmountChange}
-                      placeholder="Ej: 175"
-                      className="input-premium pr-8"
-                    />
-                    <span className="absolute right-0 top-3 text-gray-400">€</span>
-                  </div>
-                  <p className="text-xs text-gray-500 mt-2">Mínimo 50€ — Máximo 500€</p>
-                </div>
-
+                {/* Info */}
                 <div className="bg-gray-50 p-6 mb-8">
-                  <h3 className="text-sm tracking-wider uppercase text-gray-600 mb-4">Incluye</h3>
-                  <ul className="space-y-3 text-gray-700">
+                  <h3 className="text-xs tracking-widest uppercase text-gray-500 mb-4">El bono regalo incluye</h3>
+                  <ul className="space-y-2 text-sm text-gray-600">
                     {[
+                      "Código único personalizado enviado por email",
+                      "Documento de bono regalo en PDF",
                       "Válido durante 12 meses desde su emisión",
-                      "Código único personalizado",
-                      "Email personalizado al destinatario",
-                      "Opción de programar envío en fecha futura",
-                      "Canjeable en cualquier reserva",
+                      "Canjeable al realizar la reserva online",
+                      "Opción de programar el envío en una fecha futura",
                     ].map((item) => (
-                      <li key={item} className="flex items-start">
-                        <span className="inline-block w-1 h-1 bg-accent rounded-full mt-2.5 mr-3 flex-shrink-0" />
-                        <span>{item}</span>
+                      <li key={item} className="flex items-start gap-3">
+                        <span className="w-1 h-1 rounded-full bg-primary mt-2 flex-shrink-0" />
+                        {item}
                       </li>
                     ))}
                   </ul>
@@ -110,18 +134,21 @@ export default function RegalaPage() {
 
                 <button
                   onClick={handleContinue}
-                  disabled={!selectedAmount || selectedAmount < 50 || selectedAmount > 500}
-                  className="btn-primary w-full disabled:opacity-50"
+                  disabled={!selectedMenu}
+                  className="btn-primary w-full disabled:opacity-40"
                 >
-                  Continuar con {selectedAmount}€
+                  {selectedMenu
+                    ? `Continuar con ${selectedMenu.name} — ${selectedMenu.price}€/persona`
+                    : "Selecciona un menú para continuar"}
                 </button>
               </div>
             )}
 
-            {step === "form" && (
+            {step === "form" && selectedMenu && (
               <GiftCardForm
-                amount={selectedAmount}
-                onBack={() => setStep("amount")}
+                amount={selectedMenu.price}
+                menuName={selectedMenu.name}
+                onBack={() => setStep("select")}
               />
             )}
           </div>

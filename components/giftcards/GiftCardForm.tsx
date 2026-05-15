@@ -5,10 +5,11 @@ import { useRouter } from "next/navigation";
 
 interface GiftCardFormProps {
   amount: number;
+  menuName: string;
   onBack: () => void;
 }
 
-export default function GiftCardForm({ amount, onBack }: GiftCardFormProps) {
+export default function GiftCardForm({ amount, menuName, onBack }: GiftCardFormProps) {
   const router = useRouter();
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -40,7 +41,7 @@ export default function GiftCardForm({ amount, onBack }: GiftCardFormProps) {
       const response = await fetch("/api/giftcards", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...formData, amount }),
+        body: JSON.stringify({ ...formData, amount, menuName }),
       });
 
       if (!response.ok) {
@@ -61,11 +62,12 @@ export default function GiftCardForm({ amount, onBack }: GiftCardFormProps) {
     <form onSubmit={handleSubmit}>
       <h2 className="text-3xl font-serif font-light mb-8">Datos del bono regalo</h2>
 
-      {/* Resumen */}
-      <div className="bg-gray-50 p-6 mb-8">
-        <div className="flex justify-between items-center">
-          <span className="text-sm tracking-wider uppercase text-gray-600">Importe del bono</span>
-          <span className="text-3xl font-serif font-light">{amount}€</span>
+      {/* Resumen del menú seleccionado */}
+      <div className="bg-gray-50 border border-gray-200 p-6 mb-8">
+        <p className="text-xs tracking-widest uppercase text-gray-400 mb-2">Menú seleccionado</p>
+        <div className="flex items-center justify-between">
+          <span className="text-lg font-serif font-light">{menuName}</span>
+          <span className="text-2xl font-serif font-light">{amount}€<span className="text-sm text-gray-400 ml-1">/persona</span></span>
         </div>
       </div>
 
@@ -109,10 +111,10 @@ export default function GiftCardForm({ amount, onBack }: GiftCardFormProps) {
         </div>
       </div>
 
-      {/* Aviso pago */}
+      {/* Aviso */}
       <div className="bg-amber-50 border border-amber-200 p-5 mb-8 text-sm text-amber-800">
-        <p className="font-semibold mb-1">Pago del bono</p>
-        <p>Recibirás un email de confirmación con los detalles del bono y las instrucciones de pago. El bono se activará y enviará una vez confirmado el pago.</p>
+        <p className="font-semibold mb-1">¿Cómo funciona?</p>
+        <p>Al enviar este formulario recibirás un email de confirmación. Una vez confirmado el pago, el bono regalo en PDF se enviará automáticamente al destinatario con su código único.</p>
       </div>
 
       {error && (
@@ -122,7 +124,7 @@ export default function GiftCardForm({ amount, onBack }: GiftCardFormProps) {
       <div className="flex gap-4">
         <button type="button" onClick={onBack} className="btn-secondary flex-1" disabled={isProcessing}>Atrás</button>
         <button type="submit" disabled={isProcessing} className="btn-primary flex-1 disabled:opacity-50">
-          {isProcessing ? "Enviando..." : `Solicitar bono de ${amount}€`}
+          {isProcessing ? "Enviando..." : `Solicitar bono — ${menuName}`}
         </button>
       </div>
     </form>

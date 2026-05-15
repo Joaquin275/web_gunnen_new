@@ -98,6 +98,7 @@ export interface GiftCardData {
   recipientName?: string;
   purchaserName: string;
   amount: number;
+  menuName?: string;
   code: string;
   message?: string;
   expiresAt: string;
@@ -408,26 +409,56 @@ export async function sendGiftCard(data: GiftCardData) {
   const resend = await getResend();
   if (!resend) return;
 
+  const menuLabel = data.menuName || "Experiencia gastronómica";
+
   const content = `
     <h2>Has recibido un bono regalo</h2>
     <p>Estimado/a <strong>${data.recipientName || "amigo/a"}</strong>,</p>
-    <p><strong>${data.purchaserName}</strong> te ha regalado una experiencia gastronómica en ${RESTAURANT_NAME}.</p>
+    <p><strong>${data.purchaserName}</strong> te ha regalado una experiencia en ${RESTAURANT_NAME}.</p>
     ${data.message ? `<p style="font-style:italic;padding:20px;background:#fafaf9;border-left:3px solid #8b7355">"${data.message}"</p>` : ""}
+
     <div class="box">
-      <div class="row"><span class="lbl">Importe</span><span class="val">${data.amount.toFixed(2)}€</span></div>
-      <div class="row"><span class="lbl">Código</span><span class="val" style="letter-spacing:3px;font-size:18px">${data.code}</span></div>
+      <div class="row"><span class="lbl">Menú</span><span class="val" style="font-weight:600">${menuLabel}</span></div>
+      <div class="row"><span class="lbl">Importe</span><span class="val">${data.amount.toFixed(2)}€ por persona</span></div>
+      <div class="row">
+        <span class="lbl">Código del bono</span>
+        <span class="val" style="letter-spacing:4px;font-size:20px;font-family:monospace;font-weight:700;color:#8b7355">${data.code}</span>
+      </div>
       <div class="row"><span class="lbl">Válido hasta</span><span class="val">${data.expiresAt}</span></div>
     </div>
-    <p>Para usarlo, simplemente realiza una reserva e introduce el código en el proceso.</p>
-    <div style="text-align:center;margin-top:20px">
+
+    <div style="background:#1a1a1a;color:#fff;padding:28px 32px;margin:28px 0;text-align:center">
+      <p style="font-size:11px;letter-spacing:3px;text-transform:uppercase;color:#aaa;margin-bottom:8px">Tu código de bono regalo</p>
+      <p style="font-size:28px;letter-spacing:6px;font-family:monospace;font-weight:700;color:#c9a96e;margin:0">${data.code}</p>
+    </div>
+
+    <p>Para canjear tu bono, realiza una reserva en nuestra web e introduce este código en el paso de confirmación.</p>
+    <p style="font-size:13px;color:#888">El bono es válido para el menú indicado y puede usarse para cualquier reserva disponible antes de la fecha de vencimiento.</p>
+    <div style="text-align:center;margin-top:24px">
       <a href="${APP_URL}/reservas" class="btn">Reservar ahora</a>
     </div>
   `;
 
+  // Adjuntar plantilla PDF del bono si existe en /public/bono-regalo.pdf
+  let attachments: { filename: string; content: Buffer }[] = [];
+  try {
+    const fs = await import("fs");
+    const path = await import("path");
+    const pdfPath = path.join(process.cwd(), "public", "bono-regalo.pdf");
+    if (fs.existsSync(pdfPath)) {
+      const pdfContent = fs.readFileSync(pdfPath);
+      attachments = [{ filename: "Bono-Regalo-Gunnen.pdf", content: pdfContent }];
+    }
+  } catch {
+    // Sin PDF adjunto, el email se envía igualmente
+  }
+
   return resend.emails.send({
     from: FROM_EMAIL,
     to: data.recipientEmail,
-    subject: `Tienes un bono regalo de ${RESTAURANT_NAME}`,
+    cc: undefined,
+    subject: `Tu bono regalo ${RESTAURANT_NAME} — ${menuLabel}`,
     html: template(content),
+    ...(attachments.length > 0 && { attachments }),
   });
 }

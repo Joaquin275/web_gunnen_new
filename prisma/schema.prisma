@@ -248,7 +248,8 @@ model GiftCard {
   recipientEmail    String
   message           String?         @db.Text
   sendDate          DateTime        @db.Date
-  
+  menuName          String?         // Nombre del menú regalado
+
   // Payment
   stripePaymentIntentId String?     @unique
   paidAt            DateTime?
