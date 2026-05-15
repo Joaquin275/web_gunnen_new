@@ -6,7 +6,7 @@ export default function AdminSettingsPage() {
   const [saved, setSaved] = useState(false);
   const [form, setForm] = useState({
     restaurantName: "Gunnen",
-    email: "info@gunnen.es",
+    email: "reservas@gunnen.es",
     phone: "",
     address: "Juan Díaz Porlier, 15, A Coruña",
     depositMode: "percentage",

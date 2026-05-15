@@ -4,7 +4,7 @@ import { usePathname } from "next/navigation";
 import Header from "./Header";
 import Footer from "./Footer";
 
-const WHATSAPP_NUMBER = "34608977321";
+const WHATSAPP_NUMBER = "34613739550";
 const WHATSAPP_MESSAGE = "Hola, me gustaría hacer una reserva en Gunnen.";
 
 export default function LayoutShell({ children }: { children: React.ReactNode }) {

@@ -91,7 +91,7 @@ export default function PoliticaCancelacionPage() {
             </h2>
             <p>
               Para cualquier consulta sobre nuestra política de cancelación, no dude
-              en contactarnos en info@gunnen.es
+              en contactarnos en reservas@gunnen.es
             </p>
           </div>
         </div>

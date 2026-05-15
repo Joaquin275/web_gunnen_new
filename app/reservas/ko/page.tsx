@@ -63,10 +63,10 @@ function ReservaKoContent() {
             <p className="text-sm text-gray-500 mb-8">
               Puede intentarlo de nuevo o contactar con nosotros en{" "}
               <a
-                href="mailto:info@gunnen.es"
+                href="mailto:reservas@gunnen.es"
                 className="text-primary hover:underline"
               >
-                info@gunnen.es
+                reservas@gunnen.es
               </a>{" "}
               o por WhatsApp.
             </p>

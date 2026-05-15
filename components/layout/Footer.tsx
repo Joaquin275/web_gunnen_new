@@ -65,8 +65,8 @@ export default function Footer() {
             <h3 className="text-xs tracking-widest uppercase mb-5 text-white/60">Contacto</h3>
             <ul className="space-y-3 text-sm mb-6">
               <li>
-                <a href="mailto:info@gunnen.es" className="text-gray-300 hover:text-white transition-colors">
-                  info@gunnen.es
+                <a href="mailto:reservas@gunnen.es" className="text-gray-300 hover:text-white transition-colors">
+                  reservas@gunnen.es
                 </a>
               </li>
             </ul>

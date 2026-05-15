@@ -69,7 +69,7 @@ function template(content: string) {
     <div class="foot">
       ${RESTAURANT_NAME} · ${RESTAURANT_ADDRESS}<br>
       <a href="mailto:${ADMIN_EMAIL}" style="color:#8b7355">${ADMIN_EMAIL}</a> ·
-      <a href="tel:+34608977321" style="color:#8b7355">+34 608 977 321</a><br>
+      <a href="tel:+34613739550" style="color:#8b7355">+34 613 73 95 50</a><br>
       <a href="${APP_URL}" style="color:#8b7355">${APP_URL.replace("https://", "")}</a>
     </div>
   </div>
@@ -193,7 +193,7 @@ export async function sendReservationConfirmation(data: ReservationEmailData) {
     <p style="font-size:13px;color:#888">
       Para cancelar o modificar su reserva con más de 24 horas de antelación, 
       contáctenos en <a href="mailto:${ADMIN_EMAIL}" style="color:#8b7355">${ADMIN_EMAIL}</a> 
-      o por WhatsApp al +34 608 977 321.
+      o por WhatsApp al +34 613 73 95 50.
     </p>
   `;
 
@@ -233,7 +233,7 @@ export async function sendReservationRejected(data: ReservationEmailData) {
 
     <div style="text-align:center;margin:24px 0">
       <a href="${APP_URL}/reservas" class="btn">Intentar de nuevo</a>
-      <a href="https://wa.me/34608977321" class="btn btn-outline">WhatsApp</a>
+      <a href="https://wa.me/34613739550" class="btn btn-outline">WhatsApp</a>
     </div>
   `;
 
@@ -301,7 +301,7 @@ export async function sendReservationReminder(
     </p>
     ` : `
     <p>Estamos deseando recibirle. Si tiene alguna pregunta de última hora, 
-    llámenos al <a href="tel:+34608977321" style="color:#8b7355">+34 608 977 321</a>.</p>
+    llámenos al <a href="tel:+34613739550" style="color:#8b7355">+34 613 73 95 50</a>.</p>
     `}
   `;
 

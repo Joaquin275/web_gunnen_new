@@ -111,7 +111,7 @@ export default function TerminosPage() {
               contactarnos en:
             </p>
             <ul className="list-disc pl-6 space-y-2">
-              <li>Email: info@gunnen.es</li>
+              <li>Email: reservas@gunnen.es</li>
               <li>Teléfono: +34 XXX XXX XXX</li>
             </ul>
           </div>
