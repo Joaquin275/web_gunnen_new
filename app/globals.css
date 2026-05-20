@@ -15,14 +15,8 @@
     font-feature-settings: 'rlig' 1, 'calt' 1;
   }
 
-  /* Títulos: Coolvetica con peso semibold (400 = regular de Coolvetica) */
-  h1, h2, h3 {
-    @apply font-sans;
-    font-weight: 400;
-  }
-
-  /* Subtítulos y elementos de apoyo: Coolvetica Light */
-  h4, h5, h6 {
+  /* Títulos: Coolvetica Light */
+  h1, h2, h3, h4, h5, h6 {
     @apply font-sans;
     font-weight: 300;
   }
