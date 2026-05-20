@@ -43,7 +43,7 @@ export async function GET(request: Request) {
         capacity: 1,
         available: occupied > 0 ? 0 : 1,
         minPeople: 1,
-        maxPeople: 8,
+        maxPeople: 5,
         depositPerPerson: 0,
       };
     });

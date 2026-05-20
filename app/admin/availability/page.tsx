@@ -34,8 +34,8 @@ export default function AdminAvailabilityPage() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {[
               { label: "Mesas disponibles", value: "3" },
-              { label: "Personas por mesa (máx)", value: "8" },
-              { label: "Comensales totales (máx)", value: "24" },
+              { label: "Personas por mesa (máx)", value: "5" },
+              { label: "Comensales totales (máx)", value: "15" },
               { label: "Señal por persona", value: "30%" },
             ].map((item) => (
               <div key={item.label} className="bg-gray-50 p-4">
@@ -46,9 +46,8 @@ export default function AdminAvailabilityPage() {
           </div>
         </div>
 
-        <div className="bg-amber-50 border border-amber-200 p-4 text-sm text-amber-800">
-          La configuración dinámica de turnos estará disponible cuando se conecte la base de datos PostgreSQL. 
-          Actualmente los horarios se gestionan en el archivo <code className="font-mono bg-amber-100 px-1">app/api/availability/timeslots/route.ts</code>
+        <div className="bg-green-50 border border-green-200 p-4 text-sm text-green-800">
+          ✓ Base de datos Supabase (PostgreSQL) conectada y sincronizada. Los horarios y disponibilidad se gestionan en tiempo real.
         </div>
       </div>
     </div>
