@@ -1,17 +1,25 @@
 import type { Metadata } from "next";
-import { Cormorant_Garamond, Inter } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 import Providers from "./providers";
 
-const cormorant = Cormorant_Garamond({
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
+// Brefa Round — tipografía editorial para títulos
+const cormorant = localFont({
+  src: [
+    { path: "../public/fonts/brefa-round.woff2", weight: "400", style: "normal" },
+    { path: "../public/fonts/brefa-round.woff",  weight: "400", style: "normal" },
+  ],
   variable: "--font-cormorant",
   display: "swap",
 });
 
-const inter = Inter({
-  subsets: ["latin"],
+// Coolvetica — tipografía sans para cuerpo y UI
+const inter = localFont({
+  src: [
+    { path: "../public/fonts/coolvetica-light.otf",   weight: "300", style: "normal" },
+    { path: "../public/fonts/coolvetica-regular.otf", weight: "400", style: "normal" },
+    { path: "../public/fonts/coolvetica-bold.otf",    weight: "700", style: "normal" },
+  ],
   variable: "--font-inter",
   display: "swap",
 });
