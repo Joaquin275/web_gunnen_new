@@ -402,9 +402,13 @@ export default function Step5Details({ reservationData, onBack }: Step5DetailsPr
             />
             <span className="text-sm text-gray-600">
               Acepto los{" "}
-              <a href="/terminos" target="_blank" className="link-subtle text-primary">términos y condiciones</a>{" "}
+              <a href="/terminos" target="_blank" className="link-subtle text-primary">términos y condiciones</a>,
+              la{" "}
+              <a href="/politica-cancelacion" target="_blank" className="link-subtle text-primary">política de cancelación</a>{" "}
               y la{" "}
-              <a href="/politica-cancelacion" target="_blank" className="link-subtle text-primary">política de cancelación</a>.
+              <a href="/politica-devolucion" target="_blank" className="link-subtle text-primary">política de devolución</a>.
+              He consultado los{" "}
+              <a href="/datos-fiscales" target="_blank" className="link-subtle text-primary">datos fiscales del comercio</a>.
             </span>
           </label>
 

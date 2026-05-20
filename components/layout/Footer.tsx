@@ -79,10 +79,31 @@ export default function Footer() {
           </div>
         </div>
 
+        {/* Legal links row */}
+        <div className="pt-8 border-t border-white/10 mb-6">
+          <div className="flex flex-wrap gap-x-6 gap-y-2">
+            <Link href="/datos-fiscales" className="text-xs text-gray-400 hover:text-white transition-colors">
+              Datos Fiscales
+            </Link>
+            <Link href="/terminos" className="text-xs text-gray-400 hover:text-white transition-colors">
+              Términos y Condiciones
+            </Link>
+            <Link href="/politica-devolucion" className="text-xs text-gray-400 hover:text-white transition-colors">
+              Política de Devolución
+            </Link>
+            <Link href="/politica-cancelacion" className="text-xs text-gray-400 hover:text-white transition-colors">
+              Política de Cancelación
+            </Link>
+            <Link href="/politica-privacidad" className="text-xs text-gray-400 hover:text-white transition-colors">
+              Política de Privacidad
+            </Link>
+          </div>
+        </div>
+
         {/* Bottom */}
-        <div className="pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-4">
+        <div className="flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-xs text-gray-500">
-            © {currentYear} Gunnen. Todos los derechos reservados.
+            © {currentYear} LA FAMILIA GASTRO, S.L. · Gunnen. Todos los derechos reservados.
           </p>
           <div className="flex items-center gap-6">
             <a href="https://instagram.com" target="_blank" rel="noopener noreferrer"
@@ -93,12 +114,6 @@ export default function Footer() {
               className="text-xs tracking-widest uppercase text-gray-400 hover:text-white transition-colors">
               Facebook
             </a>
-            <Link href="/politica-privacidad" className="text-xs text-gray-500 hover:text-white transition-colors">
-              Privacidad
-            </Link>
-            <Link href="/terminos" className="text-xs text-gray-500 hover:text-white transition-colors">
-              Términos
-            </Link>
           </div>
         </div>
       </div>

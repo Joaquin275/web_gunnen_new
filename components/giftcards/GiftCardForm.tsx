@@ -144,6 +144,17 @@ export default function GiftCardForm({ amount, menuName, onBack }: GiftCardFormP
           <p>Al continuar serás redirigido al TPV Virtual del Banco Sabadell para realizar el pago de <strong>{amount}€</strong> de forma segura con 3D Secure. Una vez confirmado el pago, el bono se enviará automáticamente al destinatario con el PDF adjunto.</p>
         </div>
 
+        {/* Legal — exigido por TPV Sabadell */}
+        <div className="text-xs text-gray-500 mb-6 leading-relaxed">
+          Al realizar el pago aceptas nuestra{" "}
+          <a href="/politica-devolucion" target="_blank" className="text-primary underline">política de devolución</a>,
+          los{" "}
+          <a href="/terminos" target="_blank" className="text-primary underline">términos y condiciones</a>{" "}
+          y has consultado los{" "}
+          <a href="/datos-fiscales" target="_blank" className="text-primary underline">datos fiscales del comercio</a>{" "}
+          (LA FAMILIA GASTRO, S.L. · NIF B-70596397).
+        </div>
+
         {error && (
           <div className="bg-red-50 border border-red-200 text-red-700 px-6 py-4 mb-6">{error}</div>
         )}
