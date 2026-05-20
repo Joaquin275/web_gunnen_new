@@ -56,11 +56,12 @@ export default function Hero() {
       {/* Título arriba a la izquierda — igual que en la referencia */}
       <div className="absolute z-20 left-6 md:left-16" style={{ top: "38%" }}>
         <h1
-          className="font-light tracking-widest text-white uppercase"
+          className="font-brefa text-white uppercase"
           style={{
-            fontSize: "clamp(1.6rem, 5vw, 4rem)",
+            fontSize: "clamp(1.4rem, 4vw, 3.2rem)",
+            fontWeight: 400,
             textShadow: "0 2px 16px rgba(0,0,0,0.4)",
-            letterSpacing: "0.12em",
+            letterSpacing: "0.10em",
           }}
         >
           Alegría Compartida

@@ -53,7 +53,7 @@ export default function MenusPreview() {
                 
                 {/* Contenido */}
                 <div className="p-8">
-                  <h3 className="text-2xl font-serif font-light mb-4 group-hover:text-accent transition-colors">
+                  <h3 className="text-2xl font-brefa-round mb-4 group-hover:text-accent transition-colors" style={{ fontWeight: 400 }}>
                     {menu.name}
                   </h3>
                   <p className="text-gray-600 mb-6 leading-relaxed">

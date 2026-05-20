@@ -3,23 +3,35 @@ import localFont from "next/font/local";
 import "./globals.css";
 import Providers from "./providers";
 
-// Coolvetica — tipografía principal para títulos (Regular = ligeramente más peso)
-const cormorant = localFont({
+// Coolvetica — tipografía principal en toda la web
+const coolvetica = localFont({
   src: [
     { path: "../public/fonts/coolvetica-light.otf",   weight: "300", style: "normal" },
     { path: "../public/fonts/coolvetica-regular.otf", weight: "400", style: "normal" },
+    { path: "../public/fonts/coolvetica-bold.otf",    weight: "600", style: "normal" },
   ],
-  variable: "--font-cormorant",
+  variable: "--font-coolvetica",
   display: "swap",
 });
 
-// Coolvetica Light — tipografía principal para cuerpo, nav y UI (igual que gunnen.es)
-const inter = localFont({
+// Brefa — solo para el título principal del Hero
+// Nota: sustituir brefa-round.woff2 por brefa.woff2 cuando se disponga del archivo
+const brefa = localFont({
   src: [
-    { path: "../public/fonts/coolvetica-light.otf",   weight: "300", style: "normal" },
-    { path: "../public/fonts/coolvetica-regular.otf", weight: "400", style: "normal" },
+    { path: "../public/fonts/brefa-round.woff2", weight: "400", style: "normal" },
+    { path: "../public/fonts/brefa-round.woff",  weight: "400", style: "normal" },
   ],
-  variable: "--font-inter",
+  variable: "--font-brefa",
+  display: "swap",
+});
+
+// Brefa Round — solo para los títulos de los menús (TEMPO, IMPULSO)
+const brefaRound = localFont({
+  src: [
+    { path: "../public/fonts/brefa-round.woff2", weight: "400", style: "normal" },
+    { path: "../public/fonts/brefa-round.woff",  weight: "400", style: "normal" },
+  ],
+  variable: "--font-brefa-round",
   display: "swap",
 });
 
@@ -53,7 +65,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es" className={`${cormorant.variable} ${inter.variable}`}>
+    <html lang="es" className={`${coolvetica.variable} ${brefa.variable} ${brefaRound.variable}`}>
       <body>
         <Providers>
           <LayoutShell>{children}</LayoutShell>

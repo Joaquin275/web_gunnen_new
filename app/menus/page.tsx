@@ -75,10 +75,10 @@ export default function MenusPage() {
                   {/* Contenido */}
                   <div className={`md:col-span-7 ${index % 2 === 1 ? 'md:order-1' : ''}`}>
                     <div className="flex items-baseline justify-between mb-4 gap-2">
-                      <h2 className="text-2xl sm:text-4xl font-serif font-light group-hover:text-accent transition-colors">
+                      <h2 className="text-2xl sm:text-4xl font-brefa-round group-hover:text-accent transition-colors" style={{ fontWeight: 400 }}>
                         {menu.name}
                       </h2>
-                      <span className="text-xl sm:text-3xl font-serif font-light text-gray-400 flex-shrink-0">
+                      <span className="text-xl sm:text-3xl font-sans font-light text-gray-400 flex-shrink-0">
                         {menu.price}
                       </span>
                     </div>

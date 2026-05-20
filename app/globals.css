@@ -3,30 +3,33 @@
 @tailwind utilities;
 
 @layer base {
-  :root {
-    --font-cormorant: 'Cormorant Garamond', Georgia, serif;
-    --font-inter: 'Inter', system-ui, sans-serif;
-  }
-
   html {
     @apply antialiased;
     scroll-behavior: smooth;
   }
 
+  /* Base: Coolvetica Light para todo el cuerpo */
   body {
     @apply bg-background text-foreground font-sans;
-    font-weight: 300; /* Coolvetica Light como gunnen.es */
+    font-weight: 300;
     font-feature-settings: 'rlig' 1, 'calt' 1;
   }
 
-  h1, h2, h3, h4, h5, h6 {
-    @apply font-serif;
-    font-weight: 300; /* Light para headings — el tamaño da el énfasis, no el peso */
+  /* Títulos: Coolvetica con peso semibold (400 = regular de Coolvetica) */
+  h1, h2, h3 {
+    @apply font-sans;
+    font-weight: 400;
   }
 
-  /* Clases de peso para casos específicos */
-  .font-light { font-weight: 300; }
-  .font-normal { font-weight: 400; }
+  /* Subtítulos y elementos de apoyo: Coolvetica Light */
+  h4, h5, h6 {
+    @apply font-sans;
+    font-weight: 300;
+  }
+
+  p, li, span, a, label, input, textarea, select {
+    font-weight: 300;
+  }
 }
 
 @layer components {

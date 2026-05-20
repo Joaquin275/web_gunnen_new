@@ -21,8 +21,13 @@ const config: Config = {
         foreground: '#0a0a0a',
       },
       fontFamily: {
-        serif: ['var(--font-cormorant)', 'Georgia', 'serif'],
-        sans: ['var(--font-inter)', 'system-ui', 'sans-serif'],
+        // Coolvetica — tipografía base de toda la web
+        sans:  ['var(--font-coolvetica)', 'system-ui', 'sans-serif'],
+        serif: ['var(--font-coolvetica)', 'system-ui', 'sans-serif'],
+        // Brefa — exclusivo del título del Hero
+        brefa: ['var(--font-brefa)', 'Georgia', 'serif'],
+        // Brefa Round — exclusivo de los nombres de menú (Tempo, Impulso)
+        'brefa-round': ['var(--font-brefa-round)', 'Georgia', 'serif'],
       },
       fontSize: {
         'display': ['clamp(2rem, 7vw, 5.5rem)', { lineHeight: '1.1', letterSpacing: '-0.02em' }],
