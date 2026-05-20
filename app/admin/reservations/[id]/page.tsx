@@ -21,6 +21,7 @@ export default async function ReservationDetailPage({ params }: { params: Promis
     CAPTURED: { label: "Cobrado", cls: "bg-green-100 text-green-700" },
     REJECTED: { label: "Rechazado", cls: "bg-red-100 text-red-700" },
     REFUNDED: { label: "Liberado", cls: "bg-gray-100 text-gray-500" },
+    GIFT_CARD: { label: "Bono regalo", cls: "bg-purple-100 text-purple-700" },
   };
 
   const { label, cls } = statusMap[r.status] ?? { label: r.status, cls: "bg-gray-100 text-gray-700" };
@@ -133,15 +134,23 @@ export default async function ReservationDetailPage({ params }: { params: Promis
         </div>
       </div>
 
-      {/* Acción: capturar preautorización (cliente no se presentó) */}
-      {redsysStatusKey === "PREAUTHORIZED" && r.status === "CONFIRMED" && (
+      {/* Acción: cobrar garantía — visible si hay retención pendiente */}
+      {r.status === "CONFIRMED" &&
+        redsysStatusKey !== "CAPTURED" &&
+        redsysStatusKey !== "REFUNDED" &&
+        Number(r.depositAmount) > 0 && (
         <div className="bg-amber-50 border border-amber-300 p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
             <p className="font-medium text-amber-900">Cobrar garantía (no-show / cancelación tardía)</p>
             <p className="text-sm text-amber-800">
               Confirma la preautorización para cobrar el 30% retenido ({Number(r.depositAmount).toFixed(2)}€).
-              Úsalo solo si el cliente no se presentó o canceló fuera de plazo.
+              Úsalo <strong>solo</strong> si el cliente no se presentó o canceló fuera de plazo.
             </p>
+            {redsysStatusKey !== "PREAUTHORIZED" && (
+              <p className="text-xs text-amber-600 mt-1">
+                ⚠ La preautorización bancaria estará disponible cuando se active la nueva terminal Redsys.
+              </p>
+            )}
           </div>
           <CaptureButton id={id} />
         </div>
