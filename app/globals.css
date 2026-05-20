@@ -15,12 +15,18 @@
 
   body {
     @apply bg-background text-foreground font-sans;
+    font-weight: 300; /* Coolvetica Light como gunnen.es */
     font-feature-settings: 'rlig' 1, 'calt' 1;
   }
 
   h1, h2, h3, h4, h5, h6 {
     @apply font-serif;
+    font-weight: 300; /* Light para headings — el tamaño da el énfasis, no el peso */
   }
+
+  /* Clases de peso para casos específicos */
+  .font-light { font-weight: 300; }
+  .font-normal { font-weight: 400; }
 }
 
 @layer components {

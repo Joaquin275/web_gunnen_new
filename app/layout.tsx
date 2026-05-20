@@ -3,22 +3,21 @@ import localFont from "next/font/local";
 import "./globals.css";
 import Providers from "./providers";
 
-// Coolvetica Light — tipografía para títulos y headings (igual que gunnen.es)
+// Coolvetica — tipografía principal para títulos (Regular = ligeramente más peso)
 const cormorant = localFont({
   src: [
     { path: "../public/fonts/coolvetica-light.otf",   weight: "300", style: "normal" },
     { path: "../public/fonts/coolvetica-regular.otf", weight: "400", style: "normal" },
-    { path: "../public/fonts/coolvetica-bold.otf",    weight: "700", style: "normal" },
   ],
   variable: "--font-cormorant",
   display: "swap",
 });
 
-// Brefa Round — tipografía para cuerpo de texto y UI (igual que gunnen.es)
+// Coolvetica Light — tipografía principal para cuerpo, nav y UI (igual que gunnen.es)
 const inter = localFont({
   src: [
-    { path: "../public/fonts/brefa-round.woff2", weight: "400", style: "normal" },
-    { path: "../public/fonts/brefa-round.woff",  weight: "400", style: "normal" },
+    { path: "../public/fonts/coolvetica-light.otf",   weight: "300", style: "normal" },
+    { path: "../public/fonts/coolvetica-regular.otf", weight: "400", style: "normal" },
   ],
   variable: "--font-inter",
   display: "swap",
