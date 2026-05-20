@@ -152,7 +152,7 @@ export default function GiftCardForm({ amount, menuName, onBack }: GiftCardFormP
           <a href="/terminos" target="_blank" className="text-primary underline">términos y condiciones</a>{" "}
           y has consultado los{" "}
           <a href="/datos-fiscales" target="_blank" className="text-primary underline">datos fiscales del comercio</a>{" "}
-          (LA FAMILIA GASTRO, S.L. · NIF B-70596397).
+          (LA FAMILIA GASTRO, S.L. · CIF B10989226).
         </div>
 
         {error && (

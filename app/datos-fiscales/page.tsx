@@ -34,8 +34,8 @@ export default function DatosFiscalesPage() {
                 <dd className="sm:col-span-2 text-gray-800 font-semibold">LA FAMILIA GASTRO, S.L.</dd>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-1">
-                <dt className="text-gray-500 font-medium">NIF / CIF</dt>
-                <dd className="sm:col-span-2 text-gray-800">B-70596397</dd>
+                <dt className="text-gray-500 font-medium">CIF</dt>
+                <dd className="sm:col-span-2 text-gray-800">B10989226</dd>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-1">
                 <dt className="text-gray-500 font-medium">Domicilio social</dt>
