@@ -47,8 +47,8 @@ export default function DatosFiscalesPage() {
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-1">
                 <dt className="text-gray-500 font-medium">Teléfono</dt>
                 <dd className="sm:col-span-2">
-                  <a href="tel:+34881562140" className="text-gray-800 hover:text-primary">
-                    +34 881 56 21 40
+                  <a href="tel:+34613739550" className="text-gray-800 hover:text-primary">
+                    +34 613 73 95 50
                   </a>
                 </dd>
               </div>

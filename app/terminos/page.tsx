@@ -112,7 +112,7 @@ export default function TerminosPage() {
             </p>
             <ul className="list-disc pl-6 space-y-2">
               <li>Email: reservas@gunnen.es</li>
-              <li>Teléfono: +34 XXX XXX XXX</li>
+              <li>Teléfono: <a href="tel:+34613739550" className="text-primary underline">+34 613 73 95 50</a></li>
             </ul>
           </div>
         </div>

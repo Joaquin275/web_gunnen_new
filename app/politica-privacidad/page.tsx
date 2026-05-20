@@ -108,8 +108,8 @@ export default function PoliticaPrivacidadPage() {
               con nosotros en:
             </p>
             <ul className="list-disc pl-6 space-y-2">
-              <li>Email: privacidad@gunnen.es</li>
-              <li>Teléfono: +34 XXX XXX XXX</li>
+              <li>Email: <a href="mailto:reservas@gunnen.es" className="text-primary underline">reservas@gunnen.es</a></li>
+              <li>Teléfono: <a href="tel:+34613739550" className="text-primary underline">+34 613 73 95 50</a></li>
             </ul>
           </div>
         </div>
