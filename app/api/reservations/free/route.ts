@@ -81,15 +81,13 @@ export async function POST(request: Request) {
         firstName,
         lastName,
         email,
-        date,
-        time,
+        reservationDate: new Date(date + "T00:00:00"),
+        reservationTime: time,
         numberOfPeople: people,
         menuName: menuName || "",
-        menuPrice: price,
         estimatedTotal: total,
         depositAmount: 0,
         reservationId: reservation.id,
-        observations: observations || "",
       });
     } catch (emailErr) {
       console.error("Error enviando email de confirmación:", emailErr);
