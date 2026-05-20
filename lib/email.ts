@@ -11,6 +11,7 @@
  */
 
 import { generateIcs, googleCalendarLink } from "./ics";
+import { generateGiftCardPdf } from "./pdf";
 
 const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || "reservas@gunnen.es";
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "info@gunnen.es";
@@ -439,15 +440,12 @@ export async function sendGiftCard(data: GiftCardData) {
     </div>
   `;
 
-  // Adjuntar plantilla PDF del bono si existe en /public/bono-regalo.pdf
+  // Generar PDF personalizado con el código insertado dinámicamente
   let attachments: { filename: string; content: Buffer }[] = [];
   try {
-    const fs = await import("fs");
-    const path = await import("path");
-    const pdfPath = path.join(process.cwd(), "public", "bono-regalo.pdf");
-    if (fs.existsSync(pdfPath)) {
-      const pdfContent = fs.readFileSync(pdfPath);
-      attachments = [{ filename: "Bono-Regalo-Gunnen.pdf", content: pdfContent }];
+    const pdfBuffer = await generateGiftCardPdf(data.code);
+    if (pdfBuffer) {
+      attachments = [{ filename: "Bono-Regalo-Gunnen.pdf", content: pdfBuffer }];
     }
   } catch {
     // Sin PDF adjunto, el email se envía igualmente
@@ -456,7 +454,6 @@ export async function sendGiftCard(data: GiftCardData) {
   return resend.emails.send({
     from: FROM_EMAIL,
     to: data.recipientEmail,
-    cc: undefined,
     subject: `Tu bono regalo ${RESTAURANT_NAME} — ${menuLabel}`,
     html: template(content),
     ...(attachments.length > 0 && { attachments }),
