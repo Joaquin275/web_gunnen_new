@@ -63,7 +63,7 @@ export default function PoliticaDevolucionPage() {
                 compra mediante TPV Virtual (Redsys / Banco Sabadell).
               </p>
               <p>
-                <strong>Validez:</strong> Los bonos tienen una validez de <strong>12 meses</strong> desde
+                <strong>Validez:</strong> Los bonos tienen una validez de <strong>6 meses</strong> desde
                 la fecha de emisión, indicada en el propio bono.
               </p>
               <p>

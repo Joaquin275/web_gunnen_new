@@ -9,7 +9,7 @@ export default function GiftCardBanner() {
         </h2>
         <p className="text-lg md:text-xl font-light leading-relaxed mb-8 max-w-2xl mx-auto opacity-90">
           Nuestros bonos regalo son la forma perfecta de compartir momentos únicos.
-          Válidos durante 12 meses y personalizables con tu mensaje.
+          Válidos durante 6 meses y personalizables con tu mensaje.
         </p>
         <Link href="/regala" className="btn-primary bg-white text-accent hover:bg-gray-100">
           Comprar bono regalo

@@ -72,7 +72,7 @@ export default function RegalaPage() {
             {step === "select" && (
               <div>
                 <h2 className="text-2xl font-serif font-light mb-2">Selecciona el menú a regalar</h2>
-                <p className="text-sm text-gray-500 mb-8">Precio por persona · Válido 12 meses desde la emisión</p>
+                <p className="text-sm text-gray-500 mb-8">Precio por persona · Válido 6 meses desde la emisión</p>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-10">
                   {MENU_OPTIONS.map((menu) => (
@@ -120,7 +120,7 @@ export default function RegalaPage() {
                     {[
                       "Código único personalizado enviado por email",
                       "Documento de bono regalo en PDF",
-                      "Válido durante 12 meses desde su emisión",
+                      "Válido durante 6 meses desde su emisión",
                       "Canjeable al realizar la reserva online",
                       "Opción de programar el envío en una fecha futura",
                     ].map((item) => (

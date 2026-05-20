@@ -81,7 +81,7 @@ export default function TerminosPage() {
               7. Bonos Regalo
             </h2>
             <p>
-              Los bonos regalo son válidos durante 12 meses desde su fecha de emisión.
+              Los bonos regalo son válidos durante 6 meses desde su fecha de emisión.
               No son reembolsables y no pueden canjearse por dinero en efectivo.
             </p>
 
