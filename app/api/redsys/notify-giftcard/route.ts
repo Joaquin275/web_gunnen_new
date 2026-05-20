@@ -1,0 +1,115 @@
+/**
+ * POST /api/redsys/notify-giftcard
+ * Endpoint MerchantURL para notificaciones de pago de bonos regalo.
+ * Redsys llama a este endpoint server-to-server tras el pago.
+ */
+
+import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import {
+  verifyRedsysSignature,
+  decodeMerchantParams,
+  isRedsysApproved,
+} from "@/lib/redsys";
+import { sendGiftCard } from "@/lib/email";
+
+export async function POST(request: Request) {
+  try {
+    const body = await request.text();
+    const params = new URLSearchParams(body);
+
+    const merchantParams = params.get("Ds_MerchantParameters") || "";
+    const signature = params.get("Ds_Signature") || "";
+
+    const secretKey = process.env.REDSYS_SECRET_KEY;
+    if (!secretKey) {
+      console.error("REDSYS_SECRET_KEY no configurada");
+      return new NextResponse("KO", { status: 500 });
+    }
+
+    // Decodificar parámetros
+    const decoded = decodeMerchantParams(merchantParams);
+    const redsysOrder = decoded.Ds_Order || decoded.DS_MERCHANT_ORDER || "";
+    const dsResponse = decoded.Ds_Response || decoded.DS_RESPONSE || "";
+    const dsAuthCode = decoded.Ds_AuthorisationCode || "";
+
+    // Verificar firma
+    const signatureValid = verifyRedsysSignature(merchantParams, signature, redsysOrder, secretKey);
+    if (!signatureValid) {
+      console.error("Firma Redsys inválida en notify-giftcard");
+      return new NextResponse("KO", { status: 400 });
+    }
+
+    // Buscar el bono por redsysOrder (guardado en stripePaymentIntentId)
+    const giftCard = await prisma.giftCard.findFirst({
+      where: { stripePaymentIntentId: redsysOrder },
+    });
+
+    if (!giftCard) {
+      console.error("Bono no encontrado para redsysOrder:", redsysOrder);
+      return new NextResponse("KO", { status: 404 });
+    }
+
+    const approved = isRedsysApproved(dsResponse);
+
+    if (approved) {
+      // Activar el bono
+      const updated = await prisma.giftCard.update({
+        where: { id: giftCard.id },
+        data: {
+          status: "ACTIVE",
+          paidAt: new Date(),
+        },
+      });
+
+      // Enviar PDF al destinatario
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const sendDate = new Date(updated.sendDate);
+      sendDate.setHours(0, 0, 0, 0);
+
+      const expiresLabel = updated.expiresAt.toLocaleDateString("es-ES", {
+        year: "numeric", month: "long", day: "numeric",
+      });
+
+      if (sendDate <= today) {
+        await sendGiftCard({
+          recipientEmail: updated.recipientEmail,
+          recipientName: updated.recipientName || undefined,
+          purchaserName: updated.purchaserName,
+          amount: Number(updated.amount),
+          menuName: updated.menuName || undefined,
+          code: updated.code,
+          message: updated.message || undefined,
+          expiresAt: expiresLabel,
+        });
+
+        // Copia al comprador
+        await sendGiftCard({
+          recipientEmail: updated.purchaserEmail,
+          recipientName: updated.purchaserName,
+          purchaserName: updated.purchaserName,
+          amount: Number(updated.amount),
+          menuName: updated.menuName || undefined,
+          code: updated.code,
+          message: `Copia de tu bono regalo para ${updated.recipientEmail}`,
+          expiresAt: expiresLabel,
+        });
+      }
+
+      console.log(`Bono ${updated.code} activado. Auth: ${dsAuthCode}`);
+    } else {
+      // Pago rechazado → cancelar bono
+      await prisma.giftCard.update({
+        where: { id: giftCard.id },
+        data: { status: "CANCELLED" },
+      });
+      console.log(`Bono cancelado por pago rechazado. Ds_Response: ${dsResponse}`);
+    }
+
+    return new NextResponse("OK", { status: 200 });
+  } catch (error) {
+    console.error("Error en /api/redsys/notify-giftcard:", error);
+    return new NextResponse("KO", { status: 500 });
+  }
+}
