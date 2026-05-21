@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useState, useEffect } from "react";
 
 const heroImages = [
@@ -71,10 +70,10 @@ export default function Hero() {
       {/* Caja de texto — justo debajo del título, izquierda */}
       <div
         className="absolute z-20 left-6 md:left-16"
-        style={{ top: "47%", maxWidth: "min(480px, 90vw)" }}
+        style={{ top: "47%", maxWidth: "min(680px, 90vw)" }}
       >
         <div
-          className="p-4 md:p-8 text-xs md:text-base leading-relaxed text-gray-800 space-y-2 md:space-y-3"
+          className="p-4 md:p-8 text-xs md:text-sm leading-relaxed text-gray-800 space-y-2 md:space-y-3"
           style={{ background: "rgba(240,240,238,0.92)" }}
         >
           <p>
@@ -101,19 +100,6 @@ export default function Hero() {
             Alcohol), tratando con ello de llevar la temporada y la oferta del
             mercado a la copa.
           </p>
-
-          {/* CTAs */}
-          <div className="flex flex-row gap-3 pt-3">
-            <Link href="/reservas" className="btn-primary text-center text-xs">
-              Reservar mesa
-            </Link>
-            <Link
-              href="/menus"
-              className="btn-secondary text-center text-xs"
-            >
-              Ver menús
-            </Link>
-          </div>
         </div>
       </div>
 

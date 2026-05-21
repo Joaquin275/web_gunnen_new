@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import { pressDb } from "@/lib/db-json";
 
 export const metadata: Metadata = {
@@ -11,11 +12,25 @@ export default function PrensaPage() {
   const posts = pressDb.findPublished();
 
   return (
-    <div className="pt-20">
-      <section className="section-container">
-        <div className="max-w-4xl mx-auto">
-          <h1 className="text-display font-serif font-light mb-4">Prensa</h1>
-          <p className="text-xl text-gray-600">Noticias y reconocimientos</p>
+    <div>
+      {/* Hero con imagen */}
+      <section className="relative h-[55vh] min-h-[400px] overflow-hidden">
+        <Image
+          src="/images/gallery/GUNNEN-099-BAJA-scaled.jpg"
+          alt="Prensa Gunnen"
+          fill
+          className="object-cover"
+          priority
+        />
+        <div className="absolute inset-0 bg-black/55" />
+        <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-6">
+          <p className="text-white/60 text-xs tracking-[0.3em] uppercase mb-3">Noticias y reconocimientos</p>
+          <h1
+            className="text-white uppercase tracking-[0.15em] font-light"
+            style={{ fontSize: "clamp(2rem, 5vw, 4rem)" }}
+          >
+            Prensa
+          </h1>
         </div>
       </section>
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import StepIndicator from "@/components/reservations/StepIndicator";
 import Step1Date from "@/components/reservations/Step1Date";
 import Step2Time from "@/components/reservations/Step2Time";
@@ -75,14 +76,35 @@ export default function ReservasPage() {
   };
 
   return (
-    <div className="pt-20 min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50">
+      {/* Hero con imagen */}
+      <section className="relative h-[55vh] min-h-[400px] overflow-hidden">
+        <Image
+          src="/images/gallery/GUNNEN-042-BAJA-scaled.jpg"
+          alt="Reservar mesa en Gunnen"
+          fill
+          className="object-cover"
+          priority
+        />
+        <div className="absolute inset-0 bg-black/50" />
+        <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-6">
+          <p className="text-white/60 text-xs tracking-[0.3em] uppercase mb-3">Gunnen · A Coruña</p>
+          <h1
+            className="text-white uppercase tracking-[0.15em] font-light"
+            style={{ fontSize: "clamp(2rem, 5vw, 4rem)" }}
+          >
+            Reservas
+          </h1>
+          <p className="text-white/75 mt-3 text-base font-light">
+            Tres mesas · Experiencia única
+          </p>
+        </div>
+      </section>
+
       <div className="section-container">
         <div className="max-w-4xl mx-auto">
           {/* Header */}
           <div className="text-center mb-8 sm:mb-12">
-            <h1 className="text-display font-serif font-light mb-3">
-              Reservar mesa
-            </h1>
             <p className="text-base sm:text-lg text-gray-600">
               Complete el proceso de reserva en 5 sencillos pasos
             </p>

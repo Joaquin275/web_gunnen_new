@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 
 export const metadata: Metadata = {
   title: "Nuestros Menús — Gunnen",
@@ -39,17 +40,27 @@ const menus = [
 
 export default function MenusPage() {
   return (
-    <div className="pt-20">
-      {/* Hero */}
-      <section className="section-container">
-        <div className="max-w-4xl mx-auto text-center">
-          <h1 className="text-display font-serif font-light mb-6">
-            Nuestros menús
+    <div>
+      {/* Hero con imagen */}
+      <section className="relative h-[65vh] min-h-[440px] overflow-hidden">
+        <Image
+          src="/images/menus/tempo.jpg"
+          alt="Menús Gunnen"
+          fill
+          className="object-cover"
+          priority
+        />
+        <div className="absolute inset-0 bg-black/50" />
+        <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-6">
+          <p className="text-white/60 text-xs tracking-[0.3em] uppercase mb-3">Nuestros menús degustación</p>
+          <h1
+            className="text-white uppercase tracking-[0.15em] font-light"
+            style={{ fontSize: "clamp(2rem, 5vw, 4rem)" }}
+          >
+            Menús
           </h1>
-          <p className="text-xl text-gray-600 leading-relaxed">
-            Cada propuesta es un relato gastronómico diseñado para
-            sorprender y emocionar. Una experiencia completa que trasciende
-            el simple acto de comer.
+          <p className="text-white/75 mt-4 max-w-lg text-base leading-relaxed font-light">
+            Impulso · Tempo
           </p>
         </div>
       </section>

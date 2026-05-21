@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import GiftCardForm from "@/components/giftcards/GiftCardForm";
 
 interface MenuOption {
@@ -68,7 +69,30 @@ export default function RegalaPage() {
   };
 
   return (
-    <div className="pt-20 min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50">
+      {/* Hero con imagen */}
+      <section className="relative h-[55vh] min-h-[400px] overflow-hidden">
+        <Image
+          src="/images/gallery/1.Postre-de-caqui-jengibre-y-miel-Gunnen-1-1.jpeg"
+          alt="Bono regalo Gunnen"
+          fill
+          className="object-cover"
+          priority
+        />
+        <div className="absolute inset-0 bg-black/50" />
+        <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-6">
+          <p className="text-white/60 text-xs tracking-[0.3em] uppercase mb-3">Bono regalo</p>
+          <h1
+            className="text-white uppercase tracking-[0.15em] font-light"
+            style={{ fontSize: "clamp(2rem, 5vw, 4rem)" }}
+          >
+            Regala
+          </h1>
+          <p className="text-white/75 mt-3 text-base font-light">
+            Una experiencia gastronómica única
+          </p>
+        </div>
+      </section>
       <div className="section-container">
         <div className="max-w-4xl mx-auto">
 
