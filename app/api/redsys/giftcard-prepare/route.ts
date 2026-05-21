@@ -27,8 +27,8 @@ export async function POST(request: Request) {
       message, sendDate,
     } = data;
 
-    if (!amount || amount < 50 || amount > 500) {
-      return NextResponse.json({ error: "Importe inválido (50€–500€)" }, { status: 400 });
+    if (!amount || Number(amount) <= 0) {
+      return NextResponse.json({ error: "Importe inválido" }, { status: 400 });
     }
     if (!menuName) {
       return NextResponse.json({ error: "Debes seleccionar un menú" }, { status: 400 });
@@ -47,8 +47,9 @@ export async function POST(request: Request) {
     const redsysOrder = generateRedsysOrder();
     const amountCents = eurToCents(Number(amount));
 
+    // Validez: 6 meses desde la emisión
     const expiresAt = new Date();
-    expiresAt.setFullYear(expiresAt.getFullYear() + 1);
+    expiresAt.setMonth(expiresAt.getMonth() + 6);
 
     const parsedSendDate = sendDate ? new Date(sendDate) : new Date();
 

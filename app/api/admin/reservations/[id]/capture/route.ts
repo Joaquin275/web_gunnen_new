@@ -35,7 +35,7 @@ export async function POST(
         DS_MERCHANT_CURRENCY: "978",
         DS_MERCHANT_TRANSACTIONTYPE: "3",
         DS_MERCHANT_TERMINAL: terminal,
-        DS_MERCHANT_MERCHANTURL: `${appUrl}/api/redsys/notify`,
+        DS_MERCHANT_MERCHANTURL: `${appUrl}/api/redsys/notify-capture`,
         DS_MERCHANT_URLOK: `${appUrl}/admin/reservations/${id}`,
         DS_MERCHANT_URLKO: `${appUrl}/admin/reservations/${id}`,
       },
