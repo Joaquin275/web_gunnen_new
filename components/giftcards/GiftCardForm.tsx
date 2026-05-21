@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState } from "react";
 
 interface GiftCardFormProps {
   amount: number;
@@ -8,24 +8,36 @@ interface GiftCardFormProps {
   onBack: () => void;
 }
 
+function submitRedsysForm(data: {
+  url: string;
+  Ds_SignatureVersion: string;
+  Ds_MerchantParameters: string;
+  Ds_Signature: string;
+}) {
+  const form = document.createElement("form");
+  form.method = "POST";
+  form.action = data.url;
+  form.style.display = "none";
+
+  const addField = (name: string, value: string) => {
+    const input = document.createElement("input");
+    input.type = "hidden";
+    input.name = name;
+    input.value = value;
+    form.appendChild(input);
+  };
+
+  addField("Ds_SignatureVersion", data.Ds_SignatureVersion);
+  addField("Ds_MerchantParameters", data.Ds_MerchantParameters);
+  addField("Ds_Signature", data.Ds_Signature);
+
+  document.body.appendChild(form);
+  form.submit();
+}
+
 export default function GiftCardForm({ amount, menuName, onBack }: GiftCardFormProps) {
-  const redsysFormRef = useRef<HTMLFormElement>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  const [redsysData, setRedsysData] = useState<{
-    url: string;
-    Ds_SignatureVersion: string;
-    Ds_MerchantParameters: string;
-    Ds_Signature: string;
-  } | null>(null);
-
-  // Auto-envía el formulario oculto en cuanto redsysData esté en el DOM
-  useEffect(() => {
-    if (redsysData && redsysFormRef.current) {
-      redsysFormRef.current.submit();
-    }
-  }, [redsysData]);
 
   const today = new Date().toISOString().split("T")[0];
   const maxDate = new Date();
@@ -64,8 +76,7 @@ export default function GiftCardForm({ amount, menuName, onBack }: GiftCardFormP
       }
 
       const { redsysForm } = await res.json();
-      // useEffect se encarga de enviar el formulario oculto a Redsys
-      setRedsysData(redsysForm);
+      submitRedsysForm(redsysForm);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Error procesando la solicitud";
       setError(msg);
@@ -75,15 +86,6 @@ export default function GiftCardForm({ amount, menuName, onBack }: GiftCardFormP
 
   return (
     <>
-      {/* Formulario oculto para Redsys */}
-      {redsysData && (
-        <form ref={redsysFormRef} method="POST" action={redsysData.url} style={{ display: "none" }}>
-          <input type="hidden" name="Ds_SignatureVersion" value={redsysData.Ds_SignatureVersion} readOnly />
-          <input type="hidden" name="Ds_MerchantParameters" value={redsysData.Ds_MerchantParameters} readOnly />
-          <input type="hidden" name="Ds_Signature" value={redsysData.Ds_Signature} readOnly />
-        </form>
-      )}
-
       <form onSubmit={handleSubmit}>
         <h2 className="text-3xl font-serif font-light mb-8">Datos del bono regalo</h2>
 

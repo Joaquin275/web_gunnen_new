@@ -9,7 +9,7 @@
  *  - Sin bono            → Redsys 30% del total estimado (preautorización)
  */
 
-import { useState, useRef, useEffect } from "react";
+import { useState } from "react";
 import type { ReservationState } from "@/app/reservas/page";
 
 interface Step5DetailsProps {
@@ -33,24 +33,40 @@ const allergensList = [
   "Altramuces", "Moluscos",
 ];
 
+/**
+ * Crea un formulario HTML dinámicamente y lo envía a Redsys.
+ * Más fiable que React state + useEffect porque no depende del ciclo de render.
+ */
+function submitRedsysForm(data: {
+  url: string;
+  Ds_SignatureVersion: string;
+  Ds_MerchantParameters: string;
+  Ds_Signature: string;
+}) {
+  const form = document.createElement("form");
+  form.method = "POST";
+  form.action = data.url;
+  form.style.display = "none";
+
+  const addField = (name: string, value: string) => {
+    const input = document.createElement("input");
+    input.type = "hidden";
+    input.name = name;
+    input.value = value;
+    form.appendChild(input);
+  };
+
+  addField("Ds_SignatureVersion", data.Ds_SignatureVersion);
+  addField("Ds_MerchantParameters", data.Ds_MerchantParameters);
+  addField("Ds_Signature", data.Ds_Signature);
+
+  document.body.appendChild(form);
+  form.submit();
+}
+
 export default function Step5Details({ reservationData, onBack }: Step5DetailsProps) {
-  const redsysFormRef = useRef<HTMLFormElement>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  const [redsysData, setRedsysData] = useState<{
-    url: string;
-    Ds_SignatureVersion: string;
-    Ds_MerchantParameters: string;
-    Ds_Signature: string;
-  } | null>(null);
-
-  // Auto-envía el formulario oculto en cuanto redsysData esté en el DOM
-  useEffect(() => {
-    if (redsysData && redsysFormRef.current) {
-      redsysFormRef.current.submit();
-    }
-  }, [redsysData]);
 
   const [formData, setFormData] = useState({
     firstName: "",
@@ -182,7 +198,8 @@ export default function Step5Details({ reservationData, onBack }: Step5DetailsPr
         throw new Error(d.error || "Error preparando el pago");
       }
       const { redsysForm } = await res.json();
-      setRedsysData(redsysForm);
+      // Envío directo al TPV — sin pasar por React state para evitar timing issues
+      submitRedsysForm(redsysForm);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Error procesando la reserva";
       setError(msg);
@@ -192,15 +209,6 @@ export default function Step5Details({ reservationData, onBack }: Step5DetailsPr
 
   return (
     <>
-      {/* Formulario oculto para Redsys */}
-      {redsysData && (
-        <form ref={redsysFormRef} method="POST" action={redsysData.url} style={{ display: "none" }}>
-          <input type="hidden" name="Ds_SignatureVersion" value={redsysData.Ds_SignatureVersion} readOnly />
-          <input type="hidden" name="Ds_MerchantParameters" value={redsysData.Ds_MerchantParameters} readOnly />
-          <input type="hidden" name="Ds_Signature" value={redsysData.Ds_Signature} readOnly />
-        </form>
-      )}
-
       <form onSubmit={handleSubmit}>
         <h2 className="text-3xl font-serif font-light mb-8">Datos de la reserva</h2>
 
