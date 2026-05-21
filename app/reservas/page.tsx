@@ -40,35 +40,31 @@ export default function ReservasPage() {
   const [currentStep, setCurrentStep] = useState(1);
   const [reservationData, setReservationData] = useState<ReservationState>(initialState);
 
+  // Usar forma funcional de setState para evitar stale closure con menuPrice
   const handleStep1Complete = (date: string) => {
-    setReservationData({ ...reservationData, date });
+    setReservationData(prev => ({ ...prev, date }));
     setCurrentStep(2);
   };
 
   const handleStep2Complete = (timeSlotId: string, time: string, slotData: any) => {
-    setReservationData({
-      ...reservationData,
+    setReservationData(prev => ({
+      ...prev,
       timeSlotId,
       time,
       minPeople: slotData.minPeople,
       maxPeople: slotData.maxPeople,
       depositPerPerson: slotData.depositPerPerson,
-    });
+    }));
     setCurrentStep(3);
   };
 
   const handleStep3Complete = (menuId: string, menuName: string, menuPrice: number) => {
-    setReservationData({ 
-      ...reservationData, 
-      menuId,
-      menuName,
-      menuPrice,
-    });
+    setReservationData(prev => ({ ...prev, menuId, menuName, menuPrice }));
     setCurrentStep(4);
   };
 
   const handleStep4Complete = (numberOfPeople: number) => {
-    setReservationData({ ...reservationData, numberOfPeople });
+    setReservationData(prev => ({ ...prev, numberOfPeople }));
     setCurrentStep(5);
   };
 

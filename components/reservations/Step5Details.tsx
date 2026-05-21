@@ -197,7 +197,21 @@ export default function Step5Details({ reservationData, onBack }: Step5DetailsPr
         const d = await res.json();
         throw new Error(d.error || "Error preparando el pago");
       }
-      const { redsysForm } = await res.json();
+      const { redsysForm, amountCents, depositEuros, estimatedTotal } = await res.json();
+
+      // Verificación cliente: decodificar y comprobar el importe antes de enviar a Redsys
+      try {
+        const decoded = JSON.parse(atob(redsysForm.Ds_MerchantParameters));
+        console.log("[Redsys] Parámetros verificados:", decoded);
+        console.log(`[Redsys] Importe en céntimos: ${decoded.DS_MERCHANT_AMOUNT} | Pedido: ${decoded.DS_MERCHANT_ORDER}`);
+        if (!decoded.DS_MERCHANT_AMOUNT || decoded.DS_MERCHANT_AMOUNT === "0") {
+          throw new Error(`Importe inválido en parámetros Redsys: ${decoded.DS_MERCHANT_AMOUNT}`);
+        }
+      } catch (decodeErr) {
+        console.error("[Redsys] Error verificando parámetros:", decodeErr);
+        throw new Error("Error preparando el pago. Por favor, inténtalo de nuevo.");
+      }
+
       // Envío directo al TPV — sin pasar por React state para evitar timing issues
       submitRedsysForm(redsysForm);
     } catch (err: unknown) {

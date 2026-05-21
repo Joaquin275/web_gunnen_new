@@ -34,11 +34,26 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Pasarela de pago no configurada" }, { status: 500 });
     }
 
-    const people = numberOfPeople || 2;
-    const price = Number(menuPrice) || 0;
+    const people = Number(numberOfPeople) || 2;
+    const price = Number(menuPrice);
+
+    console.log(`[Redsys Prepare] menuPrice recibido: ${menuPrice} (tipo: ${typeof menuPrice}) → price: ${price}`);
+    console.log(`[Redsys Prepare] numberOfPeople: ${numberOfPeople} → people: ${people}`);
+    console.log(`[Redsys Prepare] menuName: ${menuName}`);
+
+    if (!price || isNaN(price) || price <= 0) {
+      console.error(`[Redsys Prepare] PRECIO INVÁLIDO: menuPrice=${menuPrice}`);
+      return NextResponse.json(
+        { error: "Precio del menú inválido. Vuelve atrás y selecciona un menú." },
+        { status: 400 }
+      );
+    }
+
     const estimatedTotal = price * people;
     const depositEuros = estimatedTotal * 0.3;
     const amountCents = calcDeposit30pctCents(estimatedTotal);
+
+    console.log(`[Redsys Prepare] estimatedTotal: ${estimatedTotal}€ | depositEuros: ${depositEuros}€ | amountCents: ${amountCents}`);
 
     if (amountCents <= 0) {
       return NextResponse.json(
