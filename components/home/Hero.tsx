@@ -78,23 +78,28 @@ export default function Hero() {
           style={{ background: "rgba(240,240,238,0.92)" }}
         >
           <p>
-            En <strong>Gunnen</strong> compartimos la felicidad de tu
-            experiencia y tratamos de retroalimentarla expandiéndola y
-            haciéndola duradera más allá de tu visita a nuestro pequeño gran
-            espacio gastronómico.
+            Gunnen es una palabra holandesa. Significa alegría compartida y
+            representa nuestra filosofía de trabajo. Entendemos la cocina como
+            el punto de encuentro entre quien se sienta a la mesa y quien
+            cocina, como la experiencia que se crea a partir de productos,
+            técnicas y sabores; charlas, encuentros y momentos compartidos.
           </p>
           <p>
-            Queremos compartir contigo la sabiduría que tomamos prestada para
-            crecer: el origen, la tradición, la artesanía y la concienciación
-            de trabajar por dejar un mundo mejor. Por ello, te invitamos a
-            entrar en nuestra cocina de autor, comprometida con el producto
-            fresco, local en su mayoría, de calidad y comprometida con el
-            aprovechamiento alimentario, junto con una cuidada bodega que
-            seleccionamos con clara presencia de Galicia sin dejar atrás las
-            grandes zonas vinícolas españolas e internacionales.
+            Nuestro pequeño comedor, apenas tres mesas, es un lugar para
+            sentarse y disfrutar, para explorar nuevas posibilidades de las
+            materias primas de nuestro entorno, pero también para ceder el
+            protagonismo a los productores y a los artesanos que están detrás
+            de nuestro trabajo y para disfrutar de la cocina con la
+            sostenibilidad y el aprovechamiento integral siempre de fondo.
           </p>
-          <p className="italic font-medium pt-1">
-            Difunde nuestra fórmula, multiplica alegría sin reservas.
+          <p>
+            Tratamos de que esta filosofía se traslade también al mundo líquido
+            a través de una bodega seleccionada para encajar con nuestros platos
+            y representar a proyectos y elaboradores con los que compartimos un
+            modo de entender la gastronomía. Igualmente, trabajamos a diario en
+            la elaboración de otras bebidas bajo la filosofía NOLO (No/Low
+            Alcohol), tratando con ello de llevar la temporada y la oferta del
+            mercado a la copa.
           </p>
 
           {/* CTAs */}

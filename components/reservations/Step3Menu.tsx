@@ -11,6 +11,7 @@ interface MenuOption {
   duration: string;
   highlights: string[];
   maridajePrice?: number;
+  noloPrice?: number;
 }
 
 const menus: MenuOption[] = [
@@ -19,20 +20,22 @@ const menus: MenuOption[] = [
     name: "Tempo",
     description: "Nuestra invitación a entrar hasta la cocina, a olvidarte del reloj y de las prisas. Un recorrido más extenso por nuestra forma de entender la materia prima y el entorno.",
     price: 100,
-    courses: "2 Snacks + 8 platos + 2 postres",
+    courses: "14 bocados (11 del mundo salado + 3 del mundo dulce)",
     duration: "Experiencia completa",
-    highlights: ["Bebida Natural + Snack (Bienvenida)", "12 momentos gastronómicos", "Pan + Petit fours incluido"],
-    maridajePrice: 56,
+    highlights: ["14 bocados totales", "Pan + Petit fours incluido", "Armonía con vino (+45€)", "Armonía No/Low (+30€)"],
+    maridajePrice: 45,
+    noloPrice: 30,
   },
   {
     id: "impulso",
     name: "Impulso",
     description: "Nuestra versión más inmediata, una propuesta que puede funcionar como puerta de entrada o si no dispones de mucho tiempo. Cocina ágil, estacional y de producto.",
     price: 80,
-    courses: "2 Snacks + 6 platos + 1 postre",
+    courses: "11 bocados (9 del mundo salado + 2 del mundo dulce)",
     duration: "Versión más ágil",
-    highlights: ["Bebida Natural + Snack (Bienvenida)", "9 momentos gastronómicos", "Pan + Petit fours incluido"],
-    maridajePrice: 48,
+    highlights: ["11 bocados totales", "Pan + Petit fours incluido", "Armonía con vino (+45€)", "Armonía No/Low (+30€)"],
+    maridajePrice: 45,
+    noloPrice: 30,
   },
 ];
 
@@ -43,25 +46,24 @@ interface Step3MenuProps {
 
 export default function Step3Menu({ onComplete, onBack }: Step3MenuProps) {
   const [selectedMenu, setSelectedMenu] = useState<MenuOption | null>(null);
-  const [addMaridaje, setAddMaridaje] = useState(false);
+  const [armonia, setArmonia] = useState<"none" | "vino" | "nolo">("none");
 
   const handleMenuSelect = (menu: MenuOption) => {
     setSelectedMenu(menu);
-    // Reset maridaje cuando cambia de menú
-    setAddMaridaje(false);
+    setArmonia("none");
   };
+
+  const extraPrice =
+    armonia === "vino" ? (selectedMenu?.maridajePrice ?? 0) :
+    armonia === "nolo" ? (selectedMenu?.noloPrice ?? 0) : 0;
 
   const handleContinue = () => {
     if (!selectedMenu) return;
 
-    let finalPrice = selectedMenu.price;
+    const finalPrice = selectedMenu.price + extraPrice;
     let finalName = selectedMenu.name;
-
-    // Si tiene maridaje agregado
-    if (addMaridaje && selectedMenu.maridajePrice) {
-      finalPrice += selectedMenu.maridajePrice;
-      finalName += " + Maridaje";
-    }
+    if (armonia === "vino") finalName += " + Armonía Vino";
+    if (armonia === "nolo") finalName += " + Armonía No/Low";
 
     onComplete(selectedMenu.id, finalName, finalPrice);
   };
@@ -144,33 +146,41 @@ export default function Step3Menu({ onComplete, onBack }: Step3MenuProps) {
         })}
       </div>
 
-      {/* Opción de agregar maridaje */}
-      {selectedMenu && selectedMenu.maridajePrice && (
-        <div className="bg-amber-50 border-2 border-amber-200 p-6 mb-8">
-          <label className="flex items-start gap-4 cursor-pointer group">
-            <input
-              type="checkbox"
-              checked={addMaridaje}
-              onChange={(e) => setAddMaridaje(e.target.checked)}
-              className="w-5 h-5 mt-1 accent-amber-600"
-            />
-            <div className="flex-grow">
-              <div className="flex items-center justify-between mb-2">
-                <h4 className="text-lg font-serif font-light">
-                  ¿Agregar Maridaje?
-                </h4>
-                <span className="text-xl font-serif text-amber-700">
-                  +{selectedMenu.maridajePrice}€
-                </span>
-              </div>
-              <p className="text-sm text-gray-700 mb-2">
-                Complementa tu menú con una selección de vinos y destilados cuidadosamente elegidos para armonizar con cada plato
-              </p>
-              <div className="flex gap-2 text-xs">
-                <span className="px-2 py-1 bg-amber-100 text-amber-800 rounded">Bodega seleccionada</span>
-                <span className="px-2 py-1 bg-amber-100 text-amber-800 rounded">Producto local</span>
+      {/* Opción de armonía */}
+      {selectedMenu && (
+        <div className="border-2 border-gray-200 p-6 mb-8 space-y-3">
+          <h4 className="text-lg font-serif font-light mb-4">
+            Propuesta de Armonía <span className="text-sm font-sans text-gray-500">(opcional)</span>
+          </h4>
+
+          {/* Sin armonía */}
+          <label className="flex items-center gap-3 cursor-pointer">
+            <input type="radio" name="armonia" checked={armonia === "none"} onChange={() => setArmonia("none")} className="w-4 h-4 accent-primary" />
+            <span className="text-gray-700">Sin armonía · solo menú</span>
+          </label>
+
+          {/* Armonía con vino */}
+          <label className="flex items-center justify-between cursor-pointer py-2 px-3 hover:bg-amber-50 rounded transition-colors">
+            <div className="flex items-center gap-3">
+              <input type="radio" name="armonia" checked={armonia === "vino"} onChange={() => setArmonia("vino")} className="w-4 h-4 accent-amber-600" />
+              <div>
+                <span className="text-gray-800 font-medium">Armonía con vino</span>
+                <p className="text-xs text-gray-500">Selección de vinos maridados con cada plato</p>
               </div>
             </div>
+            <span className="text-amber-700 font-serif text-lg ml-4 flex-shrink-0">+{selectedMenu.maridajePrice}€</span>
+          </label>
+
+          {/* Armonía No/Low */}
+          <label className="flex items-center justify-between cursor-pointer py-2 px-3 hover:bg-green-50 rounded transition-colors">
+            <div className="flex items-center gap-3">
+              <input type="radio" name="armonia" checked={armonia === "nolo"} onChange={() => setArmonia("nolo")} className="w-4 h-4 accent-green-700" />
+              <div>
+                <span className="text-gray-800 font-medium">Armonía No/Low elaboración propia</span>
+                <p className="text-xs text-gray-500">Bebidas sin o bajo contenido alcohólico de temporada</p>
+              </div>
+            </div>
+            <span className="text-green-700 font-serif text-lg ml-4 flex-shrink-0">+{selectedMenu.noloPrice}€</span>
           </label>
         </div>
       )}
@@ -185,17 +195,16 @@ export default function Step3Menu({ onComplete, onBack }: Step3MenuProps) {
             <div>
               <p className="text-2xl font-serif font-light mb-1">
                 {selectedMenu.name}
-                {addMaridaje && selectedMenu.maridajePrice && (
-                  <span className="text-amber-700"> + Maridaje</span>
-                )}
+                {armonia === "vino" && <span className="text-amber-700"> + Armonía Vino</span>}
+                {armonia === "nolo" && <span className="text-green-700"> + Armonía No/Low</span>}
               </p>
               <p className="text-sm text-gray-600">
-                {selectedMenu.courses} · {selectedMenu.duration}
+                {selectedMenu.courses}
               </p>
             </div>
             <div className="text-right">
               <div className="text-3xl font-serif font-light text-accent">
-                {selectedMenu.price + (addMaridaje && selectedMenu.maridajePrice ? selectedMenu.maridajePrice : 0)}€
+                {selectedMenu.price + extraPrice}€
               </div>
               <div className="text-xs text-gray-500">por persona</div>
             </div>

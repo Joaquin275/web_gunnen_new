@@ -77,21 +77,20 @@ export default function FreshQuality() {
       <div className="max-w-6xl mx-auto">
         {/* Título */}
         <h2 className="text-hero font-serif font-light mb-8 text-center">
-          Platos que celebran la frescura y la calidad
+          Temporada y origen
         </h2>
 
         {/* Texto */}
         <div className="max-w-4xl mx-auto space-y-6 text-lg leading-relaxed text-gray-700 mb-16">
           <p>
-            Seleccionamos cuidadosamente ingredientes de primera calidad, 
-            frescos y de temporada, para que cada bocado sea una 
-            celebración de lo mejor que la tierra y el mar tienen para 
-            ofrecer. Nos enorgullece ofrecerte una cocina que está llena de 
-            detalles que marcan la diferencia, donde el sabor puro y la atención a la 
-            frescura se reflejan en cada creación culinaria.
-          </p>
-          <p className="text-center italic font-light">
-            Aquí, el buen gusto no solo se siente, se vive.
+            El mercado manda. Nuestra cocina cambia con el año, evoluciona,
+            explora la despensa y lo mejor que nuestros proveedores pueden
+            ofrecernos en cada momento. Cada bocado busca ser un homenaje a los
+            orígenes de la materia prima, a quien trabaja para hacernos llegar
+            los mejores productos y a momentos que con frecuencia son efímeros
+            —tal vez no más de unas pocas semanas al año— pero que nos permiten
+            bucear en cada estación para ofrecer una propuesta efímera, viva y
+            siempre en crecimiento.
           </p>
         </div>
 

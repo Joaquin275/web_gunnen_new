@@ -16,31 +16,45 @@ const MENU_OPTIONS: MenuOption[] = [
   {
     id: "tempo",
     name: "Menú TEMPO",
-    description: "2 Snacks · 8 platos · 2 postres · Pan · Petit fours",
+    description: "14 bocados · 11 del mundo salado + 3 del mundo dulce · Pan · Petit fours",
     price: 100,
-    courses: "12 momentos gastronómicos",
+    courses: "14 bocados",
   },
   {
-    id: "tempo-maridaje",
-    name: "Menú TEMPO con Maridaje",
-    description: "2 Snacks · 8 platos · 2 postres · Pan · Petit fours + Maridaje de vinos",
-    price: 156,
-    courses: "12 momentos + maridaje",
+    id: "tempo-vino",
+    name: "Menú TEMPO + Armonía con vino",
+    description: "14 bocados · Pan · Petit fours + Propuesta de Armonía con vino",
+    price: 145,
+    courses: "14 bocados + armonía",
     tag: "Recomendado",
+  },
+  {
+    id: "tempo-nolo",
+    name: "Menú TEMPO + Armonía No/Low",
+    description: "14 bocados · Pan · Petit fours + Armonía No/Low elaboración propia",
+    price: 130,
+    courses: "14 bocados + No/Low",
   },
   {
     id: "impulso",
     name: "Menú IMPULSO",
-    description: "2 Snacks · 6 platos · 1 postre · Pan · Petit fours",
+    description: "11 bocados · 9 del mundo salado + 2 del mundo dulce · Pan · Petit fours",
     price: 80,
-    courses: "9 momentos gastronómicos",
+    courses: "11 bocados",
   },
   {
-    id: "impulso-maridaje",
-    name: "Menú IMPULSO con Maridaje",
-    description: "2 Snacks · 6 platos · 1 postre · Pan · Petit fours + Maridaje de vinos",
-    price: 128,
-    courses: "9 momentos + maridaje",
+    id: "impulso-vino",
+    name: "Menú IMPULSO + Armonía con vino",
+    description: "11 bocados · Pan · Petit fours + Propuesta de Armonía con vino",
+    price: 125,
+    courses: "11 bocados + armonía",
+  },
+  {
+    id: "impulso-nolo",
+    name: "Menú IMPULSO + Armonía No/Low",
+    description: "11 bocados · Pan · Petit fours + Armonía No/Low elaboración propia",
+    price: 110,
+    courses: "11 bocados + No/Low",
   },
 ];
 
@@ -74,43 +88,80 @@ export default function RegalaPage() {
                 <h2 className="text-2xl font-serif font-light mb-2">Selecciona el menú a regalar</h2>
                 <p className="text-sm text-gray-500 mb-8">Precio por persona · Válido 6 meses desde la emisión</p>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-10">
-                  {MENU_OPTIONS.map((menu) => (
-                    <button
-                      key={menu.id}
-                      onClick={() => setSelectedMenu(menu)}
-                      className={`relative text-left p-7 border-2 transition-all duration-200 ${
-                        selectedMenu?.id === menu.id
-                          ? "border-primary bg-primary/5"
-                          : "border-gray-200 hover:border-gray-400"
-                      }`}
-                    >
-                      {menu.tag && (
-                        <span className="absolute top-4 right-4 text-xs tracking-widest uppercase bg-primary text-white px-3 py-1">
-                          {menu.tag}
-                        </span>
-                      )}
-
-                      {/* Selector visual */}
-                      <span
-                        className={`inline-flex items-center justify-center w-5 h-5 rounded-full border-2 mr-3 mb-4 transition-colors ${
+                {/* Grupo TEMPO */}
+                <div className="mb-8">
+                  <p className="text-xs tracking-widest uppercase text-gray-400 mb-3 border-b border-gray-200 pb-2">
+                    Menú TEMPO · 14 bocados
+                  </p>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {MENU_OPTIONS.filter((m) => m.id.startsWith("tempo")).map((menu) => (
+                      <button
+                        key={menu.id}
+                        onClick={() => setSelectedMenu(menu)}
+                        className={`relative text-left p-5 border-2 transition-all duration-200 ${
                           selectedMenu?.id === menu.id
-                            ? "border-primary bg-primary"
-                            : "border-gray-300"
+                            ? "border-primary bg-primary/5"
+                            : "border-gray-200 hover:border-gray-400"
                         }`}
                       >
-                        {selectedMenu?.id === menu.id && (
-                          <span className="w-2 h-2 rounded-full bg-white" />
+                        {menu.tag && (
+                          <span className="absolute top-3 right-3 text-xs tracking-widest uppercase bg-primary text-white px-2 py-0.5">
+                            {menu.tag}
+                          </span>
                         )}
-                      </span>
+                        <span
+                          className={`inline-flex items-center justify-center w-4 h-4 rounded-full border-2 mr-2 mb-3 transition-colors ${
+                            selectedMenu?.id === menu.id ? "border-primary bg-primary" : "border-gray-300"
+                          }`}
+                        >
+                          {selectedMenu?.id === menu.id && <span className="w-1.5 h-1.5 rounded-full bg-white" />}
+                        </span>
+                        <p className="text-xs tracking-widest uppercase text-gray-400 mb-1">{menu.courses}</p>
+                        <h3 className="text-base font-serif font-light mb-2 leading-snug">{menu.name}</h3>
+                        <p className="text-xs text-gray-500 mb-4 leading-relaxed">{menu.description}</p>
+                        <p className="text-2xl font-serif font-light text-primary">{menu.price}€</p>
+                        <p className="text-xs text-gray-400">por persona</p>
+                      </button>
+                    ))}
+                  </div>
+                </div>
 
-                      <p className="text-xs tracking-widest uppercase text-gray-400 mb-1">{menu.courses}</p>
-                      <h3 className="text-xl font-serif font-light mb-2">{menu.name}</h3>
-                      <p className="text-sm text-gray-500 mb-5 leading-relaxed">{menu.description}</p>
-                      <p className="text-3xl font-serif font-light text-primary">{menu.price}€</p>
-                      <p className="text-xs text-gray-400 mt-1">por persona</p>
-                    </button>
-                  ))}
+                {/* Grupo IMPULSO */}
+                <div className="mb-10">
+                  <p className="text-xs tracking-widest uppercase text-gray-400 mb-3 border-b border-gray-200 pb-2">
+                    Menú IMPULSO · 11 bocados
+                  </p>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {MENU_OPTIONS.filter((m) => m.id.startsWith("impulso")).map((menu) => (
+                      <button
+                        key={menu.id}
+                        onClick={() => setSelectedMenu(menu)}
+                        className={`relative text-left p-5 border-2 transition-all duration-200 ${
+                          selectedMenu?.id === menu.id
+                            ? "border-primary bg-primary/5"
+                            : "border-gray-200 hover:border-gray-400"
+                        }`}
+                      >
+                        {menu.tag && (
+                          <span className="absolute top-3 right-3 text-xs tracking-widest uppercase bg-primary text-white px-2 py-0.5">
+                            {menu.tag}
+                          </span>
+                        )}
+                        <span
+                          className={`inline-flex items-center justify-center w-4 h-4 rounded-full border-2 mr-2 mb-3 transition-colors ${
+                            selectedMenu?.id === menu.id ? "border-primary bg-primary" : "border-gray-300"
+                          }`}
+                        >
+                          {selectedMenu?.id === menu.id && <span className="w-1.5 h-1.5 rounded-full bg-white" />}
+                        </span>
+                        <p className="text-xs tracking-widest uppercase text-gray-400 mb-1">{menu.courses}</p>
+                        <h3 className="text-base font-serif font-light mb-2 leading-snug">{menu.name}</h3>
+                        <p className="text-xs text-gray-500 mb-4 leading-relaxed">{menu.description}</p>
+                        <p className="text-2xl font-serif font-light text-primary">{menu.price}€</p>
+                        <p className="text-xs text-gray-400">por persona</p>
+                      </button>
+                    ))}
+                  </div>
                 </div>
 
                 {/* Info */}

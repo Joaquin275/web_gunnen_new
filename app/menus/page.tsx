@@ -15,10 +15,10 @@ const menus = [
     image2: "/images/menus/tempo-2.jpg",
     description: "Nuestra invitación a entrar hasta la cocina, a olvidarte del reloj y de las prisas. Un recorrido más extenso por nuestra forma de entender la materia prima y el entorno.",
     highlights: [
-      "Bebida Natural + Snack (Bienvenida)",
-      "2 Snacks + 8 platos + 2 postres",
+      "14 bocados (11 del mundo salado + 3 del mundo dulce)",
       "Incluye pan + petit fours",
-      "Opción maridaje (+56€)",
+      "Propuesta de Armonía con vino (+45€)",
+      "Propuesta de Armonía No/Low elaboración propia (+30€)",
     ],
   },
   {
@@ -29,10 +29,10 @@ const menus = [
     image2: "/images/menus/impulso-2.jpg",
     description: "Nuestra versión más inmediata, una propuesta que puede funcionar como puerta de entrada o si no dispones de mucho tiempo. Cocina ágil, estacional y de producto.",
     highlights: [
-      "Bebida Natural + Snack (Bienvenida)",
-      "2 Snacks + 6 platos + 1 postre",
+      "11 bocados (9 del mundo salado + 2 del mundo dulce)",
       "Incluye pan + petit fours",
-      "Opción maridaje (+48€)",
+      "Propuesta de Armonía con vino (+45€)",
+      "Propuesta de Armonía No/Low elaboración propia (+30€)",
     ],
   },
 ];
