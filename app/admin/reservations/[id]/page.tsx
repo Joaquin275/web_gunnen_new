@@ -3,6 +3,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import CancelButton from "./CancelButton";
 import CaptureButton from "./CaptureButton";
+import VoidButton from "./VoidButton";
+import RefundButton from "./RefundButton";
 
 export default async function ReservationDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -134,25 +136,52 @@ export default async function ReservationDetailPage({ params }: { params: Promis
         </div>
       </div>
 
-      {/* Acción: cobrar garantía — visible si hay retención pendiente */}
-      {r.status === "CONFIRMED" &&
-        redsysStatusKey !== "CAPTURED" &&
-        redsysStatusKey !== "REFUNDED" &&
-        Number(r.depositAmount) > 0 && (
+      {/* ── Acciones Redsys ──────────────────────────────────────── */}
+
+      {/* Type 2: Cobrar garantía — preautorización activa, cliente no se presentó */}
+      {redsysStatusKey === "PREAUTHORIZED" && Number(r.depositAmount) > 0 && (
         <div className="bg-amber-50 border border-amber-300 p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
-            <p className="font-medium text-amber-900">Cobrar garantía (no-show / cancelación tardía)</p>
+            <p className="font-medium text-amber-900">
+              Cobrar garantía · Type 2 (no-show / cancelación tardía)
+            </p>
             <p className="text-sm text-amber-800">
-              Confirma la preautorización para cobrar el 30% retenido ({Number(r.depositAmount).toFixed(2)}€).
+              Confirma la preautorización y cobra el 30% retenido ({Number(r.depositAmount).toFixed(2)}€).
               Úsalo <strong>solo</strong> si el cliente no se presentó o canceló fuera de plazo.
             </p>
-            {redsysStatusKey !== "PREAUTHORIZED" && (
-              <p className="text-xs text-amber-600 mt-1">
-                ⚠ La preautorización bancaria estará disponible cuando se active la nueva terminal Redsys.
-              </p>
-            )}
           </div>
           <CaptureButton id={id} />
+        </div>
+      )}
+
+      {/* Type 9: Liberar retención — preautorización activa, cliente se presentó o canceló en plazo */}
+      {redsysStatusKey === "PREAUTHORIZED" && Number(r.depositAmount) > 0 && (
+        <div className="bg-green-50 border border-green-300 p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div>
+            <p className="font-medium text-green-900">
+              Liberar retención · Type 9 (cliente presente / cancelación en plazo)
+            </p>
+            <p className="text-sm text-green-800">
+              Anula la preautorización y libera los {Number(r.depositAmount).toFixed(2)}€ retenidos sin cargo alguno al cliente.
+            </p>
+          </div>
+          <VoidButton id={id} />
+        </div>
+      )}
+
+      {/* Type 3: Devolver cobro — garantía ya cobrada, necesitas devolverla */}
+      {redsysStatusKey === "CAPTURED" && Number(r.depositAmount) > 0 && (
+        <div className="bg-blue-50 border border-blue-300 p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div>
+            <p className="font-medium text-blue-900">
+              Devolver cobro · Type 3 (devolución bancaria)
+            </p>
+            <p className="text-sm text-blue-800">
+              Devuelve al cliente los {Number(r.depositAmount).toFixed(2)}€ cobrados previamente.
+              Esta acción no se puede deshacer.
+            </p>
+          </div>
+          <RefundButton id={id} amount={Number(r.depositAmount)} />
         </div>
       )}
 

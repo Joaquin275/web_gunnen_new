@@ -3,10 +3,9 @@ import { prisma } from "@/lib/prisma";
 import { callRedsysREST, eurToCents } from "@/lib/redsys";
 
 /**
- * POST /api/admin/reservations/[id]/capture
- * TransactionType = 2 → Confirmación de preautorización (cobrar garantía al cliente).
- * Usado cuando el cliente no se presenta o cancela fuera de plazo.
- * Llama al WebService REST de Redsys directamente desde el servidor.
+ * POST /api/admin/reservations/[id]/refund
+ * TransactionType = 3 → Devolución automática.
+ * Usado para devolver al cliente el importe cobrado en una captura anterior (Type 2).
  */
 export async function POST(
   _req: NextRequest,
@@ -17,9 +16,9 @@ export async function POST(
     const reservation = await prisma.reservation.findUnique({ where: { id } });
 
     if (!reservation) return NextResponse.json({ error: "Reserva no encontrada" }, { status: 404 });
-    if (reservation.redsysStatus !== "PREAUTHORIZED") {
+    if (reservation.redsysStatus !== "CAPTURED") {
       return NextResponse.json(
-        { error: `La reserva debe estar en estado PREAUTHORIZED. Estado actual: "${reservation.redsysStatus}"` },
+        { error: `Solo se puede devolver un cobro ya capturado. Estado actual: "${reservation.redsysStatus}"` },
         { status: 400 }
       );
     }
@@ -37,27 +36,27 @@ export async function POST(
 
     const amountCents = eurToCents(Number(reservation.depositAmount));
 
-    console.log("[CAPTURE] Iniciando captura Type=2 para reserva", id, "order:", reservation.redsysOrder, "importe:", amountCents, "céntimos");
+    console.log("[REFUND] Iniciando devolución Type=3 para reserva", id, "order:", reservation.redsysOrder, "importe:", amountCents, "céntimos");
 
-    // TransactionType = 2 → Confirmación/captura de preautorización
+    // TransactionType = 3 → Devolución automática (devolver el cobro capturado)
     const result = await callRedsysREST(
       {
         DS_MERCHANT_AMOUNT: String(amountCents),
         DS_MERCHANT_ORDER: reservation.redsysOrder,
         DS_MERCHANT_MERCHANTCODE: merchantCode,
         DS_MERCHANT_CURRENCY: "978",
-        DS_MERCHANT_TRANSACTIONTYPE: "2",
+        DS_MERCHANT_TRANSACTIONTYPE: "3",
         DS_MERCHANT_TERMINAL: terminal,
       },
       secretKey
     );
 
-    console.log("[CAPTURE] Respuesta Redsys:", result.dsResponse, "approved:", result.approved, "authCode:", result.authCode);
+    console.log("[REFUND] Respuesta Redsys:", result.dsResponse, "approved:", result.approved);
 
     if (!result.approved) {
       return NextResponse.json(
         {
-          error: `Redsys rechazó la captura. Código: ${result.dsResponse}`,
+          error: `Redsys rechazó la devolución. Código: ${result.dsResponse}`,
           dsResponse: result.dsResponse,
         },
         { status: 402 }
@@ -67,21 +66,18 @@ export async function POST(
     await prisma.reservation.update({
       where: { id },
       data: {
-        redsysStatus: "CAPTURED",
-        redsysCapturedAt: new Date(),
-        redsysAuthCode: result.authCode || reservation.redsysAuthCode,
+        redsysStatus: "REFUNDED",
         redsysResponse: result.dsResponse,
       },
     });
 
     return NextResponse.json({
-      message: "Garantía cobrada correctamente",
+      message: "Devolución realizada correctamente",
       dsResponse: result.dsResponse,
-      authCode: result.authCode,
     });
   } catch (error: unknown) {
-    const msg = error instanceof Error ? error.message : "Error en captura";
-    console.error("[CAPTURE] Error:", msg);
+    const msg = error instanceof Error ? error.message : "Error al procesar devolución";
+    console.error("[REFUND] Error:", msg);
     return NextResponse.json({ error: msg }, { status: 500 });
   }
 }

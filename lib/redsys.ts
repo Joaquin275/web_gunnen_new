@@ -185,3 +185,70 @@ export function isRedsysApproved(dsResponse: string): boolean {
   const code = parseInt(dsResponse || "9999", 10);
   return !isNaN(code) && code >= 0 && code <= 99;
 }
+
+// ─── WebService REST (operaciones server-side sin redirección) ───────────────
+
+const REDSYS_REST_REAL = "https://sis.redsys.es/sis/rest/trataPeticionREST";
+const REDSYS_REST_TEST = "https://sis-t.redsys.es:25443/sis/rest/trataPeticionREST";
+
+export interface RedsysRESTResult {
+  approved: boolean;
+  dsResponse: string;
+  authCode: string;
+  decoded: Record<string, string>;
+  rawResult: Record<string, string>;
+}
+
+/**
+ * Llama al WebService REST de Redsys directamente desde el servidor.
+ * Usado para operaciones post-autorización:
+ *   Type 2 = Confirmación/captura de preautorización (cobrar garantía)
+ *   Type 3 = Devolución automática (devolver cobro)
+ *   Type 9 = Anulación de preautorización (liberar retención)
+ */
+export async function callRedsysREST(
+  params: Partial<RedsysMerchantParams> & {
+    DS_MERCHANT_AMOUNT: string;
+    DS_MERCHANT_ORDER: string;
+    DS_MERCHANT_MERCHANTCODE: string;
+    DS_MERCHANT_CURRENCY: string;
+    DS_MERCHANT_TRANSACTIONTYPE: string;
+    DS_MERCHANT_TERMINAL: string;
+  },
+  secretKey: string
+): Promise<RedsysRESTResult> {
+  const merchantParamsJson = JSON.stringify(params);
+  const merchantParamsB64 = Buffer.from(merchantParamsJson).toString("base64");
+  const signature = signRedsys(merchantParamsB64, params.DS_MERCHANT_ORDER, secretKey);
+
+  const body = new URLSearchParams({
+    Ds_SignatureVersion: "HMAC_SHA256_V1",
+    Ds_MerchantParameters: merchantParamsB64,
+    Ds_Signature: signature,
+  });
+
+  const url = process.env.REDSYS_ENVIRONMENT === "test" ? REDSYS_REST_TEST : REDSYS_REST_REAL;
+
+  const response = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: body.toString(),
+  });
+
+  const rawResult: Record<string, string> = await response.json().catch(() => ({}));
+
+  let decoded: Record<string, string> = {};
+  if (rawResult.Ds_MerchantParameters) {
+    try {
+      decoded = decodeMerchantParams(rawResult.Ds_MerchantParameters);
+    } catch {
+      decoded = {};
+    }
+  }
+
+  const dsResponse = decoded.Ds_Response || rawResult.Ds_Response || "9999";
+  const authCode = decoded.Ds_AuthorisationCode || rawResult.Ds_AuthorisationCode || "";
+  const approved = isRedsysApproved(dsResponse);
+
+  return { approved, dsResponse, authCode, decoded, rawResult };
+}
