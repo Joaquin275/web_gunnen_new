@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import Providers from "./providers";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 // Coolvetica — tipografía principal en toda la web
 const coolvetica = localFont({
@@ -70,6 +71,7 @@ export default function RootLayout({
         <Providers>
           <LayoutShell>{children}</LayoutShell>
         </Providers>
+        <SpeedInsights />
       </body>
     </html>
   );
