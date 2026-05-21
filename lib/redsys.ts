@@ -50,14 +50,12 @@ function deriveTransactionKey(order: string, secretKeyB64: string): Buffer {
   const keyBuffer = Buffer.from(secretKeyB64, "base64"); // 24 bytes
   const iv = Buffer.alloc(8, 0); // IV de 8 ceros
 
-  // Padding Redsys: si la longitud ya es múltiplo de 8, añadir bloque extra.
-  // Igual que el str_pad de la librería oficial PHP de Redsys.
+  // Padding exactamente igual al SDK PHP oficial de Redsys:
+  //   $l = ceil(strlen($message) / 8) * 8;
+  // Para order de 8 chars → paddedLen = 8 (NO se añade bloque extra)
   const blockSize = 8;
   const orderBytes = Buffer.byteLength(order, "utf8");
-  const paddedLen =
-    orderBytes % blockSize === 0
-      ? orderBytes + blockSize
-      : Math.ceil(orderBytes / blockSize) * blockSize;
+  const paddedLen = Math.ceil(orderBytes / blockSize) * blockSize || blockSize;
   const orderPadded = Buffer.alloc(paddedLen, 0);
   Buffer.from(order, "utf8").copy(orderPadded);
 
