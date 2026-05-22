@@ -1,57 +1,52 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 
-// Datos de los menús reales de Gunnen
-const menusData: Record<string, any> = {
-  "tempo": {
+const menusData: Record<
+  string,
+  {
+    name: string;
+    price: string;
+    description: string;
+    duration: string;
+    image: string;
+    imageAlt: string;
+    allergens: string[];
+    notes: string;
+  }
+> = {
+  tempo: {
     name: "Tempo",
     price: "100€",
-    description: "Nuestra invitación a entrar hasta la cocina, a olvidarte del reloj y de las prisas. Un recorrido más extenso por nuestra forma de entender la materia prima y el entorno.",
+    description:
+      "Nuestra invitación a entrar hasta la cocina, a olvidarte del reloj y de las prisas. Un recorrido más extenso por nuestra forma de entender la materia prima y el entorno.",
     duration: "14 bocados · 11 del mundo salado + 3 del mundo dulce",
-    courses: [
-      { name: "Bocado 01", description: "Primer momento del mundo salado · temporada" },
-      { name: "Bocado 02", description: "Segundo momento del mundo salado · temporada" },
-      { name: "Bocado 03", description: "Tercer momento del mundo salado · temporada" },
-      { name: "Bocado 04", description: "Cuarto momento del mundo salado · temporada" },
-      { name: "Bocado 05", description: "Quinto momento del mundo salado · temporada" },
-      { name: "Bocado 06", description: "Sexto momento del mundo salado · temporada" },
-      { name: "Bocado 07", description: "Séptimo momento del mundo salado · temporada" },
-      { name: "Bocado 08", description: "Octavo momento del mundo salado · temporada" },
-      { name: "Bocado 09", description: "Noveno momento del mundo salado · temporada" },
-      { name: "Bocado 10", description: "Primer momento del mundo dulce · temporada" },
-      { name: "Bocado 11", description: "Segundo momento del mundo dulce · temporada" },
-      { name: "Bocado 12", description: "Tercer momento del mundo dulce · temporada" },
-      { name: "Cierre", description: "Pan incluido + Petit fours" },
-    ],
+    image: "/images/menus/tempo-2.jpg",
+    imageAlt: "Menú Tempo Gunnen",
     allergens: ["Gluten", "Lácteos", "Pescado", "Marisco", "Frutos secos"],
-    notes: "Precio con I.V.A. incluido. Bodega no incluida. Propuesta de Armonía con vino (+45€). Propuesta de Armonía No/Low elaboración propia (+30€). Menú sujeto a cambios según disponibilidad de producto de temporada. Adaptable a alergias e intolerancias con aviso previo.",
+    notes:
+      "Precio con I.V.A. incluido. Bodega no incluida. Propuesta de Armonía con vino (+45€). Propuesta de Armonía No/Low elaboración propia (+30€). Menú sujeto a cambios según disponibilidad de producto de temporada. Adaptable a alergias e intolerancias con aviso previo.",
   },
-  "impulso": {
+  impulso: {
     name: "Impulso",
     price: "80€",
-    description: "Nuestra versión más inmediata, una propuesta que puede funcionar como puerta de entrada o si no dispones de mucho tiempo. Cocina ágil, estacional y de producto.",
+    description:
+      "Nuestra versión más inmediata, una propuesta que puede funcionar como puerta de entrada o si no dispones de mucho tiempo. Cocina ágil, estacional y de producto.",
     duration: "11 bocados · 9 del mundo salado + 2 del mundo dulce",
-    courses: [
-      { name: "Bocado 01", description: "Primer momento del mundo salado · temporada" },
-      { name: "Bocado 02", description: "Segundo momento del mundo salado · temporada" },
-      { name: "Bocado 03", description: "Tercer momento del mundo salado · temporada" },
-      { name: "Bocado 04", description: "Cuarto momento del mundo salado · temporada" },
-      { name: "Bocado 05", description: "Quinto momento del mundo salado · temporada" },
-      { name: "Bocado 06", description: "Sexto momento del mundo salado · temporada" },
-      { name: "Bocado 07", description: "Séptimo momento del mundo salado · temporada" },
-      { name: "Bocado 08", description: "Octavo momento del mundo salado · temporada" },
-      { name: "Bocado 09", description: "Noveno momento del mundo salado · temporada" },
-      { name: "Bocado 10", description: "Primer momento del mundo dulce · temporada" },
-      { name: "Bocado 11", description: "Segundo momento del mundo dulce · temporada" },
-      { name: "Cierre", description: "Pan incluido + Petit fours" },
-    ],
+    image: "/images/menus/impulso-2.jpg",
+    imageAlt: "Menú Impulso Gunnen",
     allergens: ["Gluten", "Lácteos", "Pescado", "Marisco", "Frutos secos"],
-    notes: "Precio con I.V.A. incluido. Bodega no incluida. Propuesta de Armonía con vino (+45€). Propuesta de Armonía No/Low elaboración propia (+30€). Menú sujeto a cambios según disponibilidad de producto de temporada. Adaptable a alergias e intolerancias con aviso previo.",
+    notes:
+      "Precio con I.V.A. incluido. Bodega no incluida. Propuesta de Armonía con vino (+45€). Propuesta de Armonía No/Low elaboración propia (+30€). Menú sujeto a cambios según disponibilidad de producto de temporada. Adaptable a alergias e intolerancias con aviso previo.",
   },
 };
 
-export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
   const { slug } = await params;
   const menu = menusData[slug];
   if (!menu) {
@@ -63,7 +58,11 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   };
 }
 
-export default async function MenuDetailPage({ params }: { params: Promise<{ slug: string }> }) {
+export default async function MenuDetailPage({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
   const { slug } = await params;
   const menu = menusData[slug];
 
@@ -82,10 +81,8 @@ export default async function MenuDetailPage({ params }: { params: Promise<{ slu
           >
             ← Volver a menús
           </Link>
-          <div className="flex items-baseline justify-between mb-6">
-            <h1 className="text-display font-serif font-light">
-              {menu.name}
-            </h1>
+          <div className="flex items-baseline justify-between mb-6 gap-4 flex-wrap">
+            <h1 className="text-display font-serif font-light">{menu.name}</h1>
             <span className="text-5xl font-serif font-light text-accent">
               {menu.price}
             </span>
@@ -99,28 +96,18 @@ export default async function MenuDetailPage({ params }: { params: Promise<{ slu
         </div>
       </section>
 
-      {/* Platos */}
+      {/* Imagen del menú */}
       <section className="section-container bg-gray-50">
-        <div className="max-w-4xl mx-auto">
-          <h2 className="text-3xl font-serif font-light mb-12">Recorrido gastronómico</h2>
-          <div className="space-y-8">
-            {menu.courses.map((course: any, index: number) => (
-              <div key={index} className="pb-8 border-b border-gray-200 last:border-0">
-                <div className="flex items-start gap-6">
-                  <span className="text-sm tracking-wider uppercase text-gray-400 mt-1 w-8 flex-shrink-0">
-                    {String(index + 1).padStart(2, '0')}
-                  </span>
-                  <div className="flex-grow">
-                    <h3 className="text-xl font-serif font-light mb-2">
-                      {course.name}
-                    </h3>
-                    <p className="text-gray-600 leading-relaxed">
-                      {course.description}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            ))}
+        <div className="max-w-5xl mx-auto">
+          <div className="relative aspect-[4/3] md:aspect-[16/10] overflow-hidden">
+            <Image
+              src={menu.image}
+              alt={menu.imageAlt}
+              fill
+              className="object-cover"
+              sizes="(max-width: 768px) 100vw, 1024px"
+              priority
+            />
           </div>
         </div>
       </section>
@@ -132,7 +119,7 @@ export default async function MenuDetailPage({ params }: { params: Promise<{ slu
             <div>
               <h3 className="text-xl font-serif font-light mb-4">Alérgenos</h3>
               <div className="flex flex-wrap gap-2">
-                {menu.allergens.map((allergen: string) => (
+                {menu.allergens.map((allergen) => (
                   <span
                     key={allergen}
                     className="px-4 py-2 bg-gray-100 text-sm tracking-wider uppercase text-gray-600"
@@ -143,7 +130,9 @@ export default async function MenuDetailPage({ params }: { params: Promise<{ slu
               </div>
             </div>
             <div>
-              <h3 className="text-xl font-serif font-light mb-4">Notas importantes</h3>
+              <h3 className="text-xl font-serif font-light mb-4">
+                Notas importantes
+              </h3>
               <p className="text-gray-600 leading-relaxed text-sm">
                 {menu.notes}
               </p>
@@ -161,7 +150,10 @@ export default async function MenuDetailPage({ params }: { params: Promise<{ slu
           <p className="text-lg mb-8 opacity-90">
             Déjanos sorprenderte con esta propuesta única
           </p>
-          <Link href="/reservas" className="btn-primary bg-white text-accent hover:bg-gray-100">
+          <Link
+            href="/reservas"
+            className="btn-primary bg-white text-accent hover:bg-gray-100"
+          >
             Reservar mesa
           </Link>
         </div>
