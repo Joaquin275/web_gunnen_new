@@ -10,7 +10,6 @@ interface MenuOption {
   description: string;
   price: number;
   courses: string;
-  tag?: string;
 }
 
 const MENU_OPTIONS: MenuOption[] = [
@@ -27,7 +26,6 @@ const MENU_OPTIONS: MenuOption[] = [
     description: "14 bocados · Pan · Petit fours + Propuesta de Armonía con vino",
     price: 145,
     courses: "14 bocados + armonía",
-    tag: "Recomendado",
   },
   {
     id: "tempo-nolo",
@@ -128,11 +126,6 @@ export default function RegalaPage() {
                             : "border-gray-200 hover:border-gray-400"
                         }`}
                       >
-                        {menu.tag && (
-                          <span className="absolute top-3 right-3 text-xs tracking-widest uppercase bg-primary text-white px-2 py-0.5">
-                            {menu.tag}
-                          </span>
-                        )}
                         <span
                           className={`inline-flex items-center justify-center w-4 h-4 rounded-full border-2 mr-2 mb-3 transition-colors ${
                             selectedMenu?.id === menu.id ? "border-primary bg-primary" : "border-gray-300"
@@ -166,11 +159,6 @@ export default function RegalaPage() {
                             : "border-gray-200 hover:border-gray-400"
                         }`}
                       >
-                        {menu.tag && (
-                          <span className="absolute top-3 right-3 text-xs tracking-widest uppercase bg-primary text-white px-2 py-0.5">
-                            {menu.tag}
-                          </span>
-                        )}
                         <span
                           className={`inline-flex items-center justify-center w-4 h-4 rounded-full border-2 mr-2 mb-3 transition-colors ${
                             selectedMenu?.id === menu.id ? "border-primary bg-primary" : "border-gray-300"
