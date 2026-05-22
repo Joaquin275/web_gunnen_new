@@ -10,17 +10,17 @@ const images = [
   },
   {
     id: 2,
-    src: "/images/experience/local-gunnen.jpeg",
+    src: "/images/experience/local-gunnen.jpg",
     alt: "Local Gunnen",
   },
   {
     id: 3,
-    src: "/images/experience/hortalizas.jpeg",
+    src: "/images/experience/hortalizas.jpg",
     alt: "Producto de temporada",
   },
   {
     id: 4,
-    src: "/images/experience/mar.jpeg",
+    src: "/images/experience/mar.jpg",
     alt: "Experiencia gastronómica de mar",
   },
   {

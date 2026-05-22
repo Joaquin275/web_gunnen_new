@@ -3,22 +3,22 @@ import Image from "next/image";
 const steps = [
   {
     label: "Reservas",
-    image: "/images/experience/local-horizontal.jpeg",
+    image: "/images/experience/local-horizontal.jpg",
     alt: "Interior del restaurante Gunnen",
   },
   {
     label: "Compramos",
-    image: "/images/experience/hortalizas.jpeg",
+    image: "/images/experience/hortalizas.jpg",
     alt: "Producto de temporada Gunnen",
   },
   {
     label: "Elaboramos",
-    image: "/images/team/chef-gunnen.jpeg",
+    image: "/images/team/chef-gunnen-hd.jpg",
     alt: "Equipo elaborando en cocina",
   },
   {
     label: "Disfrutas",
-    image: "/images/experience/mar.jpeg",
+    image: "/images/experience/mar.jpg",
     alt: "Experiencia gastronómica Gunnen",
   },
 ];
@@ -52,6 +52,8 @@ export default function Experience() {
                   src={step.image}
                   alt={step.alt}
                   fill
+                  quality={90}
+                  sizes="(max-width: 768px) 50vw, 25vw"
                   className="object-cover transition-transform duration-700 group-hover:scale-105"
                 />
                 {/* Overlay degradado */}

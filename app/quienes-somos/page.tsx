@@ -17,6 +17,8 @@ export default function QuienesSomosPage() {
           src="/images/heroes/quienes-somos.jpg"
           alt="Interior del restaurante Gunnen"
           fill
+          quality={90}
+          sizes="100vw"
           className="object-cover object-center"
           priority
         />
@@ -74,9 +76,11 @@ export default function QuienesSomosPage() {
           </div>
           <div className="relative aspect-[4/3] overflow-hidden order-1 md:order-2">
             <Image
-              src="/images/experience/local-gunnen.jpeg"
+              src="/images/experience/local-gunnen.jpg"
               alt="El espacio de Gunnen"
               fill
+              quality={90}
+              sizes="(max-width: 768px) 100vw, 50vw"
               className="object-cover"
             />
           </div>
@@ -88,9 +92,11 @@ export default function QuienesSomosPage() {
         <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
           <div className="relative aspect-[4/3] overflow-hidden">
             <Image
-              src="/images/experience/hortalizas.jpeg"
+              src="/images/experience/hortalizas.jpg"
               alt="Producto de temporada Gunnen"
               fill
+              quality={90}
+              sizes="(max-width: 768px) 100vw, 50vw"
               className="object-cover"
             />
           </div>
@@ -135,6 +141,7 @@ export default function QuienesSomosPage() {
               src="/images/quienes-somos/nolo-gunnen.jpeg"
               alt="Bebida NOLO — filosofía No/Low Alcohol en Gunnen"
               fill
+              quality={90}
               className="object-cover object-center"
               sizes="(max-width: 768px) 100vw, 50vw"
             />
@@ -152,9 +159,11 @@ export default function QuienesSomosPage() {
             <div className="group overflow-hidden">
               <div className="relative aspect-[3/4] overflow-hidden">
                 <Image
-                  src="/images/team/equipo-gunnen.jpeg"
+                  src="/images/team/Equipo-Gunnen-2.jpeg"
                   alt="Equipo Gunnen"
                   fill
+                  quality={90}
+                  sizes="(max-width: 768px) 100vw, 50vw"
                   className="object-cover transition-transform duration-700 group-hover:scale-105"
                 />
               </div>
@@ -162,9 +171,11 @@ export default function QuienesSomosPage() {
             <div className="group overflow-hidden">
               <div className="relative aspect-[3/4] overflow-hidden">
                 <Image
-                  src="/images/team/chef-gunnen.jpeg"
+                  src="/images/team/chef-gunnen-hd.jpg"
                   alt="Chef Gunnen"
                   fill
+                  quality={90}
+                  sizes="(max-width: 768px) 100vw, 50vw"
                   className="object-cover transition-transform duration-700 group-hover:scale-105"
                 />
               </div>
@@ -177,8 +188,8 @@ export default function QuienesSomosPage() {
       <section className="section-container bg-gray-50">
         <div className="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-3">
           {[
-            { src: "/images/experience/mar.jpeg", alt: "Experiencia gastronómica de mar" },
-            { src: "/images/experience/hortalizas.jpeg", alt: "Producto de temporada" },
+            { src: "/images/experience/mar.jpg", alt: "Experiencia gastronómica de mar" },
+            { src: "/images/experience/hortalizas.jpg", alt: "Producto de temporada" },
             { src: "/images/menus/tempo.jpg", alt: "Menú Tempo" },
             { src: "/images/menus/impulso.jpg", alt: "Menú Impulso" },
           ].map(({ src, alt }) => (
@@ -187,6 +198,8 @@ export default function QuienesSomosPage() {
                 src={src}
                 alt={alt}
                 fill
+                quality={90}
+                sizes="(max-width: 768px) 50vw, 25vw"
                 className="object-cover transition-transform duration-500 hover:scale-105"
               />
             </div>
