@@ -115,8 +115,8 @@ export default function QuienesSomosPage() {
 
       {/* ── Mundo líquido — imagen derecha ──────────────────────────── */}
       <section className="section-container bg-gray-50">
-        <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-          <div className="space-y-5 text-lg leading-relaxed text-gray-700 order-2 md:order-1">
+        <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-stretch">
+          <div className="space-y-5 text-lg leading-relaxed text-gray-700 order-2 md:order-1 flex flex-col justify-center">
             <h2 className="text-3xl font-light tracking-wide">Mundo líquido</h2>
             <p>
               Tratamos de que esta filosofía se traslade también al mundo
@@ -130,12 +130,13 @@ export default function QuienesSomosPage() {
               llevar la temporada y la oferta del mercado a la copa.
             </p>
           </div>
-          <div className="relative aspect-[4/3] overflow-hidden order-1 md:order-2">
+          <div className="relative order-1 md:order-2 min-h-[320px] sm:min-h-[400px] md:min-h-0 md:aspect-[3/4] lg:aspect-[4/5] overflow-hidden">
             <Image
-              src="/images/gallery/GUNNEN-042-BAJA-scaled.jpg"
-              alt="Ambiente y bodega Gunnen"
+              src="/images/quienes-somos/nolo-gunnen.jpeg"
+              alt="Bebida NOLO — filosofía No/Low Alcohol en Gunnen"
               fill
-              className="object-cover"
+              className="object-cover object-center"
+              sizes="(max-width: 768px) 100vw, 50vw"
             />
           </div>
         </div>
