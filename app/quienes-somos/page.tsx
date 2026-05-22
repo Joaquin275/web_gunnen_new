@@ -171,8 +171,8 @@ export default function QuienesSomosPage() {
             <div className="group overflow-hidden">
               <div className="relative aspect-[3/4] overflow-hidden">
                 <Image
-                  src="/images/team/chef-gunnen-hd.jpg"
-                  alt="Chef Gunnen"
+                  src="/images/team/chef-chechu-rey.jpeg"
+                  alt="Chechu Rey, chef de Gunnen"
                   fill
                   quality={90}
                   sizes="(max-width: 768px) 100vw, 50vw"
