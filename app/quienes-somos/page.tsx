@@ -74,7 +74,7 @@ export default function QuienesSomosPage() {
           </div>
           <div className="relative aspect-[4/3] overflow-hidden order-1 md:order-2">
             <Image
-              src="/images/restaurant/historia.jpg"
+              src="/images/experience/local-gunnen.jpeg"
               alt="El espacio de Gunnen"
               fill
               className="object-cover"
@@ -88,8 +88,8 @@ export default function QuienesSomosPage() {
         <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
           <div className="relative aspect-[4/3] overflow-hidden">
             <Image
-              src="/images/gallery/Plato-con-trufa-GUNNEN-1.jpeg"
-              alt="Plato con trufa Gunnen"
+              src="/images/experience/hortalizas.jpeg"
+              alt="Producto de temporada Gunnen"
               fill
               className="object-cover"
             />
@@ -152,7 +152,7 @@ export default function QuienesSomosPage() {
             <div className="group overflow-hidden">
               <div className="relative aspect-[3/4] overflow-hidden">
                 <Image
-                  src="/images/team/Equipo-Gunnen-2.jpeg"
+                  src="/images/team/equipo-gunnen.jpeg"
                   alt="Equipo Gunnen"
                   fill
                   className="object-cover transition-transform duration-700 group-hover:scale-105"
@@ -162,8 +162,8 @@ export default function QuienesSomosPage() {
             <div className="group overflow-hidden">
               <div className="relative aspect-[3/4] overflow-hidden">
                 <Image
-                  src="/images/team/Equipo-gunnen-3.jpg"
-                  alt="Equipo Gunnen"
+                  src="/images/team/chef-gunnen.jpeg"
+                  alt="Chef Gunnen"
                   fill
                   className="object-cover transition-transform duration-700 group-hover:scale-105"
                 />
@@ -177,8 +177,8 @@ export default function QuienesSomosPage() {
       <section className="section-container bg-gray-50">
         <div className="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-3">
           {[
-            { src: "/images/gallery/Postre-ciruela-fermentada-GUNNEN-0.jpeg", alt: "Postre de ciruela fermentada" },
-            { src: "/images/gallery/1.Postre-de-caqui-jengibre-y-miel-Gunnen-1-1.jpeg", alt: "Postre de caqui, jengibre y miel" },
+            { src: "/images/experience/mar.jpeg", alt: "Experiencia gastronómica de mar" },
+            { src: "/images/experience/hortalizas.jpeg", alt: "Producto de temporada" },
             { src: "/images/menus/tempo.jpg", alt: "Menú Tempo" },
             { src: "/images/menus/impulso.jpg", alt: "Menú Impulso" },
           ].map(({ src, alt }) => (

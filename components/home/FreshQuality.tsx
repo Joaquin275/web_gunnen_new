@@ -5,33 +5,33 @@ import { useState, useEffect } from "react";
 const images = [
   {
     id: 1,
-    src: "/images/gallery/GUNNEN-039-BAJA-scaled.jpg",
+    src: "/images/experience/interior-gunnen.jpg",
     alt: "Interior del restaurante Gunnen",
   },
   {
     id: 2,
-    src: "/images/gallery/GUNNEN-042-BAJA-scaled.jpg",
-    alt: "Ambiente íntimo de Gunnen",
+    src: "/images/experience/local-gunnen.jpeg",
+    alt: "Local Gunnen",
   },
   {
     id: 3,
-    src: "/images/gallery/Plato-con-trufa-GUNNEN-1.jpeg",
-    alt: "Plato con trufa de Gunnen",
+    src: "/images/experience/hortalizas.jpeg",
+    alt: "Producto de temporada",
   },
   {
     id: 4,
-    src: "/images/gallery/Postre-ciruela-fermentada-GUNNEN-0.jpeg",
-    alt: "Postre de ciruela fermentada",
+    src: "/images/experience/mar.jpeg",
+    alt: "Experiencia gastronómica de mar",
   },
   {
     id: 5,
-    src: "/images/gallery/1.Postre-de-caqui-jengibre-y-miel-Gunnen-1-1.jpeg",
-    alt: "Postre de caqui, jengibre y miel",
+    src: "/images/menus/tempo.jpg",
+    alt: "Menú Tempo",
   },
   {
     id: 6,
-    src: "/images/gallery/GUNNEN-099-BAJA-scaled.jpg",
-    alt: "Detalle del restaurante Gunnen",
+    src: "/images/menus/impulso.jpg",
+    alt: "Menú Impulso",
   },
 ];
 

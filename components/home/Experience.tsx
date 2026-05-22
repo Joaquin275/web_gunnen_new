@@ -3,23 +3,23 @@ import Image from "next/image";
 const steps = [
   {
     label: "Reservas",
-    image: "/images/gallery/GUNNEN-039-BAJA-scaled.jpg",
+    image: "/images/experience/local-horizontal.jpeg",
     alt: "Interior del restaurante Gunnen",
   },
   {
     label: "Compramos",
-    image: "/images/hero/Carr5.jpg",
+    image: "/images/experience/hortalizas.jpeg",
     alt: "Producto de temporada Gunnen",
   },
   {
     label: "Elaboramos",
-    image: "/images/team/Equipo-Gunnen-2.jpeg",
+    image: "/images/team/chef-gunnen.jpeg",
     alt: "Equipo elaborando en cocina",
   },
   {
     label: "Disfrutas",
-    image: "/images/gallery/Plato-con-trufa-GUNNEN-1.jpeg",
-    alt: "Plato final Gunnen",
+    image: "/images/experience/mar.jpeg",
+    alt: "Experiencia gastronómica Gunnen",
   },
 ];
 

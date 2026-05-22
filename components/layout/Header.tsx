@@ -153,7 +153,7 @@ export default function Header() {
         {/* Columna derecha: imagen decorativa (solo desktop) */}
         <div className="hidden md:block w-1/2 relative overflow-hidden">
           <img
-            src="/images/hero/Carr1.jpg"
+            src="/images/experience/local-horizontal.jpeg"
             alt="Gunnen"
             className="absolute inset-0 w-full h-full object-cover opacity-30"
           />
