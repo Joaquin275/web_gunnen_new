@@ -14,7 +14,7 @@ export default function PrensaPage() {
   return (
     <div>
       {/* Hero con imagen */}
-      <section className="relative h-[55vh] min-h-[400px] overflow-hidden">
+      <section className="relative h-[75vh] min-h-[520px] overflow-hidden">
         <Image
           src="/images/gallery/GUNNEN-099-BAJA-scaled.jpg"
           alt="Prensa Gunnen"

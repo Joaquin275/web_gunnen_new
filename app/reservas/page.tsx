@@ -78,7 +78,7 @@ export default function ReservasPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero con imagen */}
-      <section className="relative h-[55vh] min-h-[400px] overflow-hidden">
+      <section className="relative h-[75vh] min-h-[520px] overflow-hidden">
         <Image
           src="/images/gallery/GUNNEN-042-BAJA-scaled.jpg"
           alt="Reservar mesa en Gunnen"

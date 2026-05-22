@@ -12,7 +12,7 @@ export default function QuienesSomosPage() {
     <div className="pt-20">
 
       {/* ── Hero visual ─────────────────────────────────────────────── */}
-      <section className="relative h-[60vh] min-h-[420px] overflow-hidden">
+      <section className="relative h-[75vh] min-h-[520px] overflow-hidden">
         <Image
           src="/images/gallery/GUNNEN-039-BAJA-scaled.jpg"
           alt="Interior del restaurante Gunnen"

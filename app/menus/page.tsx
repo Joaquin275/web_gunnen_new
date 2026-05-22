@@ -42,7 +42,7 @@ export default function MenusPage() {
   return (
     <div>
       {/* Hero con imagen */}
-      <section className="relative h-[65vh] min-h-[440px] overflow-hidden">
+      <section className="relative h-[75vh] min-h-[520px] overflow-hidden">
         <Image
           src="/images/menus/tempo.jpg"
           alt="Menús Gunnen"
