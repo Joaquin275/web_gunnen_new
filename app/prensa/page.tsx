@@ -16,10 +16,10 @@ export default function PrensaPage() {
       {/* Hero con imagen */}
       <section className="relative h-[75vh] min-h-[520px] overflow-hidden">
         <Image
-          src="/images/gallery/GUNNEN-099-BAJA-scaled.jpg"
+          src="/images/heroes/prensa.jpg"
           alt="Prensa Gunnen"
           fill
-          className="object-cover"
+          className="object-cover object-center"
           priority
         />
         <div className="absolute inset-0 bg-black/55" />

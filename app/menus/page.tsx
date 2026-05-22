@@ -44,10 +44,10 @@ export default function MenusPage() {
       {/* Hero con imagen */}
       <section className="relative h-[75vh] min-h-[520px] overflow-hidden">
         <Image
-          src="/images/menus/tempo.jpg"
+          src="/images/heroes/menus.jpg"
           alt="Menús Gunnen"
           fill
-          className="object-cover"
+          className="object-cover object-center"
           priority
         />
         <div className="absolute inset-0 bg-black/50" />

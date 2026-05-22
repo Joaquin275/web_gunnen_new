@@ -9,15 +9,15 @@ export const metadata: Metadata = {
 
 export default function QuienesSomosPage() {
   return (
-    <div className="pt-20">
+    <div>
 
       {/* ── Hero visual ─────────────────────────────────────────────── */}
       <section className="relative h-[75vh] min-h-[520px] overflow-hidden">
         <Image
-          src="/images/gallery/GUNNEN-039-BAJA-scaled.jpg"
+          src="/images/heroes/quienes-somos.jpg"
           alt="Interior del restaurante Gunnen"
           fill
-          className="object-cover"
+          className="object-cover object-center"
           priority
         />
         <div className="absolute inset-0 bg-black/45" />

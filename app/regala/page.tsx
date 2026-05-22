@@ -71,10 +71,10 @@ export default function RegalaPage() {
       {/* Hero con imagen */}
       <section className="relative h-[75vh] min-h-[520px] overflow-hidden">
         <Image
-          src="/images/gallery/1.Postre-de-caqui-jengibre-y-miel-Gunnen-1-1.jpeg"
+          src="/images/heroes/regala.jpg"
           alt="Bono regalo Gunnen"
           fill
-          className="object-cover"
+          className="object-cover object-center"
           priority
         />
         <div className="absolute inset-0 bg-black/50" />
