@@ -100,6 +100,34 @@ export default function Footer() {
           </div>
         </div>
 
+        {/* Franja institucional — Xunta de Galicia */}
+        <div className="pt-8 border-t border-white/10 mb-8">
+          <div className="flex flex-col sm:flex-row items-center gap-6 sm:gap-10">
+            {/* Logos */}
+            <div className="flex items-center gap-4 flex-shrink-0 bg-white rounded px-4 py-3">
+              <img
+                src="/images/institucional/logo-ue.png"
+                alt="Unión Europea"
+                className="h-10 w-auto object-contain"
+              />
+              <img
+                src="/images/institucional/logo-sepe.jpg"
+                alt="SEPE"
+                className="h-10 w-auto object-contain"
+              />
+              <img
+                src="/images/institucional/logo-xunta.jpg"
+                alt="Xunta de Galicia"
+                className="h-10 w-auto object-contain"
+              />
+            </div>
+            {/* Texto */}
+            <p className="text-xs text-gray-400 leading-relaxed max-w-xl text-center sm:text-left">
+              <strong className="text-gray-300">LA FAMILIA GASTRO SL. (GUNNEN)</strong> ha sido beneficiaria del Programa de Incentivos a la Contratación por Cuenta Ajena (TR542C), impulsado por la Xunta de Galicia para fomentar el empleo de calidad en el tejido empresarial gallego.
+            </p>
+          </div>
+        </div>
+
         {/* Bottom */}
         <div className="flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-xs text-gray-500">
