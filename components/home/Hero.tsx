@@ -3,12 +3,13 @@
 import { useState, useEffect } from "react";
 
 const heroImages = [
-  "/images/experience/local-horizontal.jpeg",
-  "/images/experience/local-horizontal-2.jpeg",
-  "/images/experience/local-gunnen.jpeg",
-  "/images/experience/interior-gunnen.jpg",
-  "/images/experience/mar.jpeg",
-  "/images/experience/hortalizas.jpeg",
+  "/images/hero/Carr1.jpg",
+  "/images/hero/Carr2.jpg",
+  "/images/hero/Carr2-2.jpg",
+  "/images/hero/Carr2-3.jpg",
+  "/images/hero/Carr4.jpg",
+  "/images/hero/Carr5.jpg",
+  "/images/hero/Carr6.jpg",
 ];
 
 export default function Hero() {
