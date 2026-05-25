@@ -8,6 +8,7 @@ import { signOut } from "next-auth/react";
 
 const navigation = [
   { name: "Dashboard", href: "/admin" },
+  { name: "Analytics", href: "/admin/analytics" },
   { name: "Mesas", href: "/admin/tables" },
   { name: "Disponibilidad", href: "/admin/availability" },
   { name: "Reservas", href: "/admin/reservations" },
