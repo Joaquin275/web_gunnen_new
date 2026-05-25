@@ -18,13 +18,20 @@ export async function GET() {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { amount, buyerName, buyerEmail, recipientName, recipientEmail, message, sendDate } = body;
+    const { amount, buyerName, buyerEmail, recipientName, recipientEmail, message, sendDate, customCode } = body;
 
-    if (!amount || amount < 10) {
+    if (!amount || amount < 1) {
       return NextResponse.json({ error: "Importe inválido" }, { status: 400 });
     }
 
-    const code = generateCode();
+    // Use custom code if provided, otherwise auto-generate
+    const code = customCode?.trim() ? customCode.trim().toUpperCase() : generateCode();
+
+    // Check for duplicate code
+    const existing = giftCardsDb.findByCode(code);
+    if (existing) {
+      return NextResponse.json({ error: `El código ${code} ya existe` }, { status: 409 });
+    }
 
     const giftCard = giftCardsDb.create({
       code,

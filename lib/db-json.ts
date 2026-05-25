@@ -209,6 +209,20 @@ export const giftCardsDb = {
     return newItem;
   },
 
+  createBulk: (items: Omit<GiftCard, "id" | "createdAt">[]): { created: number; skipped: number } => {
+    const all = readFile<GiftCard>("giftcards.json");
+    const existingCodes = new Set(all.map((g) => g.code.toUpperCase()));
+    const toAdd: GiftCard[] = [];
+    let skipped = 0;
+    for (const data of items) {
+      if (existingCodes.has(data.code.toUpperCase())) { skipped++; continue; }
+      toAdd.push({ ...data, id: generateId("gc"), createdAt: new Date().toISOString() });
+      existingCodes.add(data.code.toUpperCase());
+    }
+    writeFile("giftcards.json", [...all, ...toAdd]);
+    return { created: toAdd.length, skipped };
+  },
+
   redeem: (id: string): GiftCard | null => {
     const all = readFile<GiftCard>("giftcards.json");
     const idx = all.findIndex((g) => g.id === id);
