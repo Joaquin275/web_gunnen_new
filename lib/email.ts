@@ -11,7 +11,7 @@
  *  - sendGiftCard                 → envío de bono regalo al destinatario
  */
 
-import { generateIcs, googleCalendarLink } from "./ics";
+import { generateIcs, googleCalendarLink, reservationIcsOptions, reservationStartDate } from "./ics";
 import { generateGiftCardPdf } from "./pdf";
 
 const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || "reservas@gunnen.es";
@@ -151,13 +151,6 @@ function formatDate(d: Date | string) {
   });
 }
 
-function reservationStartDate(date: Date | string, time: string): Date {
-  const d = typeof date === "string" ? new Date(date) : new Date(date);
-  const [h, m] = time.split(":").map(Number);
-  d.setHours(h, m, 0, 0);
-  return d;
-}
-
 function reservationBox(data: ReservationEmailData, extraRows = "") {
   const formattedDate = formatDate(data.reservationDate);
   return `
@@ -275,24 +268,15 @@ export async function sendReservationConfirmation(data: ReservationEmailData) {
   const resend = await getResend();
   if (!resend) return;
 
-  const startDate = reservationStartDate(data.reservationDate, data.reservationTime);
-  const gcLink = googleCalendarLink({
-    uid: `reserva-${data.reservationId}@gunnen.es`,
-    summary: `Reserva en ${RESTAURANT_NAME}`,
-    description: `Reserva para ${data.numberOfPeople} personas${data.menuName ? ` · Menú ${data.menuName}` : ""}. Número de reserva: ${data.reservationId.slice(-6).toUpperCase()}`,
-    location: RESTAURANT_ADDRESS,
-    startDate,
-    durationMinutes: 120,
+  const icsOpts = reservationIcsOptions({
+    id: data.reservationId,
+    reservationDate: data.reservationDate,
+    reservationTime: data.reservationTime,
+    numberOfPeople: data.numberOfPeople,
+    menuName: data.menuName,
   });
-
-  const icsContent = generateIcs({
-    uid: `reserva-${data.reservationId}@gunnen.es`,
-    summary: `Reserva en ${RESTAURANT_NAME}`,
-    description: `Reserva para ${data.numberOfPeople} personas${data.menuName ? ` · Menú ${data.menuName}` : ""}`,
-    location: RESTAURANT_ADDRESS,
-    startDate,
-    durationMinutes: 120,
-  });
+  const gcLink = googleCalendarLink(icsOpts);
+  const icsContent = generateIcs(icsOpts);
 
   const formattedDate = formatDate(data.reservationDate);
 
@@ -320,6 +304,7 @@ export async function sendReservationConfirmation(data: ReservationEmailData) {
     <div class="cal">
       <p>Añada la reserva a su calendario para no olvidarla</p>
       <a href="${gcLink}" class="btn" target="_blank">Google Calendar</a>
+      <p style="font-size:12px;color:#888;margin-top:10px">También puede abrir el adjunto <strong>reserva-gunnen.ics</strong> para Apple Calendar, Outlook o su móvil.</p>
     </div>
 
     <div class="info">

@@ -34,6 +34,34 @@ export interface IcsEventOptions {
   durationMinutes?: number;
 }
 
+export const GUNNEN_LOCATION = "Juan Díaz Porlier, 15 — A Coruña";
+export const GUNNEN_CALENDAR_NAME = "Gunnen";
+
+export function reservationStartDate(date: Date | string, time: string): Date {
+  const d = typeof date === "string" ? new Date(date) : new Date(date);
+  const [h, m] = time.split(":").map(Number);
+  d.setHours(h, m, 0, 0);
+  return d;
+}
+
+export function reservationIcsOptions(reservation: {
+  id: string;
+  reservationDate: Date | string;
+  reservationTime: string;
+  numberOfPeople: number;
+  menuName?: string | null;
+}): IcsEventOptions {
+  const menuPart = reservation.menuName ? ` · Menú ${reservation.menuName}` : "";
+  return {
+    uid: `reserva-${reservation.id}@gunnen.es`,
+    summary: `Reserva en ${GUNNEN_CALENDAR_NAME}`,
+    description: `Reserva para ${reservation.numberOfPeople} personas${menuPart}. Nº ${reservation.id.slice(-6).toUpperCase()}`,
+    location: GUNNEN_LOCATION,
+    startDate: reservationStartDate(reservation.reservationDate, reservation.reservationTime),
+    durationMinutes: 120,
+  };
+}
+
 /**
  * Genera el contenido de un archivo .ics con el evento de la reserva.
  * Se puede adjuntar en emails o descargar directamente.
@@ -64,9 +92,9 @@ export function generateIcs(opts: IcsEventOptions): string {
     "STATUS:CONFIRMED",
     "SEQUENCE:0",
     "BEGIN:VALARM",
-    "TRIGGER:-PT3D",       // Recordatorio 3 días antes
+    "TRIGGER:-PT24H",
     "ACTION:DISPLAY",
-    `DESCRIPTION:Recordatorio: ${escIcs(opts.summary)}`,
+    `DESCRIPTION:Recordatorio: ${escIcs(opts.summary)} mañana`,
     "END:VALARM",
     "BEGIN:VALARM",
     "TRIGGER:-PT2H",       // Recordatorio 2 horas antes

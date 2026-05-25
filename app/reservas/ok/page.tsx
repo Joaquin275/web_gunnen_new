@@ -10,6 +10,47 @@
 import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { googleCalendarLink, reservationIcsOptions } from "@/lib/ics";
+
+function CalendarButtons({ reservation }: { reservation: any }) {
+  const icsOpts = reservationIcsOptions({
+    id: reservation.id,
+    reservationDate: reservation.reservationDate,
+    reservationTime: reservation.reservationTime,
+    numberOfPeople: reservation.numberOfPeople,
+    menuName: reservation.menuName,
+  });
+  const googleUrl = googleCalendarLink(icsOpts);
+  const icsUrl = `/api/reservations/${reservation.id}/calendar`;
+
+  return (
+    <div className="bg-gray-50 border border-gray-200 p-6 mb-8 text-left">
+      <h2 className="text-xs tracking-wider uppercase text-gray-500 mb-3">
+        Añadir al calendario
+      </h2>
+      <p className="text-sm text-gray-600 mb-4">
+        Guarde la reserva en su calendario para no olvidarla.
+      </p>
+      <div className="flex flex-col sm:flex-row gap-3">
+        <a
+          href={googleUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="btn-primary text-center text-sm flex-1"
+        >
+          Google Calendar
+        </a>
+        <a
+          href={icsUrl}
+          download
+          className="btn-secondary text-center text-sm flex-1"
+        >
+          Apple / Outlook / móvil (.ics)
+        </a>
+      </div>
+    </div>
+  );
+}
 
 function ReservaOkContent() {
   const searchParams = useSearchParams();
@@ -20,12 +61,25 @@ function ReservaOkContent() {
     const reservationId = searchParams.get("reservationId");
     if (!reservationId) { setLoading(false); return; }
 
-    fetch(`/api/reservations/${reservationId}`)
-      .then((r) => r.json())
-      .then((data) => {
-        if (data.reservation) setReservation(data.reservation);
-      })
-      .finally(() => setLoading(false));
+    let attempts = 0;
+    const maxAttempts = 15;
+
+    const fetchReservation = () => {
+      fetch(`/api/reservations/${reservationId}`)
+        .then((r) => r.json())
+        .then((data) => {
+          if (data.reservation) setReservation(data.reservation);
+          if (data.reservation?.status === "CONFIRMED" || attempts >= maxAttempts) {
+            setLoading(false);
+          } else {
+            attempts += 1;
+            setTimeout(fetchReservation, 2000);
+          }
+        })
+        .catch(() => setLoading(false));
+    };
+
+    fetchReservation();
   }, [searchParams]);
 
   if (loading) {
@@ -142,6 +196,10 @@ function ReservaOkContent() {
               Le hemos enviado un email de confirmación a{" "}
               <strong>{reservation?.email}</strong>
             </p>
+
+            {reservation?.id && reservation?.status === "CONFIRMED" && (
+              <CalendarButtons reservation={reservation} />
+            )}
 
             <Link href="/" className="btn-primary w-full">
               Volver al inicio
