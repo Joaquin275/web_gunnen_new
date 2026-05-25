@@ -150,6 +150,8 @@ model Reservation {
   // Metadata
   confirmedAt       DateTime?
   completedAt       DateTime?
+  reminder24hSentAt     DateTime?
+  reminderSameDaySentAt DateTime?
   createdAt         DateTime          @default(now())
   updatedAt         DateTime          @updatedAt
 

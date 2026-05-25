@@ -4,7 +4,8 @@
  * Funciones disponibles:
  *  - sendReservationConfirmation  → al confirmar reserva (con .ics adjunto)
  *  - sendReservationRejected      → si el pago Redsys es rechazado
- *  - sendReservationReminder      → recordatorio 3 días antes y mañana de la reserva
+ *  - sendReservationReminder      → recordatorio 24h antes y el mismo día (desde las 11:00)
+ *  - sendAdminReservationNotification → copia al admin en confirmación/cancelación/rechazo
  *  - sendAdminDailyBriefing       → resumen de reservas del día para el admin
  *  - sendCancellationConfirmation → al cancelar una reserva
  *  - sendGiftCard                 → envío de bono regalo al destinatario
@@ -125,7 +126,12 @@ export interface CancellationData {
   reservationTime: string;
   refundAmount?: number;
   refundStatus: string;
+  reservationId?: string;
+  numberOfPeople?: number;
+  menuName?: string;
 }
+
+export type AdminReservationEvent = "confirmed" | "cancelled" | "rejected";
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -144,6 +150,117 @@ function reservationStartDate(date: Date | string, time: string): Date {
   const [h, m] = time.split(":").map(Number);
   d.setHours(h, m, 0, 0);
   return d;
+}
+
+function reservationBox(data: ReservationEmailData, extraRows = "") {
+  const formattedDate = formatDate(data.reservationDate);
+  return `
+    <div class="box">
+      <div class="row"><span class="lbl">N.º Reserva</span><span class="val">#${data.reservationId.slice(-6).toUpperCase()}</span></div>
+      <div class="row"><span class="lbl">Cliente</span><span class="val">${data.firstName} ${data.lastName}</span></div>
+      <div class="row"><span class="lbl">Email</span><span class="val">${data.email}</span></div>
+      <div class="row"><span class="lbl">Fecha</span><span class="val">${formattedDate}</span></div>
+      <div class="row"><span class="lbl">Hora</span><span class="val">${data.reservationTime}</span></div>
+      <div class="row"><span class="lbl">Comensales</span><span class="val">${data.numberOfPeople} personas</span></div>
+      ${data.menuName ? `<div class="row"><span class="lbl">Menú</span><span class="val">${data.menuName}</span></div>` : ""}
+      ${data.estimatedTotal ? `<div class="row"><span class="lbl">Total estimado</span><span class="val">${Number(data.estimatedTotal).toFixed(2)}€</span></div>` : ""}
+      <div class="row"><span class="lbl">Retención garantía</span><span class="val">${Number(data.depositAmount).toFixed(2)}€</span></div>
+      ${extraRows}
+    </div>
+  `;
+}
+
+// ─── Notificaciones admin (reservas) ───────────────────────────────────────────
+
+export async function sendAdminReservationNotification(
+  data: ReservationEmailData,
+  event: AdminReservationEvent
+) {
+  const resend = await getResend();
+  if (!resend) return;
+
+  const formattedDate = formatDate(data.reservationDate);
+  const titles: Record<AdminReservationEvent, string> = {
+    confirmed: "Nueva reserva confirmada",
+    cancelled: "Reserva cancelada",
+    rejected: "Reserva no completada (pago rechazado)",
+  };
+
+  const content = `
+    <h2>${titles[event]}</h2>
+    <p>Notificación automática del sistema de reservas.</p>
+    ${reservationBox(data)}
+    <div style="text-align:center;margin-top:24px">
+      <a href="${APP_URL}/admin/reservations/${data.reservationId}" class="btn">Ver en el panel</a>
+    </div>
+  `;
+
+  const subjects: Record<AdminReservationEvent, string> = {
+    confirmed: `[Gunnen] Reserva confirmada — ${formattedDate} ${data.reservationTime} · ${data.firstName} ${data.lastName}`,
+    cancelled: `[Gunnen] Reserva cancelada — ${formattedDate} · ${data.firstName} ${data.lastName}`,
+    rejected: `[Gunnen] Pago rechazado — ${data.firstName} ${data.lastName}`,
+  };
+
+  return resend.emails.send({
+    from: FROM_EMAIL,
+    to: ADMIN_EMAIL,
+    subject: subjects[event],
+    html: template(content),
+  });
+}
+
+/** Envía confirmación al cliente y copia al administrador */
+export async function notifyReservationConfirmed(data: ReservationEmailData) {
+  await Promise.all([
+    sendReservationConfirmation(data),
+    sendAdminReservationNotification(data, "confirmed"),
+  ]);
+}
+
+/** Envía rechazo al cliente y aviso al administrador */
+export async function notifyReservationRejected(data: ReservationEmailData) {
+  await Promise.all([
+    sendReservationRejected(data),
+    sendAdminReservationNotification(data, "rejected"),
+  ]);
+}
+
+/** Envía cancelación al cliente y copia al administrador */
+export async function notifyReservationCancelled(data: CancellationData) {
+  await Promise.all([
+    sendCancellationConfirmation(data),
+    sendAdminCancellationNotification(data),
+  ]);
+}
+
+async function sendAdminCancellationNotification(data: CancellationData) {
+  const resend = await getResend();
+  if (!resend) return;
+
+  const content = `
+    <h2>Reserva cancelada</h2>
+    <p>Se ha cancelado una reserva en el sistema.</p>
+    <div class="box">
+      ${data.reservationId ? `<div class="row"><span class="lbl">N.º Reserva</span><span class="val">#${data.reservationId.slice(-6).toUpperCase()}</span></div>` : ""}
+      <div class="row"><span class="lbl">Cliente</span><span class="val">${data.firstName} ${data.lastName}</span></div>
+      <div class="row"><span class="lbl">Email</span><span class="val">${data.email}</span></div>
+      <div class="row"><span class="lbl">Fecha</span><span class="val">${data.reservationDate}</span></div>
+      <div class="row"><span class="lbl">Hora</span><span class="val">${data.reservationTime}</span></div>
+      ${data.numberOfPeople ? `<div class="row"><span class="lbl">Comensales</span><span class="val">${data.numberOfPeople}</span></div>` : ""}
+      ${data.menuName ? `<div class="row"><span class="lbl">Menú</span><span class="val">${data.menuName}</span></div>` : ""}
+      ${data.refundAmount != null ? `<div class="row"><span class="lbl">Retención</span><span class="val">${data.refundAmount.toFixed(2)}€</span></div>` : ""}
+    </div>
+    <div style="text-align:center;margin-top:24px">
+      <a href="${APP_URL}/admin/reservations" class="btn">Ver reservas</a>
+    </div>
+  `;
+
+  return resend.emails.send({
+    from: FROM_EMAIL,
+    to: ADMIN_EMAIL,
+    subject: `[Gunnen] Cancelación — ${data.firstName} ${data.lastName} · ${data.reservationDate}`,
+    html: template(content),
+  });
 }
 
 // ─── 1. Confirmación de reserva ───────────────────────────────────────────────
@@ -263,7 +380,7 @@ export async function sendReservationRejected(data: ReservationEmailData) {
 
 export async function sendReservationReminder(
   data: ReservationEmailData,
-  type: "3days" | "morning"
+  type: "24h" | "same_day"
 ) {
   const resend = await getResend();
   if (!resend) return;
@@ -280,18 +397,19 @@ export async function sendReservationReminder(
     durationMinutes: 120,
   });
 
-  const is3days = type === "3days";
+  const is24h = type === "24h";
 
   const content = `
-    <h2>${is3days ? "Su reserva es en 3 días" : "Recordatorio: su reserva es hoy"}</h2>
+    <h2>${is24h ? "Recordatorio: su reserva es mañana" : "Recordatorio: su reserva es hoy"}</h2>
     <p>Estimado/a <strong>${data.firstName} ${data.lastName}</strong>,</p>
     <p>${
-      is3days
-        ? `Le recordamos que tiene una reserva en <strong>${RESTAURANT_NAME}</strong> en tres días.`
-        : `Hoy es el gran día — le esperamos esta ${Number(data.reservationTime.split(":")[0]) >= 18 ? "noche" : "tarde"} en <strong>${RESTAURANT_NAME}</strong>.`
+      is24h
+        ? `Le recordamos que tiene una reserva en <strong>${RESTAURANT_NAME}</strong> mañana.`
+        : `Hoy le esperamos en <strong>${RESTAURANT_NAME}</strong> a las <strong>${data.reservationTime}</strong>.`
     }</p>
 
     <div class="box">
+      <div class="row"><span class="lbl">N.º Reserva</span><span class="val">#${data.reservationId.slice(-6).toUpperCase()}</span></div>
       <div class="row"><span class="lbl">Fecha</span><span class="val">${formattedDate}</span></div>
       <div class="row"><span class="lbl">Hora</span><span class="val">${data.reservationTime}</span></div>
       <div class="row"><span class="lbl">Comensales</span><span class="val">${data.numberOfPeople} personas</span></div>
@@ -303,25 +421,25 @@ export async function sendReservationReminder(
       Le recomendamos llegar con 5 minutos de antelación.
     </div>
 
-    ${is3days ? `
+    ${is24h ? `
     <div class="cal">
       <p>¿Aún no lo tiene en su calendario?</p>
       <a href="${gcLink}" class="btn" target="_blank">Añadir a Google Calendar</a>
     </div>
     <p style="font-size:13px;color:#888">
-      Si necesita cancelar, recuerde que debe hacerlo con más de 24 horas de antelación 
-      para evitar el cargo de la garantía. Contáctenos en 
+      Si necesita cancelar, recuerde que debe hacerlo con más de 24 horas de antelación
+      para evitar el cargo de la garantía. Contáctenos en
       <a href="mailto:${ADMIN_EMAIL}" style="color:#8b7355">${ADMIN_EMAIL}</a>.
     </p>
     ` : `
-    <p>Estamos deseando recibirle. Si tiene alguna pregunta de última hora, 
+    <p>Estamos deseando recibirle. Si tiene alguna pregunta de última hora,
     llámenos al <a href="tel:+34613739550" style="color:#8b7355">+34 613 73 95 50</a>.</p>
     `}
   `;
 
-  const subject = is3days
-    ? `Recordatorio: su reserva en ${RESTAURANT_NAME} es en 3 días`
-    : `¡Hoy es su reserva en ${RESTAURANT_NAME}! 🍽`;
+  const subject = is24h
+    ? `Recordatorio: su reserva en ${RESTAURANT_NAME} es mañana`
+    : `¡Hoy es su reserva en ${RESTAURANT_NAME}! — ${data.reservationTime}`;
 
   return resend.emails.send({
     from: FROM_EMAIL,

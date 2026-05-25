@@ -1,13 +1,9 @@
 /**
  * GET /api/cron/reminders
  *
- * Ejecutado automáticamente por Vercel Cron Jobs cada día a las 08:00 (hora España).
- * Envía:
- *  1. Recordatorio al cliente 3 días antes de su reserva
- *  2. Recordatorio al cliente la mañana del día de la reserva
- *  3. Resumen diario al admin con todas las reservas de hoy
- *
- * vercel.json configura el schedule: "0 7 * * *" (08:00 Madrid = 07:00 UTC)
+ * Ejecutado por Vercel Cron:
+ *  - 09:00 UTC → recordatorio 24h antes (reservas de mañana)
+ *  - 10:00 UTC → recordatorio mismo día (desde las 11:00 Madrid) + resumen admin
  */
 
 import { NextRequest, NextResponse } from "next/server";
@@ -17,100 +13,144 @@ import {
   sendAdminDailyBriefing,
   type ReservationEmailData,
 } from "@/lib/email";
+import {
+  madridDateKey,
+  addDaysToDateKey,
+  dateKeyToUtcDate,
+  isSameDayReminderWindow,
+} from "@/lib/timezone";
 
 export const dynamic = "force-dynamic";
 
-export async function GET(request: NextRequest) {
-  // Protección: solo Vercel Cron o llamada con clave secreta
+type CronMode = "24h" | "same_day";
+
+function authorize(request: NextRequest): boolean {
   const authHeader = request.headers.get("authorization");
   const cronSecret = process.env.CRON_SECRET;
-  if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
+  if (cronSecret && authHeader !== `Bearer ${cronSecret}`) return false;
+  return true;
+}
+
+function toEmailData(r: {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  reservationDate: Date;
+  reservationTime: string;
+  numberOfPeople: number;
+  menuName: string | null;
+  estimatedTotal: unknown;
+  depositAmount: unknown;
+}): ReservationEmailData {
+  return {
+    reservationId: r.id,
+    email: r.email,
+    firstName: r.firstName,
+    lastName: r.lastName,
+    reservationDate: r.reservationDate,
+    reservationTime: r.reservationTime,
+    numberOfPeople: r.numberOfPeople,
+    menuName: r.menuName ?? undefined,
+    estimatedTotal: Number(r.estimatedTotal),
+    depositAmount: Number(r.depositAmount),
+  };
+}
+
+async function handle24hReminders() {
+  const tomorrowKey = addDaysToDateKey(madridDateKey(), 1);
+  const tomorrowDate = dateKeyToUtcDate(tomorrowKey);
+
+  const reservations = await prisma.reservation.findMany({
+    where: {
+      status: "CONFIRMED",
+      reservationDate: tomorrowDate,
+      reminder24hSentAt: null,
+    },
+  });
+
+  let sent = 0;
+  const errors: string[] = [];
+
+  for (const r of reservations) {
+    try {
+      await sendReservationReminder(toEmailData(r), "24h");
+      await prisma.reservation.update({
+        where: { id: r.id },
+        data: { reminder24hSentAt: new Date() },
+      });
+      sent++;
+    } catch (e) {
+      errors.push(`24h-${r.id}: ${e}`);
+    }
+  }
+
+  return { sent, errors, total: reservations.length };
+}
+
+async function handleSameDayReminders() {
+  if (!isSameDayReminderWindow()) {
+    return { sent: 0, errors: [], total: 0, skipped: "before_11_madrid" };
+  }
+
+  const todayKey = madridDateKey();
+  const todayDate = dateKeyToUtcDate(todayKey);
+
+  const reservations = await prisma.reservation.findMany({
+    where: {
+      status: "CONFIRMED",
+      reservationDate: todayDate,
+      reminderSameDaySentAt: null,
+    },
+    orderBy: { reservationTime: "asc" },
+  });
+
+  let sent = 0;
+  const errors: string[] = [];
+
+  for (const r of reservations) {
+    try {
+      await sendReservationReminder(toEmailData(r), "same_day");
+      await prisma.reservation.update({
+        where: { id: r.id },
+        data: { reminderSameDaySentAt: new Date() },
+      });
+      sent++;
+    } catch (e) {
+      errors.push(`same_day-${r.id}: ${e}`);
+    }
+  }
+
+  // Resumen diario al admin (a las 11:00 junto con recordatorios del día)
+  try {
+    await sendAdminDailyBriefing(reservations.map(toEmailData));
+  } catch (e) {
+    errors.push(`admin-briefing: ${e}`);
+  }
+
+  return { sent, errors, total: reservations.length };
+}
+
+export async function GET(request: NextRequest) {
+  if (!authorize(request)) {
     return NextResponse.json({ error: "No autorizado" }, { status: 401 });
   }
 
+  const mode = (request.nextUrl.searchParams.get("mode") || "all") as CronMode | "all";
+
   try {
-    const now = new Date();
+    const results: Record<string, unknown> = { ok: true, madridNow: madridDateKey() };
 
-    // ── Fecha de hoy (sin hora) ─────────────────────────────────────────────
-    const todayStart = new Date(now);
-    todayStart.setHours(0, 0, 0, 0);
-    const todayEnd = new Date(now);
-    todayEnd.setHours(23, 59, 59, 999);
-
-    // ── Fecha en 3 días ─────────────────────────────────────────────────────
-    const in3daysStart = new Date(now);
-    in3daysStart.setDate(in3daysStart.getDate() + 3);
-    in3daysStart.setHours(0, 0, 0, 0);
-    const in3daysEnd = new Date(in3daysStart);
-    in3daysEnd.setHours(23, 59, 59, 999);
-
-    // ── Consultar reservas CONFIRMED ────────────────────────────────────────
-    const [todayReservations, in3daysReservations] = await Promise.all([
-      prisma.reservation.findMany({
-        where: {
-          reservationDate: { gte: todayStart, lte: todayEnd },
-          status: "CONFIRMED",
-        },
-        orderBy: { reservationTime: "asc" },
-      }),
-      prisma.reservation.findMany({
-        where: {
-          reservationDate: { gte: in3daysStart, lte: in3daysEnd },
-          status: "CONFIRMED",
-        },
-      }),
-    ]);
-
-    const toEmailData = (r: typeof todayReservations[0]): ReservationEmailData => ({
-      reservationId: r.id,
-      email: r.email,
-      firstName: r.firstName,
-      lastName: r.lastName,
-      reservationDate: r.reservationDate,
-      reservationTime: r.reservationTime,
-      numberOfPeople: r.numberOfPeople,
-      menuName: r.menuName ?? undefined,
-      estimatedTotal: Number(r.estimatedTotal),
-      depositAmount: Number(r.depositAmount),
-    });
-
-    const results = {
-      morningReminders: 0,
-      threeDayReminders: 0,
-      adminBriefing: false,
-      errors: [] as string[],
-    };
-
-    // ── 1. Recordatorio mañana de la reserva ────────────────────────────────
-    for (const r of todayReservations) {
-      try {
-        await sendReservationReminder(toEmailData(r), "morning");
-        results.morningReminders++;
-      } catch (e) {
-        results.errors.push(`morning-${r.id}: ${e}`);
-      }
+    if (mode === "24h" || mode === "all") {
+      results.reminder24h = await handle24hReminders();
     }
 
-    // ── 2. Recordatorio 3 días antes ────────────────────────────────────────
-    for (const r of in3daysReservations) {
-      try {
-        await sendReservationReminder(toEmailData(r), "3days");
-        results.threeDayReminders++;
-      } catch (e) {
-        results.errors.push(`3days-${r.id}: ${e}`);
-      }
-    }
-
-    // ── 3. Resumen diario al admin ──────────────────────────────────────────
-    try {
-      await sendAdminDailyBriefing(todayReservations.map(toEmailData));
-      results.adminBriefing = todayReservations.length > 0;
-    } catch (e) {
-      results.errors.push(`admin-briefing: ${e}`);
+    if (mode === "same_day" || mode === "all") {
+      results.reminderSameDay = await handleSameDayReminders();
     }
 
     console.log("[Cron Reminders]", results);
-    return NextResponse.json({ ok: true, ...results });
+    return NextResponse.json(results);
   } catch (error) {
     console.error("[Cron Reminders] Error:", error);
     return NextResponse.json({ error: "Error en cron" }, { status: 500 });

@@ -7,7 +7,7 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { decodeMerchantParams, verifyRedsysSignature, isRedsysApproved } from "@/lib/redsys";
-import { sendReservationConfirmation, sendReservationRejected } from "@/lib/email";
+import { sendReservationConfirmation, notifyReservationConfirmed, notifyReservationRejected } from "@/lib/email";
 
 export async function POST(request: NextRequest) {
   try {
@@ -79,13 +79,13 @@ export async function POST(request: NextRequest) {
     };
 
     if (approved) {
-      await sendReservationConfirmation(emailData).catch((e) =>
-        console.error("[Redsys Notify] Error enviando email confirmación:", e)
+      await notifyReservationConfirmed(emailData).catch((e) =>
+        console.error("[Redsys Notify] Error enviando emails confirmación:", e)
       );
       console.log(`[Redsys Notify] ✅ Preautorización OK | orden=${order} | reserva=${reservation.id}`);
     } else {
-      await sendReservationRejected(emailData).catch((e) =>
-        console.error("[Redsys Notify] Error enviando email rechazo:", e)
+      await notifyReservationRejected(emailData).catch((e) =>
+        console.error("[Redsys Notify] Error enviando emails rechazo:", e)
       );
       console.log(`[Redsys Notify] ❌ Rechazado | orden=${order} | respuesta=${dsResponse}`);
     }

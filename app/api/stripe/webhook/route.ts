@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { stripe } from "@/lib/stripe";
 import { prisma } from "@/lib/prisma";
-import { sendReservationConfirmation } from "@/lib/email";
+import { notifyReservationConfirmed } from "@/lib/email";
 
 export async function POST(request: Request) {
   const body = await request.text();
@@ -92,16 +92,11 @@ async function handlePaymentIntentSucceeded(paymentIntent: any) {
 
       // Enviar email de confirmación
       const reservation = existingPayment.reservation;
-      await sendReservationConfirmation({
+      await notifyReservationConfirmed({
         email: reservation.email,
         firstName: reservation.firstName,
         lastName: reservation.lastName,
-        reservationDate: reservation.reservationDate.toLocaleDateString("es-ES", {
-          weekday: "long",
-          year: "numeric",
-          month: "long",
-          day: "numeric",
-        }),
+        reservationDate: reservation.reservationDate,
         reservationTime: reservation.reservationTime,
         numberOfPeople: reservation.numberOfPeople,
         depositAmount: Number(reservation.depositAmount),

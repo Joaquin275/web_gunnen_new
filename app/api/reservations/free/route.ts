@@ -6,7 +6,7 @@
 
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { sendReservationConfirmation } from "@/lib/email";
+import { notifyReservationConfirmed } from "@/lib/email";
 
 export async function POST(request: Request) {
   try {
@@ -77,7 +77,7 @@ export async function POST(request: Request) {
 
     // Enviar email de confirmación al cliente
     try {
-      await sendReservationConfirmation({
+      await notifyReservationConfirmed({
         firstName,
         lastName,
         email,
@@ -90,7 +90,7 @@ export async function POST(request: Request) {
         reservationId: reservation.id,
       });
     } catch (emailErr) {
-      console.error("Error enviando email de confirmación:", emailErr);
+      console.error("Error enviando emails de confirmación:", emailErr);
     }
 
     return NextResponse.json({ reservationId: reservation.id, status: "CONFIRMED" });
