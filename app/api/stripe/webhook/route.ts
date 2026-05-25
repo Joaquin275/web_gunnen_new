@@ -154,16 +154,11 @@ async function handlePaymentIntentSucceeded(paymentIntent: any) {
   });
 
   // Enviar email de confirmación
-  await sendReservationConfirmation({
+  await notifyReservationConfirmed({
     email: reservation.email,
     firstName: reservation.firstName,
     lastName: reservation.lastName,
-    reservationDate: reservation.reservationDate.toLocaleDateString("es-ES", {
-      weekday: "long",
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    }),
+    reservationDate: reservation.reservationDate,
     reservationTime: reservation.reservationTime,
     numberOfPeople: reservation.numberOfPeople,
     depositAmount: Number(reservation.depositAmount),
