@@ -1,5 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
+import { defaultWeeklySchedule } from "../lib/schedule-types";
 
 const prisma = new PrismaClient();
 
@@ -39,6 +40,18 @@ async function main() {
     });
   }
   console.log("✅ Configuración inicial cargada");
+
+  // Horario semanal por defecto
+  await prisma.settings.upsert({
+    where: { key: "weekly_schedule" },
+    update: {},
+    create: {
+      key: "weekly_schedule",
+      value: JSON.stringify(defaultWeeklySchedule()),
+      description: "Horario semanal de franjas horarias para reservas",
+    },
+  });
+  console.log("✅ Horario semanal inicial cargado");
 
   console.log("🎉 Seed completado");
 }

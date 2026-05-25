@@ -1,15 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-
-const LUNCH_SLOTS = ["13:30", "13:45", "14:00"];
-const DINNER_SLOTS = ["20:30", "20:45", "21:00"];
-const SLOTS_BY_DAY: Record<number, string[]> = {
-  2: LUNCH_SLOTS,
-  3: LUNCH_SLOTS,
-  4: [...LUNCH_SLOTS, ...DINNER_SLOTS],
-  5: [...LUNCH_SLOTS, ...DINNER_SLOTS],
-  6: [...LUNCH_SLOTS, ...DINNER_SLOTS],
-};
+import { getWeeklySchedule, getActiveSlotsForDay } from "@/lib/schedule";
 
 export async function GET(request: Request) {
   try {
@@ -23,9 +14,10 @@ export async function GET(request: Request) {
     today.setHours(0, 0, 0, 0);
     if (selectedDate < today) return NextResponse.json({ timeSlots: [] });
 
-    const dayOfWeek = selectedDate.getDay();
-    const slots = SLOTS_BY_DAY[dayOfWeek];
-    if (!slots) return NextResponse.json({ timeSlots: [] });
+    const schedule = await getWeeklySchedule();
+    const slots = getActiveSlotsForDay(schedule, selectedDate.getDay());
+
+    if (slots.length === 0) return NextResponse.json({ timeSlots: [] });
 
     const dateReservations = await prisma.reservation.findMany({
       where: {
@@ -35,15 +27,16 @@ export async function GET(request: Request) {
       select: { reservationTime: true },
     });
 
-    const timeSlots = slots.map((time) => {
-      const occupied = dateReservations.filter((r) => r.reservationTime === time).length;
+    const timeSlots = slots.map((slot) => {
+      const occupied = dateReservations.filter((r) => r.reservationTime === slot.time).length;
       return {
-        id: `slot-${dateParam}-${time.replace(":", "")}`,
-        time,
+        id: `slot-${dateParam}-${slot.time.replace(":", "")}`,
+        time: slot.time,
+        label: slot.label,
         capacity: 1,
         available: occupied > 0 ? 0 : 1,
         minPeople: 1,
-        maxPeople: 5,
+        maxPeople: slot.maxPeople,
         depositPerPerson: 0,
       };
     });
