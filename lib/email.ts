@@ -15,7 +15,12 @@ import { generateIcs, googleCalendarLink } from "./ics";
 import { generateGiftCardPdf } from "./pdf";
 
 const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || "reservas@gunnen.es";
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "info@gunnen.es";
+const ADMIN_EMAILS = [
+  "reservas@gunnen.es",
+  "info@gunnen.es",
+  ...(process.env.ADMIN_EMAIL ? [process.env.ADMIN_EMAIL] : []),
+].filter((email, i, arr) => arr.indexOf(email) === i);
+const CONTACT_EMAIL = "reservas@gunnen.es";
 const RESTAURANT_NAME = process.env.NEXT_PUBLIC_RESTAURANT_NAME || "Gunnen";
 const RESTAURANT_ADDRESS = "Juan Díaz Porlier, 15 — A Coruña";
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://web-gunnen-new.vercel.app";
@@ -70,7 +75,8 @@ function template(content: string) {
     <div class="body">${content}</div>
     <div class="foot">
       ${RESTAURANT_NAME} · ${RESTAURANT_ADDRESS}<br>
-      <a href="mailto:${ADMIN_EMAIL}" style="color:#8b7355">${ADMIN_EMAIL}</a> ·
+      <a href="mailto:${CONTACT_EMAIL}" style="color:#8b7355">${CONTACT_EMAIL}</a> ·
+      <a href="mailto:info@gunnen.es" style="color:#8b7355">info@gunnen.es</a> ·
       <a href="tel:+34613739550" style="color:#8b7355">+34 613 73 95 50</a><br>
       <a href="${APP_URL}" style="color:#8b7355">${APP_URL.replace("https://", "")}</a>
     </div>
@@ -203,7 +209,7 @@ export async function sendAdminReservationNotification(
 
   return resend.emails.send({
     from: FROM_EMAIL,
-    to: ADMIN_EMAIL,
+    to: ADMIN_EMAILS,
     subject: subjects[event],
     html: template(content),
   });
@@ -257,7 +263,7 @@ async function sendAdminCancellationNotification(data: CancellationData) {
 
   return resend.emails.send({
     from: FROM_EMAIL,
-    to: ADMIN_EMAIL,
+    to: ADMIN_EMAILS,
     subject: `[Gunnen] Cancelación — ${data.firstName} ${data.lastName} · ${data.reservationDate}`,
     html: template(content),
   });
@@ -323,7 +329,7 @@ export async function sendReservationConfirmation(data: ReservationEmailData) {
 
     <p style="font-size:13px;color:#888">
       Para cancelar o modificar su reserva con más de 24 horas de antelación, 
-      contáctenos en <a href="mailto:${ADMIN_EMAIL}" style="color:#8b7355">${ADMIN_EMAIL}</a> 
+      contáctenos en <a href="mailto:${CONTACT_EMAIL}" style="color:#8b7355">${CONTACT_EMAIL}</a> 
       o por WhatsApp al +34 613 73 95 50.
     </p>
   `;
@@ -429,7 +435,7 @@ export async function sendReservationReminder(
     <p style="font-size:13px;color:#888">
       Si necesita cancelar, recuerde que debe hacerlo con más de 24 horas de antelación
       para evitar el cargo de la garantía. Contáctenos en
-      <a href="mailto:${ADMIN_EMAIL}" style="color:#8b7355">${ADMIN_EMAIL}</a>.
+      <a href="mailto:${CONTACT_EMAIL}" style="color:#8b7355">${CONTACT_EMAIL}</a>.
     </p>
     ` : `
     <p>Estamos deseando recibirle. Si tiene alguna pregunta de última hora,
@@ -492,7 +498,7 @@ export async function sendAdminDailyBriefing(
 
   return resend.emails.send({
     from: FROM_EMAIL,
-    to: ADMIN_EMAIL,
+    to: ADMIN_EMAILS,
     subject: `[Gunnen] ${reservations.length} reserva${reservations.length > 1 ? "s" : ""} para hoy — ${today}`,
     html: template(content),
   });
@@ -563,7 +569,7 @@ export async function sendAdminGiftCardNotification(data: AdminGiftCardNotificat
 
   return resend.emails.send({
     from: FROM_EMAIL,
-    to: ADMIN_EMAIL,
+    to: ADMIN_EMAILS,
     subject: `[Gunnen] Bono vendido — ${data.code} (${data.amount.toFixed(2)}€)`,
     html: template(content),
   });
