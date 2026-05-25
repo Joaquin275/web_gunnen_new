@@ -1,5 +1,21 @@
-import { prisma } from "@/lib/prisma";
+"use client";
+
+import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
+
+interface Reservation {
+  id: string;
+  reservationDate: string;
+  reservationTime: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  numberOfPeople: number;
+  menuName: string | null;
+  depositAmount: number;
+  status: string;
+  redsysStatus: string | null;
+}
 
 function statusLabel(status: string) {
   if (status === "CONFIRMED") return { label: "Confirmada", cls: "bg-green-100 text-green-700" };
@@ -7,17 +23,64 @@ function statusLabel(status: string) {
   return { label: "Pendiente pago", cls: "bg-amber-100 text-amber-700" };
 }
 
-export default async function AdminReservationsPage() {
-  const reservations = await prisma.reservation.findMany({
-    orderBy: { createdAt: "desc" },
-  });
+export default function AdminReservationsPage() {
+  const [reservations, setReservations] = useState<Reservation[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+
+  const fetchReservations = useCallback(async (silent = false) => {
+    if (!silent) setLoading(true);
+    else setRefreshing(true);
+    try {
+      const res = await fetch("/api/admin/reservations-list");
+      const json = await res.json();
+      setReservations(json.reservations ?? []);
+      setLastUpdated(new Date());
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  }, []);
+
+  useEffect(() => { fetchReservations(); }, [fetchReservations]);
+
+  useEffect(() => {
+    const id = setInterval(() => fetchReservations(true), 30_000);
+    return () => clearInterval(id);
+  }, [fetchReservations]);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-48">
+        <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h1 className="text-3xl font-serif font-light">Reservas</h1>
-          <p className="text-gray-500 mt-1">{reservations.length} reservas en total</p>
+          <div className="flex items-center gap-2 mt-1">
+            <span className={`w-2 h-2 rounded-full ${refreshing ? "bg-amber-400 animate-pulse" : "bg-green-500"}`} />
+            <p className="text-gray-500 text-sm">
+              {refreshing ? "Actualizando…" : lastUpdated
+                ? `${reservations.length} reservas · actualizado ${lastUpdated.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}`
+                : ""}
+            </p>
+            <button
+              onClick={() => fetchReservations(true)}
+              disabled={refreshing}
+              title="Actualizar ahora"
+              className="p-1 text-gray-400 hover:text-primary transition-colors disabled:opacity-40"
+            >
+              <svg className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+            </button>
+          </div>
         </div>
       </div>
 
