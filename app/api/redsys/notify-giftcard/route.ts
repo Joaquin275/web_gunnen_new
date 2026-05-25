@@ -11,7 +11,8 @@ import {
   decodeMerchantParams,
   isRedsysApproved,
 } from "@/lib/redsys";
-import { sendGiftCard } from "@/lib/email";
+import { sendGiftCard, sendAdminGiftCardNotification } from "@/lib/email";
+import { releaseGiftCardToPool } from "@/lib/giftcards-pool";
 
 export async function POST(request: Request) {
   try {
@@ -97,13 +98,23 @@ export async function POST(request: Request) {
         });
       }
 
+      // Notificación interna a Gunnen
+      await sendAdminGiftCardNotification({
+        code: updated.code,
+        amount: Number(updated.amount),
+        menuName: updated.menuName || undefined,
+        purchaserName: updated.purchaserName,
+        purchaserEmail: updated.purchaserEmail,
+        recipientName: updated.recipientName || undefined,
+        recipientEmail: updated.recipientEmail,
+        message: updated.message || undefined,
+        paidAt: updated.paidAt?.toLocaleString("es-ES") || new Date().toLocaleString("es-ES"),
+      });
+
       console.log(`Bono ${updated.code} activado. Auth: ${dsAuthCode}`);
     } else {
-      // Pago rechazado → cancelar bono
-      await prisma.giftCard.update({
-        where: { id: giftCard.id },
-        data: { status: "CANCELLED" },
-      });
+      // Pago rechazado → devolver código al inventario
+      await releaseGiftCardToPool(giftCard.id);
       console.log(`Bono cancelado por pago rechazado. Ds_Response: ${dsResponse}`);
     }
 

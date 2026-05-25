@@ -223,6 +223,7 @@ model Coupon {
 // ============ GIFT CARDS ============
 
 enum GiftCardStatus {
+  AVAILABLE        // Código pre-cargado en inventario (sin comprador asignado)
   PENDING_PAYMENT
   ACTIVE
   REDEEMED

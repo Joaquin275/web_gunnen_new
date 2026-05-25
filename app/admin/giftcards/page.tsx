@@ -1,7 +1,24 @@
-import { giftCardsDb } from "@/lib/db-json";
+import { prisma } from "@/lib/prisma";
 import GiftCardsClient from "./GiftCardsClient";
 
-export default function AdminGiftCardsPage() {
-  const giftCards = giftCardsDb.findAll();
-  return <GiftCardsClient initialGiftCards={giftCards} />;
+export default async function AdminGiftCardsPage() {
+  const giftCards = await prisma.giftCard.findMany({ orderBy: { createdAt: "desc" } });
+
+  const serialized = giftCards.map((g) => ({
+    id: g.id,
+    code: g.code,
+    amount: Number(g.amount),
+    buyerName: g.purchaserName,
+    buyerEmail: g.purchaserEmail,
+    recipientName: g.recipientName || g.purchaserName,
+    recipientEmail: g.recipientEmail,
+    message: g.message || "",
+    status: g.status,
+    menuName: g.menuName || "",
+    sendDate: g.sendDate.toISOString().split("T")[0],
+    redeemedAt: g.redeemedAt?.toISOString() ?? null,
+    createdAt: g.createdAt.toISOString(),
+  }));
+
+  return <GiftCardsClient initialGiftCards={serialized} />;
 }

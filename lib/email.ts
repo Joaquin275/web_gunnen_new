@@ -105,6 +105,18 @@ export interface GiftCardData {
   expiresAt: string;
 }
 
+export interface AdminGiftCardNotificationData {
+  code: string;
+  amount: number;
+  menuName?: string;
+  purchaserName: string;
+  purchaserEmail: string;
+  recipientName?: string;
+  recipientEmail: string;
+  message?: string;
+  paidAt: string;
+}
+
 export interface CancellationData {
   email: string;
   firstName: string;
@@ -405,6 +417,39 @@ export async function sendCancellationConfirmation(data: CancellationData) {
 }
 
 // ─── 6. Bono regalo ──────────────────────────────────────────────────────────
+
+export async function sendAdminGiftCardNotification(data: AdminGiftCardNotificationData) {
+  const resend = await getResend();
+  if (!resend) return;
+
+  const menuLabel = data.menuName || "Experiencia gastronómica";
+
+  const content = `
+    <h2>Nueva venta de bono regalo</h2>
+    <p>Se ha completado una compra de bono regalo en la web.</p>
+
+    <div class="box">
+      <div class="row"><span class="lbl">Código asignado</span><span class="val" style="font-family:monospace;letter-spacing:2px">${data.code}</span></div>
+      <div class="row"><span class="lbl">Menú</span><span class="val">${menuLabel}</span></div>
+      <div class="row"><span class="lbl">Importe</span><span class="val">${data.amount.toFixed(2)}€</span></div>
+      <div class="row"><span class="lbl">Comprador</span><span class="val">${data.purchaserName} (${data.purchaserEmail})</span></div>
+      <div class="row"><span class="lbl">Destinatario</span><span class="val">${data.recipientName || data.purchaserName} (${data.recipientEmail})</span></div>
+      ${data.message ? `<div class="row"><span class="lbl">Dedicatoria</span><span class="val" style="font-style:italic">"${data.message}"</span></div>` : ""}
+      <div class="row"><span class="lbl">Fecha pago</span><span class="val">${data.paidAt}</span></div>
+    </div>
+
+    <div style="text-align:center;margin-top:24px">
+      <a href="${APP_URL}/admin/giftcards" class="btn">Ver bonos en el panel</a>
+    </div>
+  `;
+
+  return resend.emails.send({
+    from: FROM_EMAIL,
+    to: ADMIN_EMAIL,
+    subject: `[Gunnen] Bono vendido — ${data.code} (${data.amount.toFixed(2)}€)`,
+    html: template(content),
+  });
+}
 
 export async function sendGiftCard(data: GiftCardData) {
   const resend = await getResend();

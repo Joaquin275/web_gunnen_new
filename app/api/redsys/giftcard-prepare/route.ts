@@ -1,21 +1,12 @@
 /**
  * POST /api/redsys/giftcard-prepare
- * Crea el bono como PENDING_PAYMENT y genera parámetros Redsys para cobro inmediato.
- * TransactionType = 0 → PAGO INMEDIATO (no preautorización)
+ * Reserva un código del inventario (AVAILABLE) y genera parámetros Redsys.
+ * TransactionType = 0 → PAGO INMEDIATO
  */
 
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
 import { buildRedsysForm, generateRedsysOrder, eurToCents } from "@/lib/redsys";
-
-function generateCode(): string {
-  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-  let code = "GUNNEN-";
-  for (let i = 0; i < 4; i++) code += chars.charAt(Math.floor(Math.random() * chars.length));
-  code += "-";
-  for (let i = 0; i < 4; i++) code += chars.charAt(Math.floor(Math.random() * chars.length));
-  return code;
-}
+import { claimAvailableGiftCard } from "@/lib/giftcards-pool";
 
 export async function POST(request: Request) {
   try {
@@ -43,43 +34,46 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Pasarela de pago no configurada" }, { status: 500 });
     }
 
-    const code = generateCode();
     const redsysOrder = generateRedsysOrder();
     const amountCents = eurToCents(Number(amount));
 
-    // Validez: 6 meses desde la emisión
     const expiresAt = new Date();
     expiresAt.setMonth(expiresAt.getMonth() + 6);
 
     const parsedSendDate = sendDate ? new Date(sendDate) : new Date();
 
-    // Crear bono en PENDING_PAYMENT
-    const giftCard = await prisma.giftCard.create({
-      data: {
-        code,
-        amount: Number(amount),
-        remainingAmount: Number(amount),
-        status: "PENDING_PAYMENT",
-        menuName: menuName || null,
-        purchaserName: purchaserName || "—",
-        purchaserEmail: purchaserEmail || "—",
-        recipientName: recipientName || null,
-        recipientEmail: recipientEmail || purchaserEmail || "—",
-        message: message || null,
-        sendDate: parsedSendDate,
-        expiresAt,
-        stripePaymentIntentId: redsysOrder, // reutilizamos el campo para guardar el redsysOrder
-      },
+    // Asignar un código aleatorio del inventario pre-cargado por el admin
+    const giftCard = await claimAvailableGiftCard({
+      amount: Number(amount),
+      menuName,
+      purchaserName: purchaserName || "—",
+      purchaserEmail: purchaserEmail || "—",
+      recipientName: recipientName || undefined,
+      recipientEmail: recipientEmail || purchaserEmail || "—",
+      message: message || undefined,
+      sendDate: parsedSendDate,
+      expiresAt,
+      redsysOrder,
     });
 
-    // TransactionType = 0 → PAGO INMEDIATO
+    if (!giftCard) {
+      return NextResponse.json(
+        {
+          error:
+            "No hay bonos disponibles para este importe en este momento. " +
+            "Por favor, contacta con el restaurante en reservas@gunnen.es",
+        },
+        { status: 409 }
+      );
+    }
+
     const redsysForm = buildRedsysForm(
       {
         DS_MERCHANT_AMOUNT: String(amountCents),
         DS_MERCHANT_ORDER: redsysOrder,
         DS_MERCHANT_MERCHANTCODE: merchantCode,
         DS_MERCHANT_CURRENCY: "978",
-        DS_MERCHANT_TRANSACTIONTYPE: "0", // ← cobro inmediato
+        DS_MERCHANT_TRANSACTIONTYPE: "0",
         DS_MERCHANT_TERMINAL: terminal,
         DS_MERCHANT_MERCHANTURL: `${appUrl}/api/redsys/notify-giftcard`,
         DS_MERCHANT_URLOK: `${appUrl}/regala/ok?giftCardId=${giftCard.id}`,
@@ -93,6 +87,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({
       giftCardId: giftCard.id,
+      code: giftCard.code,
       redsysOrder,
       amountCents,
       redsysForm,

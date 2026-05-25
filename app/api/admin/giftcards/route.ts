@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { giftCardsDb } from "@/lib/db-json";
+import { prisma } from "@/lib/prisma";
+import { inventoryDefaults } from "@/lib/giftcards-pool";
 
 function generateCode(): string {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
@@ -10,9 +11,27 @@ function generateCode(): string {
   return code;
 }
 
+function serialize(g: Awaited<ReturnType<typeof prisma.giftCard.findMany>>[number]) {
+  return {
+    id: g.id,
+    code: g.code,
+    amount: Number(g.amount),
+    buyerName: g.purchaserName,
+    buyerEmail: g.purchaserEmail,
+    recipientName: g.recipientName || g.purchaserName,
+    recipientEmail: g.recipientEmail,
+    message: g.message || "",
+    status: g.status,
+    menuName: g.menuName || "",
+    sendDate: g.sendDate.toISOString().split("T")[0],
+    redeemedAt: g.redeemedAt?.toISOString() ?? null,
+    createdAt: g.createdAt.toISOString(),
+  };
+}
+
 export async function GET() {
-  const giftCards = giftCardsDb.findAll();
-  return NextResponse.json(giftCards);
+  const giftCards = await prisma.giftCard.findMany({ orderBy: { createdAt: "desc" } });
+  return NextResponse.json(giftCards.map(serialize));
 }
 
 export async function POST(req: NextRequest) {
@@ -24,29 +43,35 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Importe inválido" }, { status: 400 });
     }
 
-    // Use custom code if provided, otherwise auto-generate
     const code = customCode?.trim() ? customCode.trim().toUpperCase() : generateCode();
 
-    // Check for duplicate code
-    const existing = giftCardsDb.findByCode(code);
+    const existing = await prisma.giftCard.findUnique({ where: { code } });
     if (existing) {
       return NextResponse.json({ error: `El código ${code} ya existe` }, { status: 409 });
     }
 
-    const giftCard = giftCardsDb.create({
-      code,
-      amount: Number(amount),
-      buyerName: buyerName || recipientName || "—",
-      buyerEmail: buyerEmail || recipientEmail || "—",
-      recipientName: recipientName || buyerName || "—",
-      recipientEmail: recipientEmail || buyerEmail || "—",
-      message: message || "",
-      status: "ACTIVE",
-      sendDate: sendDate || new Date().toISOString().split("T")[0],
-      redeemedAt: null,
+    const defaults = inventoryDefaults(Number(amount), code);
+
+    const giftCard = await prisma.giftCard.create({
+      data: {
+        ...defaults,
+        // Si el admin rellena datos de comprador, crear como ACTIVE directamente
+        ...(buyerName && buyerEmail
+          ? {
+              status: "ACTIVE" as const,
+              purchaserName: buyerName,
+              purchaserEmail: buyerEmail,
+              recipientName: recipientName || buyerName,
+              recipientEmail: recipientEmail || buyerEmail,
+              message: message || null,
+              sendDate: sendDate ? new Date(sendDate) : new Date(),
+              paidAt: new Date(),
+            }
+          : {}),
+      },
     });
 
-    return NextResponse.json({ id: giftCard.id, code: giftCard.code });
+    return NextResponse.json(serialize(giftCard));
   } catch (error) {
     console.error("Error creating gift card:", error);
     return NextResponse.json({ error: "Error creando bono regalo" }, { status: 500 });

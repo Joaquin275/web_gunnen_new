@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { giftCardsDb, pressDb } from "@/lib/db-json";
+import { pressDb } from "@/lib/db-json";
 import Link from "next/link";
 
 export default async function AdminDashboard() {
@@ -16,7 +16,9 @@ export default async function AdminDashboard() {
       prisma.reservation.findMany({ orderBy: { createdAt: "desc" }, take: 5 }),
     ]);
 
-  const activeGiftCards = giftCardsDb.countActive();
+  const activeGiftCards = await prisma.giftCard.count({
+    where: { status: { in: ["AVAILABLE", "ACTIVE"] } },
+  });
   const totalPress = pressDb.findAll().length;
 
   return (

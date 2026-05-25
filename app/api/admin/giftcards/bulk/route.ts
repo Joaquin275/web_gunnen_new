@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { giftCardsDb } from "@/lib/db-json";
+import { prisma } from "@/lib/prisma";
+import { inventoryDefaults } from "@/lib/giftcards-pool";
 
 export async function POST(req: NextRequest) {
   try {
@@ -21,21 +22,45 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Sin datos" }, { status: 400 });
     }
 
-    const toImport = items.map((item) => ({
-      code: item.code.trim().toUpperCase(),
-      amount: Number(item.amount),
-      buyerName: item.buyerName?.trim() || "—",
-      buyerEmail: item.buyerEmail?.trim() || "—",
-      recipientName: item.recipientName?.trim() || item.buyerName?.trim() || "—",
-      recipientEmail: item.recipientEmail?.trim() || item.buyerEmail?.trim() || "—",
-      message: item.message?.trim() || "",
-      status: "ACTIVE" as const,
-      sendDate: item.sendDate || new Date().toISOString().split("T")[0],
-      redeemedAt: null,
-    }));
+    const existingCodes = new Set(
+      (await prisma.giftCard.findMany({ select: { code: true } })).map((g) => g.code.toUpperCase())
+    );
 
-    const result = giftCardsDb.createBulk(toImport);
-    return NextResponse.json(result);
+    let created = 0;
+    let skipped = 0;
+
+    for (const item of items) {
+      const code = item.code.trim().toUpperCase();
+      if (!code || existingCodes.has(code)) {
+        skipped++;
+        continue;
+      }
+
+      const defaults = inventoryDefaults(Number(item.amount), code);
+
+      await prisma.giftCard.create({
+        data: {
+          ...defaults,
+          ...(item.buyerName && item.buyerEmail
+            ? {
+                status: "ACTIVE" as const,
+                purchaserName: item.buyerName.trim(),
+                purchaserEmail: item.buyerEmail.trim(),
+                recipientName: item.recipientName?.trim() || item.buyerName.trim(),
+                recipientEmail: item.recipientEmail?.trim() || item.buyerEmail.trim(),
+                message: item.message?.trim() || null,
+                sendDate: item.sendDate ? new Date(item.sendDate) : new Date(),
+                paidAt: new Date(),
+              }
+            : {}),
+        },
+      });
+
+      existingCodes.add(code);
+      created++;
+    }
+
+    return NextResponse.json({ created, skipped });
   } catch (error) {
     console.error("Error bulk import:", error);
     return NextResponse.json({ error: "Error en importación masiva" }, { status: 500 });

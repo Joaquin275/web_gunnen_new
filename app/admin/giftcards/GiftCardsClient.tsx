@@ -18,8 +18,11 @@ interface BulkRow {
 }
 
 function statusLabel(status: string) {
+  if (status === "AVAILABLE") return { label: "Disponible", cls: "bg-blue-100 text-blue-700" };
   if (status === "ACTIVE") return { label: "Activo", cls: "bg-green-100 text-green-700" };
+  if (status === "PENDING_PAYMENT") return { label: "Pendiente pago", cls: "bg-yellow-100 text-yellow-700" };
   if (status === "REDEEMED") return { label: "Canjeado", cls: "bg-gray-100 text-gray-500" };
+  if (status === "CANCELLED") return { label: "Cancelado", cls: "bg-red-100 text-red-600" };
   return { label: "Expirado", cls: "bg-red-100 text-red-700" };
 }
 
@@ -162,9 +165,10 @@ export default function GiftCardsClient({ initialGiftCards }: { initialGiftCards
     setBulkImporting(false);
   };
 
+  const available = giftCards.filter((g) => g.status === "AVAILABLE").length;
   const active = giftCards.filter((g) => g.status === "ACTIVE").length;
   const redeemed = giftCards.filter((g) => g.status === "REDEEMED").length;
-  const totalValue = giftCards.filter((g) => g.status === "ACTIVE").reduce((s, g) => s + g.amount, 0);
+  const totalValue = giftCards.filter((g) => g.status === "AVAILABLE" || g.status === "ACTIVE").reduce((s, g) => s + g.amount, 0);
 
   return (
     <div className="space-y-6">
@@ -172,7 +176,7 @@ export default function GiftCardsClient({ initialGiftCards }: { initialGiftCards
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h1 className="text-3xl font-serif font-light">Bonos Regalo</h1>
-          <p className="text-gray-500 mt-1">{active} activos · {redeemed} canjeados · {totalValue}€ pendiente</p>
+          <p className="text-gray-500 mt-1">{available} en inventario · {active} activos · {redeemed} canjeados · {totalValue}€ en circulación</p>
         </div>
         <div className="flex gap-2">
           <button
@@ -193,7 +197,8 @@ export default function GiftCardsClient({ initialGiftCards }: { initialGiftCards
       {/* ── Formulario individual ─────────────────────────────────────────────── */}
       {tab === "new" && (
         <form onSubmit={handleSubmit} className="bg-white border border-gray-200 p-6 space-y-6">
-          <h2 className="font-serif font-light text-xl border-b border-gray-100 pb-4">Nuevo bono regalo</h2>
+          <h2 className="font-serif font-light text-xl border-b border-gray-100 pb-4">Añadir código al inventario</h2>
+          <p className="text-sm text-gray-500">Introduce el código y el importe. Los datos del comprador son opcionales — si los dejas vacíos, el código queda disponible para asignarse automáticamente cuando alguien compre en la web.</p>
 
           {/* Importe */}
           <div>
@@ -236,17 +241,17 @@ export default function GiftCardsClient({ initialGiftCards }: { initialGiftCards
           {/* Datos comprador / destinatario */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div>
-              <p className="text-xs tracking-wider uppercase text-gray-400 mb-3">Comprador</p>
+              <p className="text-xs tracking-wider uppercase text-gray-400 mb-3">Comprador <span className="normal-case text-gray-300">(opcional — solo si ya está vendido)</span></p>
               <div className="space-y-3">
                 <div>
-                  <label className="block text-xs text-gray-500 mb-1">Nombre *</label>
-                  <input type="text" required value={form.buyerName}
+                  <label className="block text-xs text-gray-500 mb-1">Nombre</label>
+                  <input type="text" value={form.buyerName}
                     onChange={(e) => setForm((f) => ({ ...f, buyerName: e.target.value }))}
                     className="w-full border border-gray-200 px-3 py-2 focus:outline-none focus:border-primary text-sm" />
                 </div>
                 <div>
-                  <label className="block text-xs text-gray-500 mb-1">Email *</label>
-                  <input type="email" required value={form.buyerEmail}
+                  <label className="block text-xs text-gray-500 mb-1">Email</label>
+                  <input type="email" value={form.buyerEmail}
                     onChange={(e) => setForm((f) => ({ ...f, buyerEmail: e.target.value }))}
                     className="w-full border border-gray-200 px-3 py-2 focus:outline-none focus:border-primary text-sm" />
                 </div>
@@ -289,7 +294,7 @@ export default function GiftCardsClient({ initialGiftCards }: { initialGiftCards
 
           <div className="flex items-center gap-4 pt-2 border-t border-gray-100">
             <button type="submit" disabled={saving} className="btn-primary disabled:opacity-50">
-              {saving ? "Guardando..." : `Guardar bono de ${finalAmount || "—"}€`}
+              {saving ? "Guardando..." : form.customCode ? `Guardar ${form.customCode.toUpperCase()} (${finalAmount || "—"}€)` : `Guardar bono de ${finalAmount || "—"}€`}
             </button>
             <button type="button" onClick={() => setTab("list")} className="btn-secondary">Cancelar</button>
           </div>
@@ -398,10 +403,18 @@ GUNNEN-WXYZ-5678,150,María López,maria@email.com,Pedro López,pedro@email.com,
                         <p className="font-mono font-medium tracking-wider text-sm">{g.code}</p>
                         <span className={`text-xs px-2 py-0.5 tracking-wider uppercase ${cls}`}>{label}</span>
                       </div>
-                      <p className="text-sm text-gray-600">
-                        De: <strong>{g.buyerName}</strong>
-                        {g.recipientName !== g.buyerName && <> → Para: <strong>{g.recipientName}</strong> ({g.recipientEmail})</>}
-                      </p>
+                    <p className="text-sm text-gray-600">
+                      {g.status === "AVAILABLE" ? (
+                        <span className="text-gray-400 italic">Sin asignar — listo para venta</span>
+                      ) : (
+                        <>
+                          De: <strong>{g.buyerName === "INVENTARIO" ? "—" : g.buyerName}</strong>
+                          {g.recipientName !== g.buyerName && g.recipientName !== "INVENTARIO" && (
+                            <> → Para: <strong>{g.recipientName}</strong> ({g.recipientEmail})</>
+                          )}
+                        </>
+                      )}
+                    </p>
                       {g.message && <p className="text-sm text-gray-400 italic mt-1">&ldquo;{g.message}&rdquo;</p>}
                       <p className="text-xs text-gray-400 mt-1">
                         Creado: {new Date(g.createdAt).toLocaleDateString("es-ES")}
