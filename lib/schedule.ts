@@ -27,7 +27,15 @@ export async function getWeeklySchedule(): Promise<DaySchedule[]> {
 
     const parsed = JSON.parse(setting.value) as DaySchedule[];
     if (!Array.isArray(parsed) || parsed.length !== 7) return defaultWeeklySchedule();
-    return parsed;
+
+    // Garantizar que maxPeople nunca supere 4, aunque el valor guardado sea mayor
+    return parsed.map((day) => ({
+      ...day,
+      slots: day.slots.map((s) => ({
+        ...s,
+        maxPeople: Math.min(4, s.maxPeople || 4),
+      })),
+    }));
   } catch {
     return defaultWeeklySchedule();
   }
