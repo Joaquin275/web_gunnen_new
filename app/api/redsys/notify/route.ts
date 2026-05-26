@@ -9,7 +9,6 @@ import { randomBytes } from "crypto";
 import { prisma } from "@/lib/prisma";
 import { decodeMerchantParams, verifyRedsysSignature, isRedsysApproved } from "@/lib/redsys";
 import {
-  sendReservationConfirmation,
   notifyReservationConfirmed,
   notifyReservationRejected,
   sendReservationReminder,
@@ -114,6 +113,7 @@ export async function POST(request: NextRequest) {
         menuName: updated.menuName ?? undefined,
         estimatedTotal: Number(updated.estimatedTotal),
         depositAmount: Number(updated.depositAmount),
+        attendanceToken: updated.attendanceToken ?? undefined,
       };
 
       if (reservationDateKey === tomorrowKey && !updated.reminder24hSentAt) {
