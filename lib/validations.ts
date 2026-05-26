@@ -9,7 +9,7 @@ export const reservationSchema = z.object({
   lastName: z.string().min(2, "El apellido es requerido"),
   email: z.string().email("Email inválido"),
   phone: z.string().min(9, "Teléfono inválido"),
-  numberOfPeople: z.number().min(1).max(20),
+  numberOfPeople: z.number().min(1, "Mínimo 1 comensal").max(4, "Máximo 4 comensales"),
   observations: z.string().optional(),
   allergens: z.array(z.string()).optional(),
   allergenNotes: z.string().optional(),

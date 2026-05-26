@@ -29,7 +29,7 @@ const initialState: ReservationState = {
   time: null,
   capacity: 10,
   minPeople: 1,
-  maxPeople: 5,
+  maxPeople: 4,
   depositPerPerson: 50,
   menuId: null,
   menuName: null,

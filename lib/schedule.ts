@@ -40,7 +40,7 @@ export async function saveWeeklySchedule(schedule: DaySchedule[]): Promise<DaySc
       .map((s) => ({
         ...s,
         time: s.time.trim(),
-        maxPeople: Math.max(1, Math.min(20, s.maxPeople || 5)),
+        maxPeople: Math.max(1, Math.min(4, s.maxPeople || 4)),
       }))
       .filter((s) => /^\d{2}:\d{2}$/.test(s.time))
       .sort((a, b) => a.time.localeCompare(b.time)),

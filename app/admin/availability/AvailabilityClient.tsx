@@ -9,7 +9,7 @@ function newSlot(): ScheduleSlot {
     time: "13:00",
     label: "Comida",
     isActive: true,
-    maxPeople: 5,
+    maxPeople: 4,
   };
 }
 

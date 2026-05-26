@@ -31,7 +31,7 @@ function makeSlot(time: string, label: string): ScheduleSlot {
     time,
     label,
     isActive: true,
-    maxPeople: 5,
+    maxPeople: 4,
   };
 }
 
