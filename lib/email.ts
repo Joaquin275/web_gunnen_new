@@ -99,6 +99,7 @@ export interface ReservationEmailData {
   estimatedTotal?: number;
   depositAmount: number;
   redsysOrder?: string;
+  attendanceToken?: string;
 }
 
 export interface GiftCardData {
@@ -411,6 +412,19 @@ export async function sendReservationReminder(
       <strong>📍 Cómo llegar:</strong> ${RESTAURANT_ADDRESS}<br>
       Le recomendamos llegar con 5 minutos de antelación.
     </div>
+
+    ${data.attendanceToken ? `
+    <div style="background:#f0f8f0;border:2px solid #4ade80;padding:20px 24px;margin:24px 0;text-align:center">
+      <p style="font-size:15px;font-weight:600;color:#166534;margin-bottom:6px">¿Confirma su asistencia?</p>
+      <p style="font-size:13px;color:#166534;margin-bottom:14px">
+        Un simple clic y lo tenemos registrado. Nos ayuda a prepararlo todo para usted.
+      </p>
+      <a href="${APP_URL}/api/reservations/confirm-attendance?token=${data.attendanceToken}"
+         style="display:inline-block;padding:12px 32px;background:#166534;color:#fff;text-decoration:none;text-transform:uppercase;letter-spacing:2px;font-size:12px">
+        ✓ Confirmo mi asistencia
+      </a>
+    </div>
+    ` : ""}
 
     ${is24h ? `
     <div class="cal">

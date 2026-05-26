@@ -21,6 +21,7 @@ export async function GET() {
       depositAmount: true,
       status: true,
       redsysStatus: true,
+      attendanceConfirmedAt: true,
     },
   });
 

@@ -15,6 +15,7 @@ interface Reservation {
   depositAmount: number;
   status: string;
   redsysStatus: string | null;
+  attendanceConfirmedAt: string | null;
 }
 
 function statusLabel(status: string) {
@@ -99,6 +100,7 @@ export default function AdminReservationsPage() {
                   <th className="px-4 py-3 text-right text-xs tracking-wider uppercase text-gray-500">Retención</th>
                   <th className="px-4 py-3 text-center text-xs tracking-wider uppercase text-gray-500">Estado</th>
                   <th className="px-4 py-3 text-center text-xs tracking-wider uppercase text-gray-500">Redsys</th>
+                  <th className="px-4 py-3 text-center text-xs tracking-wider uppercase text-gray-500">Asistencia</th>
                   <th className="px-4 py-3 text-center text-xs tracking-wider uppercase text-gray-500">Acciones</th>
                 </tr>
               </thead>
@@ -129,6 +131,19 @@ export default function AdminReservationsPage() {
                       </td>
                       <td className={`px-4 py-3 text-center text-xs font-medium ${redsysCls}`}>
                         {r.redsysStatus || "—"}
+                      </td>
+                      <td className="px-4 py-3 text-center">
+                        {r.status === "CONFIRMED" ? (
+                          r.attendanceConfirmedAt ? (
+                            <span className="inline-flex items-center gap-1 text-xs px-2 py-1 bg-green-100 text-green-700">
+                              ✓ Confirmada
+                            </span>
+                          ) : (
+                            <span className="text-xs text-gray-400">Pendiente</span>
+                          )
+                        ) : (
+                          <span className="text-xs text-gray-300">—</span>
+                        )}
                       </td>
                       <td className="px-4 py-3 text-center">
                         <Link href={`/admin/reservations/${r.id}`} className="text-xs tracking-wider uppercase text-gray-500 hover:text-primary">

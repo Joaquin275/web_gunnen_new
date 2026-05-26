@@ -5,6 +5,7 @@
  */
 
 import { NextRequest } from "next/server";
+import { randomBytes } from "crypto";
 import { prisma } from "@/lib/prisma";
 import { decodeMerchantParams, verifyRedsysSignature, isRedsysApproved } from "@/lib/redsys";
 import {
@@ -59,6 +60,11 @@ export async function POST(request: NextRequest) {
 
     const approved = isRedsysApproved(dsResponse);
 
+    // Generar token único de confirmación de asistencia
+    const attendanceToken = approved
+      ? randomBytes(32).toString("hex")
+      : undefined;
+
     const updated = await prisma.reservation.update({
       where: { id: reservation.id },
       data: {
@@ -67,6 +73,7 @@ export async function POST(request: NextRequest) {
         redsysAuthCode: authCode,
         redsysResponse: dsResponse,
         confirmedAt: approved ? new Date() : undefined,
+        ...(attendanceToken ? { attendanceToken } : {}),
       },
     });
 

@@ -42,6 +42,7 @@ function toEmailData(r: {
   menuName: string | null;
   estimatedTotal: unknown;
   depositAmount: unknown;
+  attendanceToken: string | null;
 }): ReservationEmailData {
   return {
     reservationId: r.id,
@@ -54,6 +55,7 @@ function toEmailData(r: {
     menuName: r.menuName ?? undefined,
     estimatedTotal: Number(r.estimatedTotal),
     depositAmount: Number(r.depositAmount),
+    attendanceToken: r.attendanceToken ?? undefined,
   };
 }
 
