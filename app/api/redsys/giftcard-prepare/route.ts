@@ -58,12 +58,8 @@ export async function POST(request: Request) {
 
     if (!giftCard) {
       return NextResponse.json(
-        {
-          error:
-            "No hay bonos disponibles para este importe en este momento. " +
-            "Por favor, contacta con el restaurante en reservas@gunnen.es",
-        },
-        { status: 409 }
+        { error: "No se pudo crear el bono regalo. Por favor inténtalo de nuevo." },
+        { status: 500 }
       );
     }
 
