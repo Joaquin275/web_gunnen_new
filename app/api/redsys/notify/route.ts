@@ -7,7 +7,14 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { decodeMerchantParams, verifyRedsysSignature, isRedsysApproved } from "@/lib/redsys";
-import { sendReservationConfirmation, notifyReservationConfirmed, notifyReservationRejected } from "@/lib/email";
+import {
+  sendReservationConfirmation,
+  notifyReservationConfirmed,
+  notifyReservationRejected,
+  sendReservationReminder,
+  type ReservationEmailData,
+} from "@/lib/email";
+import { madridDateKey, addDaysToDateKey } from "@/lib/timezone";
 
 export async function POST(request: NextRequest) {
   try {
@@ -82,6 +89,52 @@ export async function POST(request: NextRequest) {
       await notifyReservationConfirmed(emailData).catch((e) =>
         console.error("[Redsys Notify] Error enviando emails confirmación:", e)
       );
+
+      // ── Recordatorio inmediato si la reserva es hoy o mañana ────────────────
+      // (el cron diario puede haberse ejecutado ANTES de que se creara la reserva)
+      const reservationDateKey = updated.reservationDate.toISOString().slice(0, 10);
+      const todayKey    = madridDateKey();
+      const tomorrowKey = addDaysToDateKey(todayKey, 1);
+
+      const reminderData: ReservationEmailData = {
+        reservationId: updated.id,
+        email: updated.email,
+        firstName: updated.firstName,
+        lastName: updated.lastName,
+        reservationDate: updated.reservationDate,
+        reservationTime: updated.reservationTime,
+        numberOfPeople: updated.numberOfPeople,
+        menuName: updated.menuName ?? undefined,
+        estimatedTotal: Number(updated.estimatedTotal),
+        depositAmount: Number(updated.depositAmount),
+      };
+
+      if (reservationDateKey === tomorrowKey && !updated.reminder24hSentAt) {
+        // Reserva para mañana confirmada hoy → recordatorio 24h ahora
+        sendReservationReminder(reminderData, "24h")
+          .then(() =>
+            prisma.reservation.update({
+              where: { id: updated.id },
+              data: { reminder24hSentAt: new Date() },
+            })
+          )
+          .catch((e) =>
+            console.error("[Redsys Notify] Error enviando recordatorio 24h:", e)
+          );
+      } else if (reservationDateKey === todayKey && !updated.reminderSameDaySentAt) {
+        // Reserva para hoy confirmada tarde → recordatorio mismo día ahora
+        sendReservationReminder(reminderData, "same_day")
+          .then(() =>
+            prisma.reservation.update({
+              where: { id: updated.id },
+              data: { reminderSameDaySentAt: new Date() },
+            })
+          )
+          .catch((e) =>
+            console.error("[Redsys Notify] Error enviando recordatorio mismo día:", e)
+          );
+      }
+
       console.log(`[Redsys Notify] ✅ Preautorización OK | orden=${order} | reserva=${reservation.id}`);
     } else {
       await notifyReservationRejected(emailData).catch((e) =>
