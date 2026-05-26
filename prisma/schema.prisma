@@ -335,6 +335,21 @@ model Settings {
   @@map("settings")
 }
 
+// ============ TABLES (MESAS) ============
+
+model Table {
+  id        String   @id @default(cuid())
+  name      String
+  capacity  Int      @default(4)
+  available Boolean  @default(true)
+  notes     String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("tables")
+}
+
 // Settings keys:
 // - deposit_mode: "PER_PERSON" | "FIXED_TOTAL"
 // - deposit_per_person: "50.00"
