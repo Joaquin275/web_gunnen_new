@@ -1,9 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function AdminSettingsPage() {
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [error, setError] = useState("");
   const [form, setForm] = useState({
     restaurantName: "Gunnen",
     email: "reservas@gunnen.es",
@@ -16,11 +19,43 @@ export default function AdminSettingsPage() {
     cancelPolicy48_72h: "100",
   });
 
-  const handleSave = (e: React.FormEvent) => {
+  useEffect(() => {
+    fetch("/api/admin/settings")
+      .then((r) => r.json())
+      .then((data) => {
+        if (data && !data.error) setForm(data);
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
+  }, []);
+
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2500);
+    setSaving(true);
+    setError("");
+    const res = await fetch("/api/admin/settings", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(form),
+    });
+    if (res.ok) {
+      const data = await res.json();
+      setForm(data);
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2500);
+    } else {
+      setError("No se pudo guardar la configuración");
+    }
+    setSaving(false);
   };
+
+  if (loading) {
+    return (
+      <div className="text-center py-12">
+        <div className="inline-block w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 max-w-3xl">
@@ -30,7 +65,6 @@ export default function AdminSettingsPage() {
       </div>
 
       <form onSubmit={handleSave} className="space-y-6">
-        {/* Datos del restaurante */}
         <div className="bg-white border border-gray-200 p-6 space-y-4">
           <h2 className="font-serif font-light text-lg border-b border-gray-100 pb-3">Datos del restaurante</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -58,7 +92,6 @@ export default function AdminSettingsPage() {
           </div>
         </div>
 
-        {/* Política de señal */}
         <div className="bg-white border border-gray-200 p-6 space-y-4">
           <h2 className="font-serif font-light text-lg border-b border-gray-100 pb-3">Señal / Depósito</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -80,7 +113,6 @@ export default function AdminSettingsPage() {
           </div>
         </div>
 
-        {/* Política de cancelación */}
         <div className="bg-white border border-gray-200 p-6 space-y-4">
           <h2 className="font-serif font-light text-lg border-b border-gray-100 pb-3">Política de cancelación</h2>
           <p className="text-sm text-gray-500">% de reembolso aplicado según antelación de la cancelación</p>
@@ -105,10 +137,11 @@ export default function AdminSettingsPage() {
         </div>
 
         <div className="flex items-center gap-4">
-          <button type="submit" className="btn-primary">
-            Guardar configuración
+          <button type="submit" disabled={saving} className="btn-primary disabled:opacity-50">
+            {saving ? "Guardando..." : "Guardar configuración"}
           </button>
           {saved && <p className="text-sm text-green-600">✓ Configuración guardada</p>}
+          {error && <p className="text-sm text-red-600">{error}</p>}
         </div>
       </form>
     </div>

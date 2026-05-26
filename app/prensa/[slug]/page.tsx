@@ -1,19 +1,22 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { pressDb } from "@/lib/db-json";
+import { prisma } from "@/lib/prisma";
+import { serializePressPost } from "@/lib/serializers";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
-  const post = pressDb.findBySlug(slug);
-  if (!post) return { title: "Artículo no encontrado" };
+  const row = await prisma.pressPost.findUnique({ where: { slug } });
+  if (!row) return { title: "Artículo no encontrado" };
+  const post = serializePressPost(row);
   return { title: `${post.title} — Gunnen`, description: post.excerpt };
 }
 
 export default async function PressDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const post = pressDb.findBySlug(slug);
-  if (!post || !post.published) notFound();
+  const row = await prisma.pressPost.findUnique({ where: { slug } });
+  if (!row || !row.isPublished) notFound();
+  const post = serializePressPost(row);
 
   return (
     <div className="pt-20">

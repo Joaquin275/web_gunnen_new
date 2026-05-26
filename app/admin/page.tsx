@@ -1,5 +1,4 @@
 import { prisma } from "@/lib/prisma";
-import { pressDb } from "@/lib/db-json";
 import Link from "next/link";
 
 export default async function AdminDashboard() {
@@ -19,7 +18,7 @@ export default async function AdminDashboard() {
   const activeGiftCards = await prisma.giftCard.count({
     where: { status: { in: ["AVAILABLE", "ACTIVE"] } },
   });
-  const totalPress = pressDb.findAll().length;
+  const totalPress = await prisma.pressPost.count();
 
   return (
     <div className="space-y-8">

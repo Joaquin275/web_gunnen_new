@@ -1,19 +1,23 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
-import { pressDb } from "@/lib/db-json";
+import { prisma } from "@/lib/prisma";
+import { serializePressPost } from "@/lib/serializers";
 
 export const metadata: Metadata = {
   title: "Prensa — Gunnen",
   description: "Últimas noticias y apariciones en prensa de Gunnen.",
 };
 
-export default function PrensaPage() {
-  const posts = pressDb.findPublished();
+export default async function PrensaPage() {
+  const rows = await prisma.pressPost.findMany({
+    where: { isPublished: true },
+    orderBy: { publishedAt: "desc" },
+  });
+  const posts = rows.map(serializePressPost);
 
   return (
     <div>
-      {/* Hero con imagen */}
       <section className="relative h-[75vh] min-h-[520px] overflow-hidden">
         <Image
           src="/images/heroes/prensa.jpg"

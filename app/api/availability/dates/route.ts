@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
 import { getWeeklySchedule, getOpenDayNumbers } from "@/lib/schedule";
-import { tablesDb } from "@/lib/db-json";
 
 export async function GET() {
   try {
-    const activeTables = tablesDb.findAll().filter((t) => t.available);
-    if (activeTables.length === 0) {
+    const activeTables = await prisma.table.count({ where: { available: true } });
+    if (activeTables === 0) {
       return NextResponse.json({ dates: [] });
     }
 

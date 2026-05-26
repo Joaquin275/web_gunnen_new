@@ -1,8 +1,10 @@
-import { pressDb } from "@/lib/db-json";
+import { prisma } from "@/lib/prisma";
 import Link from "next/link";
+import { serializePressPost } from "@/lib/serializers";
 
-export default function AdminPressPage() {
-  const posts = pressDb.findAll();
+export default async function AdminPressPage() {
+  const rows = await prisma.pressPost.findMany({ orderBy: { publishedAt: "desc" } });
+  const posts = rows.map(serializePressPost);
 
   return (
     <div className="space-y-6">

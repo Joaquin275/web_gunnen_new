@@ -29,6 +29,7 @@ async function main() {
     { key: "cancel_policy_48h", value: "0" },
     { key: "restaurant_name", value: "Gunnen" },
     { key: "restaurant_email", value: "info@gunnen.es" },
+    { key: "restaurant_phone", value: "" },
     { key: "restaurant_address", value: "Juan Díaz Porlier, 15, A Coruña" },
   ];
 
