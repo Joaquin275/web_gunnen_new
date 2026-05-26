@@ -2,8 +2,8 @@
  * GET /api/cron/reminders
  *
  * Ejecutado por Vercel Cron:
- *  - 09:00 UTC → recordatorio 24h antes (reservas de mañana)
- *  - 10:00 UTC → recordatorio mismo día (desde las 11:00 Madrid) + resumen admin
+ *  - 07:00 UTC (09:00 Madrid) → recordatorio 24h antes (reservas de mañana)
+ *  - 08:00 UTC (10:00 Madrid) → recordatorio mismo día (desde las 10:00 Madrid) + resumen admin
  */
 
 import { NextRequest, NextResponse } from "next/server";

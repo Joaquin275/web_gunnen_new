@@ -46,5 +46,5 @@ export function reservationDateKey(date: Date): string {
 }
 
 export function isSameDayReminderWindow(date = new Date()): boolean {
-  return getMadridParts(date).hour >= 11;
+  return getMadridParts(date).hour >= 10;
 }
