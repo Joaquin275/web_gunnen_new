@@ -3,6 +3,11 @@
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 
+const HORARIOS = [
+  "13:30", "13:45", "14:00",
+  "20:30", "20:45", "21:00",
+];
+
 const MENUS = [
   "Menú TEMPO",
   "Menú TEMPO + Armonía con vino",
@@ -171,9 +176,12 @@ export default function AdminReservationsPage() {
             </div>
             <div>
               <label className="block text-xs tracking-wider uppercase text-gray-500 mb-1">Hora *</label>
-              <input required type="time" value={form.reservationTime}
+              <select required value={form.reservationTime}
                 onChange={(e) => setForm((f) => ({ ...f, reservationTime: e.target.value }))}
-                className="w-full border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:border-primary" />
+                className="w-full border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:border-primary">
+                <option value="">Seleccionar hora</option>
+                {HORARIOS.map((h) => <option key={h} value={h}>{h}</option>)}
+              </select>
             </div>
             <div>
               <label className="block text-xs tracking-wider uppercase text-gray-500 mb-1">Personas *</label>

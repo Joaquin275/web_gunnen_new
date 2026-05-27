@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
         lastName: lastName.trim(),
         email: email.trim().toLowerCase(),
         phone: phone?.trim() || "",
-        reservationDate: new Date(reservationDate),
+        reservationDate: new Date(reservationDate + "T00:00:00"),
         reservationTime,
         numberOfPeople: Number(numberOfPeople),
         menuName: menuName?.trim() || null,
