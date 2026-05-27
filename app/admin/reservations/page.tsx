@@ -3,6 +3,21 @@
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 
+const MENUS = [
+  "Menú TEMPO",
+  "Menú TEMPO + Armonía con vino",
+  "Menú TEMPO + Armonía No/Low",
+  "Menú IMPULSO",
+  "Menú IMPULSO + Armonía con vino",
+  "Menú IMPULSO + Armonía No/Low",
+];
+
+const EMPTY_FORM = {
+  firstName: "", lastName: "", email: "", phone: "",
+  reservationDate: "", reservationTime: "", numberOfPeople: 2,
+  menuName: "", observations: "",
+};
+
 interface Reservation {
   id: string;
   reservationDate: string;
@@ -30,6 +45,12 @@ export default function AdminReservationsPage() {
   const [refreshing, setRefreshing] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
+  // Nueva reserva manual
+  const [showForm, setShowForm] = useState(false);
+  const [form, setForm] = useState(EMPTY_FORM);
+  const [saving, setSaving] = useState(false);
+  const [formError, setFormError] = useState("");
+
   const fetchReservations = useCallback(async (silent = false) => {
     if (!silent) setLoading(true);
     else setRefreshing(true);
@@ -50,6 +71,26 @@ export default function AdminReservationsPage() {
     const id = setInterval(() => fetchReservations(true), 30_000);
     return () => clearInterval(id);
   }, [fetchReservations]);
+
+  const handleCreateReservation = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSaving(true);
+    setFormError("");
+    const res = await fetch("/api/admin/reservations", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(form),
+    });
+    if (res.ok) {
+      setShowForm(false);
+      setForm(EMPTY_FORM);
+      fetchReservations(true);
+    } else {
+      const data = await res.json();
+      setFormError(data.error || "Error al crear la reserva");
+    }
+    setSaving(false);
+  };
 
   if (loading) {
     return (
@@ -83,7 +124,94 @@ export default function AdminReservationsPage() {
             </button>
           </div>
         </div>
+        <button
+          onClick={() => { setShowForm((v) => !v); setFormError(""); }}
+          className="btn-primary text-sm"
+        >
+          {showForm ? "Cancelar" : "+ Nueva reserva"}
+        </button>
       </div>
+
+      {/* ── Formulario reserva manual ── */}
+      {showForm && (
+        <form onSubmit={handleCreateReservation} className="bg-white border border-gray-200 p-6 space-y-5">
+          <h2 className="font-serif font-light text-xl border-b border-gray-100 pb-4">Nueva reserva manual</h2>
+          <p className="text-sm text-gray-500">La reserva se creará directamente como <strong>Confirmada</strong>, sin pasar por pago.</p>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-xs tracking-wider uppercase text-gray-500 mb-1">Nombre *</label>
+              <input required type="text" value={form.firstName}
+                onChange={(e) => setForm((f) => ({ ...f, firstName: e.target.value }))}
+                className="w-full border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:border-primary" />
+            </div>
+            <div>
+              <label className="block text-xs tracking-wider uppercase text-gray-500 mb-1">Apellidos *</label>
+              <input required type="text" value={form.lastName}
+                onChange={(e) => setForm((f) => ({ ...f, lastName: e.target.value }))}
+                className="w-full border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:border-primary" />
+            </div>
+            <div>
+              <label className="block text-xs tracking-wider uppercase text-gray-500 mb-1">Email *</label>
+              <input required type="email" value={form.email}
+                onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
+                className="w-full border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:border-primary" />
+            </div>
+            <div>
+              <label className="block text-xs tracking-wider uppercase text-gray-500 mb-1">Teléfono</label>
+              <input type="tel" value={form.phone}
+                onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
+                className="w-full border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:border-primary" />
+            </div>
+            <div>
+              <label className="block text-xs tracking-wider uppercase text-gray-500 mb-1">Fecha *</label>
+              <input required type="date" value={form.reservationDate}
+                onChange={(e) => setForm((f) => ({ ...f, reservationDate: e.target.value }))}
+                className="w-full border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:border-primary" />
+            </div>
+            <div>
+              <label className="block text-xs tracking-wider uppercase text-gray-500 mb-1">Hora *</label>
+              <input required type="time" value={form.reservationTime}
+                onChange={(e) => setForm((f) => ({ ...f, reservationTime: e.target.value }))}
+                className="w-full border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:border-primary" />
+            </div>
+            <div>
+              <label className="block text-xs tracking-wider uppercase text-gray-500 mb-1">Personas *</label>
+              <input required type="number" min={1} max={20} value={form.numberOfPeople}
+                onChange={(e) => setForm((f) => ({ ...f, numberOfPeople: Number(e.target.value) }))}
+                className="w-full border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:border-primary" />
+            </div>
+            <div>
+              <label className="block text-xs tracking-wider uppercase text-gray-500 mb-1">Menú</label>
+              <select value={form.menuName}
+                onChange={(e) => setForm((f) => ({ ...f, menuName: e.target.value }))}
+                className="w-full border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:border-primary">
+                <option value="">Sin especificar</option>
+                {MENUS.map((m) => <option key={m} value={m}>{m}</option>)}
+              </select>
+            </div>
+            <div className="sm:col-span-2 lg:col-span-1">
+              <label className="block text-xs tracking-wider uppercase text-gray-500 mb-1">Observaciones</label>
+              <input type="text" value={form.observations}
+                onChange={(e) => setForm((f) => ({ ...f, observations: e.target.value }))}
+                placeholder="Alergias, peticiones especiales..."
+                className="w-full border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:border-primary" />
+            </div>
+          </div>
+
+          {formError && <p className="text-sm text-red-600">{formError}</p>}
+
+          <div className="flex items-center gap-4 pt-2 border-t border-gray-100">
+            <button type="submit" disabled={saving} className="btn-primary disabled:opacity-50">
+              {saving ? "Creando…" : "Crear reserva confirmada"}
+            </button>
+            <button type="button" onClick={() => { setShowForm(false); setForm(EMPTY_FORM); }}
+              className="btn-secondary">
+              Cancelar
+            </button>
+          </div>
+        </form>
+      )}
 
       <div className="bg-white border border-gray-200 overflow-hidden">
         {reservations.length === 0 ? (
