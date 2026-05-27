@@ -155,30 +155,26 @@ export default function QuienesSomosPage() {
           <h2 className="text-3xl font-light tracking-wide text-center mb-12">
             El equipo
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="group overflow-hidden">
-              <div className="relative aspect-[3/4] overflow-hidden">
-                <Image
-                  src="/images/team/equipo-gunnen.jpeg"
-                  alt="Equipo Gunnen"
-                  fill
-                  unoptimized
-                  sizes="(max-width: 768px) 100vw, 50vw"
-                  className="object-cover transition-transform duration-700 group-hover:scale-105"
-                />
-              </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+            <div className="group overflow-hidden bg-gray-50">
+              <Image
+                src="/images/team/equipo-gunnen.jpeg"
+                alt="Equipo Gunnen"
+                width={640}
+                height={427}
+                unoptimized
+                className="w-full h-auto max-w-[640px] mx-auto transition-transform duration-700 group-hover:scale-[1.02]"
+              />
             </div>
-            <div className="group overflow-hidden">
-              <div className="relative aspect-[3/4] overflow-hidden">
-                <Image
-                  src="/images/team/CHEF-GUNNEN-CHECHU-REY.jpeg"
-                  alt="Chechu Rey, chef de Gunnen"
-                  fill
-                  unoptimized
-                  sizes="(max-width: 768px) 100vw, 50vw"
-                  className="object-cover transition-transform duration-700 group-hover:scale-105"
-                />
-              </div>
+            <div className="group overflow-hidden bg-gray-50">
+              <Image
+                src="/images/team/chef-gunnen-chechu-rey.jpeg"
+                alt="Chechu Rey, chef de Gunnen"
+                width={640}
+                height={427}
+                unoptimized
+                className="w-full h-auto max-w-[640px] mx-auto transition-transform duration-700 group-hover:scale-[1.02]"
+              />
             </div>
           </div>
 
