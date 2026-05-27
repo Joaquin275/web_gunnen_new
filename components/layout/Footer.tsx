@@ -134,7 +134,7 @@ export default function Footer() {
             © {currentYear} LA FAMILIA GASTRO, S.L. · Gunnen. Todos los derechos reservados.
           </p>
           <div className="flex items-center gap-6">
-            <a href="https://instagram.com" target="_blank" rel="noopener noreferrer"
+            <a href="https://www.instagram.com/gunnen_restaurante?igsh=MTh2enB4ajhkdGQzcg==" target="_blank" rel="noopener noreferrer"
               className="text-xs tracking-widest uppercase text-gray-400 hover:text-white transition-colors">
               Instagram
             </a>

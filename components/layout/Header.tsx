@@ -140,7 +140,7 @@ export default function Header() {
               <p>Jue–Sáb: 13:00–15:00 · 20:00–23:00</p>
             </div>
             <div className="flex gap-5 text-sm tracking-widest uppercase text-white/40">
-              <a href="https://instagram.com" target="_blank" rel="noopener noreferrer"
+              <a href="https://www.instagram.com/gunnen_restaurante?igsh=MTh2enB4ajhkdGQzcg==" target="_blank" rel="noopener noreferrer"
                 className="hover:text-white transition-colors">Instagram</a>
               <a href="https://facebook.com" target="_blank" rel="noopener noreferrer"
                 className="hover:text-white transition-colors">Facebook</a>
