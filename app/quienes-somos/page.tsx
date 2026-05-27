@@ -159,7 +159,7 @@ export default function QuienesSomosPage() {
             <div className="group overflow-hidden">
               <div className="relative aspect-[3/4] overflow-hidden">
                 <Image
-                  src="/images/team/EQUIPO-GUNNEN.jpeg"
+                  src="/images/team/equipo-gunnen.jpeg"
                   alt="Equipo Gunnen"
                   fill
                   unoptimized
@@ -171,7 +171,7 @@ export default function QuienesSomosPage() {
             <div className="group overflow-hidden">
               <div className="relative aspect-[3/4] overflow-hidden">
                 <Image
-                  src="/images/team/CHEF-GUNNEN-CHECHU-REY.jpeg"
+                  src="/images/team/chef-gunnen-chechu-rey.jpeg"
                   alt="Chechu Rey, chef de Gunnen"
                   fill
                   unoptimized
