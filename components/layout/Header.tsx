@@ -35,9 +35,7 @@ export default function Header() {
   // Cerrar menú al navegar
   useEffect(() => { setMenuOpen(false); }, [pathname]);
 
-  // En páginas que no son el home el header siempre es blanco
-  const isHome = pathname === "/";
-  const isWhite = scrolled || !isHome;
+  const isWhite = scrolled;
 
   return (
     <>

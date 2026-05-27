@@ -3,22 +3,22 @@ import Image from "next/image";
 const steps = [
   {
     label: "Reservas",
-    image: "/images/experience/local-horizontal.jpg",
+    image: "/images/experience/restaurante-gunnen-1.jpeg",
     alt: "Interior del restaurante Gunnen",
   },
   {
     label: "Compramos",
-    image: "/images/experience/hortalizas.jpg",
+    image: "/images/experience/experiencia-gunnen-2.jpeg",
     alt: "Producto de temporada Gunnen",
   },
   {
     label: "Elaboramos",
-    image: "/images/team/chef-gunnen-hd.jpg",
+    image: "/images/experience/chef-gunnen-1.jpeg",
     alt: "Equipo elaborando en cocina",
   },
   {
     label: "Disfrutas",
-    image: "/images/experience/mar.jpg",
+    image: "/images/experience/experiencia-gunnen-1.jpeg",
     alt: "Experiencia gastronómica Gunnen",
   },
 ];
