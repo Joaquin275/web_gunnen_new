@@ -159,10 +159,10 @@ export default function QuienesSomosPage() {
             <div className="group overflow-hidden">
               <div className="relative aspect-[3/4] overflow-hidden">
                 <Image
-                  src="/images/team/Equipo-Gunnen-2.jpeg"
+                  src="/images/team/Equipo-gunnen-3.jpg"
                   alt="Equipo Gunnen"
                   fill
-                  quality={90}
+                  unoptimized
                   sizes="(max-width: 768px) 100vw, 50vw"
                   className="object-cover transition-transform duration-700 group-hover:scale-105"
                 />
@@ -171,15 +171,31 @@ export default function QuienesSomosPage() {
             <div className="group overflow-hidden">
               <div className="relative aspect-[3/4] overflow-hidden">
                 <Image
-                  src="/images/team/chef-chechu-rey.jpeg"
+                  src="/images/team/chef-gunnen-hd.jpg"
                   alt="Chechu Rey, chef de Gunnen"
                   fill
-                  quality={90}
+                  unoptimized
                   sizes="(max-width: 768px) 100vw, 50vw"
                   className="object-cover transition-transform duration-700 group-hover:scale-105"
                 />
               </div>
             </div>
+          </div>
+
+          {/* Nota de candidaturas */}
+          <div className="mt-10 text-center border-t border-gray-100 pt-10">
+            <p className="text-gray-600 text-base leading-relaxed">
+              ¿Quieres trabajar con nosotros o hacer unas prácticas en Gunnen?
+            </p>
+            <p className="text-gray-500 text-sm mt-2">
+              Envía tu candidatura a{" "}
+              <a
+                href="mailto:info@gunnen.es"
+                className="text-primary underline underline-offset-4 hover:opacity-70 transition-opacity"
+              >
+                info@gunnen.es
+              </a>
+            </p>
           </div>
         </div>
       </section>
