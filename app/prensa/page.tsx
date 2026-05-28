@@ -4,6 +4,8 @@ import Image from "next/image";
 import { prisma } from "@/lib/prisma";
 import { serializePressPost } from "@/lib/serializers";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Prensa — Gunnen",
   description: "Últimas noticias y apariciones en prensa de Gunnen.",

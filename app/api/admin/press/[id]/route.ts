@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
@@ -32,6 +33,9 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       },
     });
 
+    revalidatePath("/prensa");
+    revalidatePath(`/prensa/${post.slug}`);
+    revalidatePath("/admin/press");
     return NextResponse.json(serializePressPost(post));
   } catch (e: any) {
     if (e?.code === "P2025") return NextResponse.json({ error: "No encontrado" }, { status: 404 });
@@ -47,6 +51,8 @@ export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ 
   try {
     const { id } = await params;
     await prisma.pressPost.delete({ where: { id } });
+    revalidatePath("/prensa");
+    revalidatePath("/admin/press");
     return NextResponse.json({ ok: true });
   } catch (e: any) {
     if (e?.code === "P2025") return NextResponse.json({ error: "No encontrado" }, { status: 404 });
