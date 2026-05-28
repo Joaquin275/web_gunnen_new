@@ -136,8 +136,8 @@ export default function Header() {
           <div className="mt-auto pt-10 space-y-4">
             <div className="text-sm text-white/50 leading-relaxed">
               <p className="text-white/80 font-medium">Juan Díaz Porlier, 15 — A Coruña</p>
-              <p>Mar–Mié: 13:00–15:00</p>
-              <p>Jue–Sáb: 13:00–15:00 · 20:00–23:00</p>
+              <p>Mar–Mié: 13:30–15:30</p>
+              <p>Jue–Sáb: 13:30–15:30 · 20:30–23:00</p>
             </div>
             <div className="flex gap-5 text-sm tracking-widest uppercase text-white/40">
               <a href="https://www.instagram.com/gunnen_restaurante?igsh=MTh2enB4ajhkdGQzcg==" target="_blank" rel="noopener noreferrer"
