@@ -35,6 +35,7 @@ export async function POST(req: NextRequest) {
 
     revalidatePath("/prensa");
     revalidatePath("/admin/press");
+    revalidatePath("/");
     return NextResponse.json(serializePressPost(post), { status: 201 });
   } catch (e: any) {
     if (e?.code === "P2002") {

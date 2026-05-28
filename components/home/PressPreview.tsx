@@ -1,31 +1,17 @@
 import Link from "next/link";
+import { prisma } from "@/lib/prisma";
+import { serializePressPost } from "@/lib/serializers";
 
-// Datos de ejemplo - estos vendrán de la DB
-const pressItems = [
-  {
-    id: "1",
-    slug: "apertura-gunnen-nueva-propuesta",
-    title: "Gunnen inaugura una nueva era en la alta cocina",
-    excerpt: "El nuevo restaurante promete revolucionar el panorama gastronómico con su propuesta única.",
-    publishedAt: "2024-01-15",
-  },
-  {
-    id: "2",
-    slug: "reconocimiento-internacional",
-    title: "Reconocimiento internacional a nuestra propuesta",
-    excerpt: "Medios especializados destacan nuestra visión innovadora de la gastronomía contemporánea.",
-    publishedAt: "2024-02-20",
-  },
-  {
-    id: "3",
-    slug: "producto-local-excelencia",
-    title: "Compromiso con el producto local de excelencia",
-    excerpt: "Colaboramos con más de 30 productores locales para garantizar la máxima calidad.",
-    publishedAt: "2024-03-10",
-  },
-];
+export default async function PressPreview() {
+  const rows = await prisma.pressPost.findMany({
+    where: { isPublished: true },
+    orderBy: { publishedAt: "desc" },
+    take: 3,
+  });
+  const pressItems = rows.map(serializePressPost);
 
-export default function PressPreview() {
+  if (pressItems.length === 0) return null;
+
   return (
     <section className="section-container bg-background">
       <div className="max-w-6xl mx-auto">

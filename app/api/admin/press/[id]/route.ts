@@ -36,6 +36,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     revalidatePath("/prensa");
     revalidatePath(`/prensa/${post.slug}`);
     revalidatePath("/admin/press");
+    revalidatePath("/");
     return NextResponse.json(serializePressPost(post));
   } catch (e: any) {
     if (e?.code === "P2025") return NextResponse.json({ error: "No encontrado" }, { status: 404 });
@@ -53,6 +54,7 @@ export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ 
     await prisma.pressPost.delete({ where: { id } });
     revalidatePath("/prensa");
     revalidatePath("/admin/press");
+    revalidatePath("/");
     return NextResponse.json({ ok: true });
   } catch (e: any) {
     if (e?.code === "P2025") return NextResponse.json({ error: "No encontrado" }, { status: 404 });
