@@ -28,17 +28,23 @@ export default function NewPressPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
-    const res = await fetch("/api/admin/press", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...form, publishedAt: new Date(form.publishedAt).toISOString() }),
-    });
-    if (res.ok) {
-      router.push("/admin/press");
-    } else {
-      alert("Error al guardar");
-      setSaving(false);
+    try {
+      const res = await fetch("/api/admin/press", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...form, publishedAt: new Date(form.publishedAt).toISOString() }),
+      });
+      if (res.ok) {
+        router.push("/admin/press");
+        return;
+      }
+      const data = await res.json().catch(() => ({}));
+      alert(data.error || `Error al guardar (${res.status})`);
+    } catch (err) {
+      alert("Error de conexión al guardar");
     }
+    setSaving(false);
   };
 
   return (
