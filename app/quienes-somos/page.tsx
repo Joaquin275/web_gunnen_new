@@ -2,9 +2,14 @@ import type { Metadata } from "next";
 import Image from "next/image";
 
 export const metadata: Metadata = {
-  title: "Quiénes somos — Gunnen",
+  title: "Quiénes Somos",
   description:
-    "Gunnen significa alegría compartida. Conoce nuestra filosofía, nuestro espacio y nuestra cocina de temporada.",
+    "Gunnen significa alegría compartida. Conoce nuestra filosofía, nuestro equipo y nuestra cocina de temporada en A Coruña.",
+  alternates: { canonical: "https://www.gunnen.es/quienes-somos" },
+  openGraph: {
+    url: "https://www.gunnen.es/quienes-somos",
+    images: [{ url: "/images/heroes/quienes-somos.jpg", width: 1200, height: 630 }],
+  },
 };
 
 export default function QuienesSomosPage() {

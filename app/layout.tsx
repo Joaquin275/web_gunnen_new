@@ -36,24 +36,60 @@ const brefaRound = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Gunnen Alegría Compartida",
-  description: "Experiencia gastronómica de vanguardia. Reserva tu mesa y descubre una cocina innovadora.",
-  keywords: ["restaurante", "alta gastronomía", "cocina innovadora", "menú degustación"],
-  authors: [{ name: "Gunnen" }],
-  icons: {
-    icon: [
-      { url: "/favicon.svg", type: "image/svg+xml" },
-    ],
-    apple: [
-      { url: "/favicon.svg" },
-    ],
+  metadataBase: new URL("https://www.gunnen.es"),
+  title: {
+    default: "Gunnen — Alegría Compartida | Restaurante A Coruña",
+    template: "%s | Gunnen",
+  },
+  description:
+    "Restaurante Gunnen en A Coruña. Cocina de autor y experiencia gastronómica única. Menú degustación con productos del Atlántico. Reserva tu mesa.",
+  keywords: [
+    "restaurante A Coruña",
+    "restaurante Gunnen",
+    "menú degustación A Coruña",
+    "cocina de autor Galicia",
+    "alta gastronomía A Coruña",
+    "restaurante Galicia",
+    "Alegría Compartida",
+  ],
+  authors: [{ name: "Gunnen", url: "https://www.gunnen.es" }],
+  creator: "Gunnen",
+  publisher: "La Familia Gastro S.L.",
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: { index: true, follow: true },
+  },
+  alternates: {
+    canonical: "https://www.gunnen.es",
   },
   openGraph: {
     type: "website",
     locale: "es_ES",
+    url: "https://www.gunnen.es",
     siteName: "Gunnen",
-    title: "Gunnen — Alegría Compartida",
-    description: "Experiencia gastronómica de vanguardia",
+    title: "Gunnen — Alegría Compartida | Restaurante A Coruña",
+    description:
+      "Restaurante Gunnen en A Coruña. Cocina de autor, menú degustación y productos del Atlántico. Reserva tu mesa.",
+    images: [
+      {
+        url: "/images/heroes/quienes-somos.jpg",
+        width: 1200,
+        height: 630,
+        alt: "Restaurante Gunnen — A Coruña",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Gunnen — Alegría Compartida | Restaurante A Coruña",
+    description:
+      "Cocina de autor y experiencia gastronómica única en A Coruña. Reserva tu mesa.",
+    images: ["/images/heroes/quienes-somos.jpg"],
+  },
+  icons: {
+    icon: [{ url: "/favicon.svg", type: "image/svg+xml" }],
+    apple: [{ url: "/favicon.svg" }],
   },
 };
 

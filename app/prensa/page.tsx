@@ -7,8 +7,13 @@ import { serializePressPost } from "@/lib/serializers";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Prensa — Gunnen",
-  description: "Últimas noticias y apariciones en prensa de Gunnen.",
+  title: "Prensa",
+  description: "Últimas noticias y apariciones en prensa de Gunnen, restaurante de cocina de autor en A Coruña.",
+  alternates: { canonical: "https://www.gunnen.es/prensa" },
+  openGraph: {
+    url: "https://www.gunnen.es/prensa",
+    images: [{ url: "/images/heroes/prensa.jpg", width: 1200, height: 630 }],
+  },
 };
 
 export default async function PrensaPage() {

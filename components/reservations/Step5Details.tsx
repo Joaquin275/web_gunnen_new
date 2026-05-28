@@ -10,7 +10,7 @@
  */
 
 import { useState } from "react";
-import type { ReservationState } from "@/app/reservas/page";
+import type { ReservationState } from "@/app/reservas/ReservasClient";
 
 interface Step5DetailsProps {
   reservationData: ReservationState;

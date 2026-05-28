@@ -3,8 +3,14 @@ import Link from "next/link";
 import Image from "next/image";
 
 export const metadata: Metadata = {
-  title: "Nuestros Menús — Gunnen",
-  description: "Descubre nuestras propuestas gastronómicas: menú degustación, maridaje premium y experiencia vegetal.",
+  title: "Nuestros Menús",
+  description:
+    "Descubre los menús de Gunnen en A Coruña: TEMPO (14 bocados) e IMPULSO (11 bocados). Maridaje con vino y opciones No/Low disponibles.",
+  alternates: { canonical: "https://www.gunnen.es/menus" },
+  openGraph: {
+    url: "https://www.gunnen.es/menus",
+    images: [{ url: "/images/heroes/menus.jpg", width: 1200, height: 630 }],
+  },
 };
 
 const menus = [
