@@ -8,7 +8,7 @@ import { prisma } from "@/lib/prisma";
 
 export async function GET(request: NextRequest) {
   const token = request.nextUrl.searchParams.get("token");
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://web-gunnen-new.vercel.app";
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://www.gunnen.es";
 
   if (!token) {
     return NextResponse.redirect(`${appUrl}/reservas/confirmar?error=token_missing`);

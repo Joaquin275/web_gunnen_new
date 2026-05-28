@@ -22,7 +22,7 @@ export default function PoliticaDevolucionPage() {
             <h2 className="text-base font-semibold text-gray-900 mb-3">1. Titular y ámbito de aplicación</h2>
             <p>
               Esta política es aplicable a todos los servicios contratados a través de{" "}
-              <strong>web-gunnen-new.vercel.app</strong> y <strong>gunnen.es</strong>, gestionados por{" "}
+              <strong>gunnen.es</strong> y <strong>www.gunnen.es</strong>, gestionados por{" "}
               <strong>LA FAMILIA GASTRO, S.L.</strong> (CIF B10989226), titular de la marca Gunnen,
               con domicilio en Rúa Juan de la Cierva, 7 — 15008 A Coruña.
             </p>

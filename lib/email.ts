@@ -23,7 +23,7 @@ const ADMIN_EMAILS = [
 const CONTACT_EMAIL = "reservas@gunnen.es";
 const RESTAURANT_NAME = process.env.NEXT_PUBLIC_RESTAURANT_NAME || "Gunnen";
 const RESTAURANT_ADDRESS = "Juan Díaz Porlier, 15 — A Coruña";
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://web-gunnen-new.vercel.app";
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://www.gunnen.es";
 
 async function getResend() {
   if (!process.env.RESEND_API_KEY) {

@@ -28,7 +28,7 @@ export async function POST(request: Request) {
     const secretKey = process.env.REDSYS_SECRET_KEY;
     const merchantCode = process.env.REDSYS_MERCHANT_CODE;
     const terminal = process.env.REDSYS_TERMINAL || "1";
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://web-gunnen-new.vercel.app";
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://www.gunnen.es";
 
     if (!secretKey || !merchantCode) {
       return NextResponse.json({ error: "Pasarela de pago no configurada" }, { status: 500 });
