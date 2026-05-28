@@ -50,6 +50,7 @@ export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ 
     return NextResponse.json({ ok: true });
   } catch (e: any) {
     if (e?.code === "P2025") return NextResponse.json({ error: "No encontrado" }, { status: 404 });
+    console.error("Error deleting press post:", e);
     return NextResponse.json({ error: "Error interno" }, { status: 500 });
   }
 }

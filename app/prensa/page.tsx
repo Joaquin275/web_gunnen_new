@@ -46,6 +46,15 @@ export default async function PrensaPage() {
             posts.map((post) => (
               <article key={post.id} className="border-b border-gray-200 pb-10">
                 <Link href={`/prensa/${post.slug}`} className="group block">
+                  {post.coverImage && (
+                    <div className="mb-6 aspect-[16/9] overflow-hidden bg-gray-100">
+                      <img
+                        src={post.coverImage}
+                        alt={post.title}
+                        className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                      />
+                    </div>
+                  )}
                   <p className="text-xs tracking-wider uppercase text-gray-400 mb-2">
                     {new Date(post.publishedAt).toLocaleDateString("es-ES", {
                       year: "numeric", month: "long", day: "numeric",

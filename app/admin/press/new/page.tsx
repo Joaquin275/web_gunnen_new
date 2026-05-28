@@ -12,6 +12,7 @@ export default function NewPressPage() {
     slug: "",
     excerpt: "",
     content: "",
+    coverImage: "",
     published: false,
     publishedAt: new Date().toISOString().split("T")[0],
   });
@@ -83,6 +84,20 @@ export default function NewPressPage() {
             className="w-full border border-gray-200 px-3 py-2 focus:outline-none focus:border-primary resize-none text-sm"
             placeholder="Breve descripción para listados"
           />
+        </div>
+
+        <div>
+          <label className="block text-xs tracking-wider uppercase text-gray-500 mb-1">Imagen de portada</label>
+          <input
+            type="url"
+            value={form.coverImage}
+            onChange={(e) => setForm((f) => ({ ...f, coverImage: e.target.value }))}
+            className="input-premium w-full border border-gray-200 px-3 py-2 focus:outline-none focus:border-primary text-sm"
+            placeholder="https://..."
+          />
+          <p className="text-xs text-gray-400 mt-1">
+            Pega la URL de la imagen de la noticia. Si la dejas vacía, la noticia se mostrará sin portada.
+          </p>
         </div>
 
         <div>
