@@ -31,30 +31,39 @@ export default async function PressPreview() {
 
         {/* Grid de artículos */}
         <div className="space-y-8">
-          {pressItems.map((item, index) => (
-            <article key={item.id}>
-              <Link href={`/prensa/${item.slug}`} className="group block">
-                <div className="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-8 py-8 transition-all duration-300 hover:bg-gray-50/50">
-                  <div className="md:col-span-2 flex items-center">
-                    <time className="text-sm tracking-wider uppercase text-gray-400">
-                      {new Date(item.publishedAt).toLocaleDateString("es-ES", {
-                        year: "numeric",
-                        month: "short",
-                        day: "numeric",
-                      })}
-                    </time>
+          {pressItems.map((item, index) => {
+            const href = item.externalUrl || `/prensa/${item.slug}`;
+            const isExternal = !!item.externalUrl;
+            return (
+              <article key={item.id}>
+                <Link
+                  href={href}
+                  target={isExternal ? "_blank" : undefined}
+                  rel={isExternal ? "noopener noreferrer" : undefined}
+                  className="group block"
+                >
+                  <div className="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-8 py-8 transition-all duration-300 hover:bg-gray-50/50">
+                    <div className="md:col-span-2 flex items-center">
+                      <time className="text-sm tracking-wider uppercase text-gray-400">
+                        {new Date(item.publishedAt).toLocaleDateString("es-ES", {
+                          year: "numeric",
+                          month: "short",
+                          day: "numeric",
+                        })}
+                      </time>
+                    </div>
+                    <div className="md:col-span-10">
+                      <h3 className="text-2xl font-serif font-light mb-3 group-hover:text-accent transition-colors">
+                        {item.title}
+                      </h3>
+                      <p className="text-gray-600 leading-relaxed">{item.excerpt}</p>
+                    </div>
                   </div>
-                  <div className="md:col-span-10">
-                    <h3 className="text-2xl font-serif font-light mb-3 group-hover:text-accent transition-colors">
-                      {item.title}
-                    </h3>
-                    <p className="text-gray-600 leading-relaxed">{item.excerpt}</p>
-                  </div>
-                </div>
-              </Link>
-              {index < pressItems.length - 1 && <div className="divider" />}
-            </article>
-          ))}
+                </Link>
+                {index < pressItems.length - 1 && <div className="divider" />}
+              </article>
+            );
+          })}
         </div>
 
         {/* CTA mobile */}

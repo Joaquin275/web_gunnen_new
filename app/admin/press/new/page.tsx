@@ -13,6 +13,7 @@ export default function NewPressPage() {
     excerpt: "",
     content: "",
     coverImage: "",
+    externalUrl: "",
     published: false,
     publishedAt: new Date().toISOString().split("T")[0],
   });
@@ -103,6 +104,20 @@ export default function NewPressPage() {
           />
           <p className="text-xs text-gray-400 mt-1">
             Pega la URL de la imagen de la noticia. Si la dejas vacía, la noticia se mostrará sin portada.
+          </p>
+        </div>
+
+        <div>
+          <label className="block text-xs tracking-wider uppercase text-gray-500 mb-1">Enlace externo (artículo original)</label>
+          <input
+            type="url"
+            value={form.externalUrl}
+            onChange={(e) => setForm((f) => ({ ...f, externalUrl: e.target.value }))}
+            className="input-premium w-full border border-gray-200 px-3 py-2 focus:outline-none focus:border-primary text-sm"
+            placeholder="https://www.lavanguardia.com/..."
+          />
+          <p className="text-xs text-gray-400 mt-1">
+            Si rellenas este campo, al hacer clic en la noticia se abrirá este enlace externo en vez de una página interna.
           </p>
         </div>
 

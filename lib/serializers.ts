@@ -25,6 +25,7 @@ export function serializePressPost(p: PressPost) {
     publishedAt: p.publishedAt.toISOString(),
     published: p.isPublished,
     coverImage: p.coverImage ?? "",
+    externalUrl: p.externalUrl ?? "",
   };
 }
 

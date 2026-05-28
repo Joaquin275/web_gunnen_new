@@ -30,6 +30,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
         ...(body.published !== undefined ? { isPublished: !!body.published } : {}),
         ...(body.publishedAt !== undefined ? { publishedAt: new Date(body.publishedAt) } : {}),
         ...(body.coverImage !== undefined ? { coverImage: body.coverImage?.trim() || null } : {}),
+        ...(body.externalUrl !== undefined ? { externalUrl: body.externalUrl?.trim() || null } : {}),
       },
     });
 

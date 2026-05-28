@@ -45,33 +45,42 @@ export default async function PrensaPage() {
           {posts.length === 0 ? (
             <p className="text-gray-400 text-center py-12">No hay publicaciones aún</p>
           ) : (
-            posts.map((post) => (
-              <article key={post.id} className="border-b border-gray-200 pb-10">
-                <Link href={`/prensa/${post.slug}`} className="group block">
-                  {post.coverImage && (
-                    <div className="mb-6 aspect-[16/9] overflow-hidden bg-gray-100">
-                      <img
-                        src={post.coverImage}
-                        alt={post.title}
-                        className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-                      />
-                    </div>
-                  )}
-                  <p className="text-xs tracking-wider uppercase text-gray-400 mb-2">
-                    {new Date(post.publishedAt).toLocaleDateString("es-ES", {
-                      year: "numeric", month: "long", day: "numeric",
-                    })}
-                  </p>
-                  <h2 className="text-xl sm:text-3xl font-serif font-light mb-3 group-hover:text-accent transition-colors">
-                    {post.title}
-                  </h2>
-                  <p className="text-sm sm:text-base text-gray-600 leading-relaxed mb-4">{post.excerpt}</p>
-                  <span className="text-sm tracking-wider uppercase text-gray-500 group-hover:text-primary transition-colors">
-                    Leer más →
-                  </span>
-                </Link>
-              </article>
-            ))
+            posts.map((post) => {
+              const href = post.externalUrl || `/prensa/${post.slug}`;
+              const isExternal = !!post.externalUrl;
+              return (
+                <article key={post.id} className="border-b border-gray-200 pb-10">
+                  <Link
+                    href={href}
+                    target={isExternal ? "_blank" : undefined}
+                    rel={isExternal ? "noopener noreferrer" : undefined}
+                    className="group block"
+                  >
+                    {post.coverImage && (
+                      <div className="mb-6 aspect-[16/9] overflow-hidden bg-gray-100">
+                        <img
+                          src={post.coverImage}
+                          alt={post.title}
+                          className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                        />
+                      </div>
+                    )}
+                    <p className="text-xs tracking-wider uppercase text-gray-400 mb-2">
+                      {new Date(post.publishedAt).toLocaleDateString("es-ES", {
+                        year: "numeric", month: "long", day: "numeric",
+                      })}
+                    </p>
+                    <h2 className="text-xl sm:text-3xl font-serif font-light mb-3 group-hover:text-accent transition-colors">
+                      {post.title}
+                    </h2>
+                    <p className="text-sm sm:text-base text-gray-600 leading-relaxed mb-4">{post.excerpt}</p>
+                    <span className="text-sm tracking-wider uppercase text-gray-500 group-hover:text-primary transition-colors">
+                      {isExternal ? "Ver artículo original →" : "Leer más →"}
+                    </span>
+                  </Link>
+                </article>
+              );
+            })
           )}
         </div>
       </section>

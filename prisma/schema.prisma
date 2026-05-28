@@ -290,6 +290,7 @@ model PressPost {
   excerpt       String    @db.Text
   content       String    @db.Text
   coverImage    String?
+  externalUrl   String?   // Enlace al artículo externo (La Vanguardia, Repsol, etc.)
   
   publishedAt   DateTime  @default(now())
   isPublished   Boolean   @default(true)

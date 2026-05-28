@@ -12,7 +12,7 @@ export default function EditPressPage() {
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
   const [form, setForm] = useState({
-    title: "", slug: "", excerpt: "", content: "", coverImage: "", published: false, publishedAt: "",
+    title: "", slug: "", excerpt: "", content: "", coverImage: "", externalUrl: "", published: false, publishedAt: "",
   });
 
   useEffect(() => {
@@ -31,6 +31,7 @@ export default function EditPressPage() {
             excerpt: data.excerpt,
             content: data.content,
             coverImage: data.coverImage ?? "",
+            externalUrl: data.externalUrl ?? "",
             published: data.published,
             publishedAt: data.publishedAt?.split("T")[0] ?? "",
           });
@@ -124,6 +125,13 @@ export default function EditPressPage() {
             placeholder="https://..."
             className="w-full border border-gray-200 px-3 py-2 focus:outline-none focus:border-primary text-sm" />
           <p className="text-xs text-gray-400 mt-1">Pega la URL de la imagen de la noticia.</p>
+        </div>
+        <div>
+          <label className="block text-xs tracking-wider uppercase text-gray-500 mb-1">Enlace externo (artículo original)</label>
+          <input type="url" value={form.externalUrl} onChange={(e) => setForm((f) => ({ ...f, externalUrl: e.target.value }))}
+            placeholder="https://www.lavanguardia.com/..."
+            className="w-full border border-gray-200 px-3 py-2 focus:outline-none focus:border-primary text-sm" />
+          <p className="text-xs text-gray-400 mt-1">Si rellenas este campo, al hacer clic en la noticia se abrirá este enlace externo en vez de una página interna.</p>
         </div>
         <div>
           <label className="block text-xs tracking-wider uppercase text-gray-500 mb-1">Contenido *</label>

@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json();
-    const { title, slug, excerpt, content, published, publishedAt, coverImage } = body;
+    const { title, slug, excerpt, content, published, publishedAt, coverImage, externalUrl } = body;
     if (!title || !slug || !content) {
       return NextResponse.json({ error: "Faltan campos requeridos" }, { status: 400 });
     }
@@ -30,6 +30,7 @@ export async function POST(req: NextRequest) {
         isPublished: !!published,
         publishedAt: publishedAt ? new Date(publishedAt) : new Date(),
         coverImage: coverImage?.trim() || null,
+        externalUrl: externalUrl?.trim() || null,
       },
     });
 
