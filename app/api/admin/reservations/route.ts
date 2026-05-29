@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { randomBytes } from "crypto";
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
@@ -42,6 +43,7 @@ export async function POST(req: NextRequest) {
         redsysStatus: "NONE",
         estimatedTotal: 0,
         depositAmount: 0,
+        attendanceToken: randomBytes(32).toString("hex"),
       },
     });
 
