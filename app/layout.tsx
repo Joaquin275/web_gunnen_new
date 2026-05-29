@@ -37,6 +37,9 @@ const brefaRound = localFont({
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.gunnen.es"),
+  verification: {
+    google: "7Z_vnhDG2k4p91y5rVHmevVBUiKnLV_1z_jMPrDrpqk",
+  },
   title: {
     default: "Gunnen — Alegría Compartida | Restaurante A Coruña",
     template: "%s | Gunnen",
