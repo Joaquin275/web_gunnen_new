@@ -89,6 +89,8 @@ export async function POST(request: NextRequest) {
       estimatedTotal: Number(updated.estimatedTotal),
       depositAmount: Number(updated.depositAmount),
       redsysOrder: updated.redsysOrder ?? undefined,
+      allergens: updated.allergens as string[] ?? [],
+      allergenNotes: (updated as any).allergenNotes ?? undefined,
     };
 
     if (approved) {

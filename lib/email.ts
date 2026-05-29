@@ -100,6 +100,8 @@ export interface ReservationEmailData {
   depositAmount: number;
   redsysOrder?: string;
   attendanceToken?: string;
+  allergens?: string[];
+  allergenNotes?: string;
 }
 
 export interface GiftCardData {
@@ -167,6 +169,17 @@ function reservationBox(data: ReservationEmailData, extraRows = "") {
       <div class="row"><span class="lbl">Retención garantía</span><span class="val">${Number(data.depositAmount).toFixed(2)}€</span></div>
       ${extraRows}
     </div>
+    ${(data.allergens && data.allergens.length > 0) || data.allergenNotes ? `
+    <div style="background:#fff8e1;border:2px solid #f59e0b;padding:16px 20px;margin:16px 0">
+      <p style="font-size:12px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#92400e;margin:0 0 8px">⚠️ Alergias e intolerancias declaradas</p>
+      ${data.allergens && data.allergens.length > 0 ? `<p style="font-size:14px;color:#78350f;margin:0 0 6px"><strong>${data.allergens.join(", ")}</strong></p>` : ""}
+      ${data.allergenNotes ? `<p style="font-size:13px;color:#78350f;margin:0">Notas: ${data.allergenNotes}</p>` : ""}
+    </div>
+    ` : `
+    <div style="background:#f0fdf4;border:1px solid #86efac;padding:10px 16px;margin:16px 0">
+      <p style="font-size:12px;color:#166534;margin:0">✓ Sin alergias ni intolerancias declaradas</p>
+    </div>
+    `}
   `;
 }
 

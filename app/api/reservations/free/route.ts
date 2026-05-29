@@ -88,6 +88,8 @@ export async function POST(request: Request) {
         estimatedTotal: total,
         depositAmount: 0,
         reservationId: reservation.id,
+        allergens: allergens || [],
+        allergenNotes: allergenNotes || "",
       });
     } catch (emailErr) {
       console.error("Error enviando emails de confirmación:", emailErr);

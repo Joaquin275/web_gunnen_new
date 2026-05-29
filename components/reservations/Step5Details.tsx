@@ -76,6 +76,7 @@ export default function Step5Details({ reservationData, onBack }: Step5DetailsPr
     observations: "",
     allergens: [] as string[],
     allergenNotes: "",
+    noAllergens: false,
     giftCardCode: "",
     acceptTerms: false,
     acceptRedsysPolicy: false,
@@ -98,12 +99,10 @@ export default function Step5Details({ reservationData, onBack }: Step5DetailsPr
   };
 
   const handleAllergenToggle = (allergen: string) => {
-    setFormData({
-      ...formData,
-      allergens: formData.allergens.includes(allergen)
-        ? formData.allergens.filter((a) => a !== allergen)
-        : [...formData.allergens, allergen],
-    });
+    const newAllergens = formData.allergens.includes(allergen)
+      ? formData.allergens.filter((a) => a !== allergen)
+      : [...formData.allergens, allergen];
+    setFormData({ ...formData, allergens: newAllergens, noAllergens: false });
   };
 
   const handleApplyGiftCard = async () => {
@@ -143,6 +142,10 @@ export default function Step5Details({ reservationData, onBack }: Step5DetailsPr
 
     if (!formData.acceptTerms) {
       setError("Debe aceptar los términos y condiciones");
+      return;
+    }
+    if (formData.allergens.length === 0 && !formData.noAllergens) {
+      setError("Por favor, indique sus alergias o confirme que no tiene ninguna.");
       return;
     }
     if (!isFreeReservation && !formData.acceptRedsysPolicy) {
@@ -385,9 +388,12 @@ export default function Step5Details({ reservationData, onBack }: Step5DetailsPr
 
           {/* Alérgenos */}
           <div>
-            <label className="block text-sm tracking-wider uppercase text-gray-600 mb-4">
-              Alergias e intolerancias
+            <label className="block text-sm tracking-wider uppercase text-gray-600 mb-1">
+              Alergias e intolerancias <span className="text-red-500">*</span>
             </label>
+            <p className="text-xs text-gray-400 mb-4">
+              Marque todas las que apliquen o confirme que no tiene ninguna.
+            </p>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-4">
               {allergensList.map((allergen) => (
                 <label key={allergen} className="flex items-center gap-2 cursor-pointer">
@@ -406,9 +412,27 @@ export default function Step5Details({ reservationData, onBack }: Step5DetailsPr
               value={formData.allergenNotes}
               onChange={handleInputChange}
               rows={2}
-              className="input-premium resize-none"
+              className="input-premium resize-none mb-3"
               placeholder="Notas adicionales sobre alergias..."
             />
+            <label className={`flex items-center gap-3 p-3 cursor-pointer border transition-colors ${
+              formData.noAllergens
+                ? "bg-green-50 border-green-400"
+                : formData.allergens.length === 0
+                  ? "bg-amber-50 border-amber-300"
+                  : "bg-gray-50 border-gray-200 opacity-50"
+            }`}>
+              <input
+                type="checkbox"
+                checked={formData.noAllergens}
+                disabled={formData.allergens.length > 0}
+                onChange={(e) => setFormData({ ...formData, noAllergens: e.target.checked })}
+                className="w-4 h-4 flex-shrink-0"
+              />
+              <span className="text-sm font-medium">
+                Confirmo que no tengo ninguna alergia ni intolerancia alimentaria
+              </span>
+            </label>
           </div>
         </div>
 
