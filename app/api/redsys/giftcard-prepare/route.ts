@@ -12,7 +12,7 @@ export async function POST(request: Request) {
   try {
     const data = await request.json();
     const {
-      amount, menuName,
+      amount, pricePerPerson, numberOfPeople, menuName,
       purchaserName, purchaserEmail,
       recipientName, recipientEmail,
       message, sendDate,
@@ -43,8 +43,11 @@ export async function POST(request: Request) {
     const parsedSendDate = sendDate ? new Date(sendDate) : new Date();
 
     // Asignar un código aleatorio del inventario pre-cargado por el admin
+    const people = Number(numberOfPeople) || 1;
     const giftCard = await claimAvailableGiftCard({
       amount: Number(amount),
+      pricePerPerson: Number(pricePerPerson) || Number(amount),
+      numberOfPeople: people,
       menuName,
       purchaserName: purchaserName || "—",
       purchaserEmail: purchaserEmail || "—",

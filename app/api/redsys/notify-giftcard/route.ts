@@ -74,11 +74,17 @@ export async function POST(request: Request) {
       });
 
       if (sendDate <= today) {
+        const people = updated.numberOfPeople || 1;
+        const totalAmount = Number(updated.amount);
+        const pricePerPerson = people > 1 ? Math.round((totalAmount / people) * 100) / 100 : totalAmount;
+
         await sendGiftCard({
           recipientEmail: updated.recipientEmail,
           recipientName: updated.recipientName || undefined,
           purchaserName: updated.purchaserName,
-          amount: Number(updated.amount),
+          amount: totalAmount,
+          pricePerPerson,
+          numberOfPeople: people,
           menuName: updated.menuName || undefined,
           code: updated.code,
           message: updated.message || undefined,
@@ -90,7 +96,9 @@ export async function POST(request: Request) {
           recipientEmail: updated.purchaserEmail,
           recipientName: updated.purchaserName,
           purchaserName: updated.purchaserName,
-          amount: Number(updated.amount),
+          amount: totalAmount,
+          pricePerPerson,
+          numberOfPeople: people,
           menuName: updated.menuName || undefined,
           code: updated.code,
           message: `Copia de tu bono regalo para ${updated.recipientEmail}`,

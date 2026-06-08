@@ -59,7 +59,10 @@ const MENU_OPTIONS: MenuOption[] = [
 
 export default function RegalaPage() {
   const [selectedMenu, setSelectedMenu] = useState<MenuOption | null>(null);
+  const [numberOfPeople, setNumberOfPeople] = useState(2);
   const [step, setStep] = useState<"select" | "form">("select");
+
+  const totalAmount = selectedMenu ? selectedMenu.price * numberOfPeople : 0;
 
   const handleContinue = () => {
     if (!selectedMenu) return;
@@ -176,6 +179,39 @@ export default function RegalaPage() {
                   </div>
                 </div>
 
+                {/* Selector de personas */}
+                <div className="mb-8 p-6 border border-gray-200 bg-white">
+                  <p className="text-sm tracking-wider uppercase text-gray-600 mb-4">
+                    ¿Para cuántas personas es el bono? <span className="text-red-500">*</span>
+                  </p>
+                  <div className="flex gap-3">
+                    {[1, 2, 3, 4].map((n) => (
+                      <button
+                        key={n}
+                        type="button"
+                        onClick={() => setNumberOfPeople(n)}
+                        className={`w-14 h-14 text-lg font-serif font-light border-2 transition-all duration-200 ${
+                          numberOfPeople === n
+                            ? "border-primary bg-primary text-white"
+                            : "border-gray-200 hover:border-gray-400 text-gray-700"
+                        }`}
+                      >
+                        {n}
+                      </button>
+                    ))}
+                  </div>
+                  {selectedMenu && (
+                    <div className="mt-4 pt-4 border-t border-gray-100 flex items-center justify-between">
+                      <span className="text-sm text-gray-500">
+                        {numberOfPeople} {numberOfPeople === 1 ? "persona" : "personas"} × {selectedMenu.price}€/persona
+                      </span>
+                      <span className="text-xl font-serif font-light text-primary">
+                        Total: {totalAmount}€
+                      </span>
+                    </div>
+                  )}
+                </div>
+
                 {/* Info */}
                 <div className="bg-gray-50 p-6 mb-8">
                   <h3 className="text-xs tracking-widest uppercase text-gray-500 mb-4">El bono regalo incluye</h3>
@@ -201,7 +237,7 @@ export default function RegalaPage() {
                   className="btn-primary w-full disabled:opacity-40"
                 >
                   {selectedMenu
-                    ? `Continuar con ${selectedMenu.name} — ${selectedMenu.price}€/persona`
+                    ? `Continuar — ${numberOfPeople} ${numberOfPeople === 1 ? "persona" : "personas"} · Total ${totalAmount}€`
                     : "Selecciona un menú para continuar"}
                 </button>
               </div>
@@ -209,7 +245,8 @@ export default function RegalaPage() {
 
             {step === "form" && selectedMenu && (
               <GiftCardForm
-                amount={selectedMenu.price}
+                pricePerPerson={selectedMenu.price}
+                numberOfPeople={numberOfPeople}
                 menuName={selectedMenu.name}
                 onBack={() => setStep("select")}
               />

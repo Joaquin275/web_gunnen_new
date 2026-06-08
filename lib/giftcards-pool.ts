@@ -42,6 +42,8 @@ async function generateUniqueCode(): Promise<string> {
 
 export interface ClaimGiftCardData {
   amount: number;
+  pricePerPerson?: number;
+  numberOfPeople?: number;
   menuName?: string;
   purchaserName: string;
   purchaserEmail: string;
@@ -74,6 +76,7 @@ export async function claimAvailableGiftCard(
       data: {
         status: "PENDING_PAYMENT",
         menuName: data.menuName || null,
+        numberOfPeople: data.numberOfPeople || 1,
         purchaserName: data.purchaserName,
         purchaserEmail: data.purchaserEmail,
         recipientName: data.recipientName || null,
@@ -101,6 +104,7 @@ export async function claimAvailableGiftCard(
       remainingAmount: data.amount,
       status: "PENDING_PAYMENT",
       menuName: data.menuName || null,
+      numberOfPeople: data.numberOfPeople || 1,
       purchaserName: data.purchaserName,
       purchaserEmail: data.purchaserEmail,
       recipientName: data.recipientName || null,

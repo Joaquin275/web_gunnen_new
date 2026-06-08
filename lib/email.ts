@@ -109,6 +109,8 @@ export interface GiftCardData {
   recipientName?: string;
   purchaserName: string;
   amount: number;
+  pricePerPerson?: number;
+  numberOfPeople?: number;
   menuName?: string;
   code: string;
   message?: string;
@@ -601,7 +603,11 @@ export async function sendGiftCard(data: GiftCardData) {
 
     <div class="box">
       <div class="row"><span class="lbl">Menú</span><span class="val" style="font-weight:600">${menuLabel}</span></div>
-      <div class="row"><span class="lbl">Importe</span><span class="val">${data.amount.toFixed(2)}€ por persona</span></div>
+      ${data.numberOfPeople ? `<div class="row"><span class="lbl">Personas</span><span class="val">${data.numberOfPeople} ${data.numberOfPeople === 1 ? "persona" : "personas"}</span></div>` : ""}
+      ${data.pricePerPerson && data.numberOfPeople && data.numberOfPeople > 1
+        ? `<div class="row"><span class="lbl">Precio por persona</span><span class="val">${data.pricePerPerson.toFixed(2)}€</span></div>`
+        : ""}
+      <div class="row"><span class="lbl">Importe total</span><span class="val" style="font-weight:700;color:#8b7355">${data.amount.toFixed(2)}€</span></div>
       <div class="row">
         <span class="lbl">Código del bono</span>
         <span class="val" style="letter-spacing:4px;font-size:20px;font-family:monospace;font-weight:700;color:#8b7355">${data.code}</span>

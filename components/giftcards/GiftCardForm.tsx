@@ -3,7 +3,8 @@
 import { useState } from "react";
 
 interface GiftCardFormProps {
-  amount: number;
+  pricePerPerson: number;
+  numberOfPeople: number;
   menuName: string;
   onBack: () => void;
 }
@@ -35,9 +36,10 @@ function submitRedsysForm(data: {
   form.submit();
 }
 
-export default function GiftCardForm({ amount, menuName, onBack }: GiftCardFormProps) {
+export default function GiftCardForm({ pricePerPerson, numberOfPeople, menuName, onBack }: GiftCardFormProps) {
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const totalAmount = pricePerPerson * numberOfPeople;
 
   const today = new Date().toISOString().split("T")[0];
   const maxDate = new Date();
@@ -67,7 +69,7 @@ export default function GiftCardForm({ amount, menuName, onBack }: GiftCardFormP
       const res = await fetch("/api/redsys/giftcard-prepare", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...formData, amount, menuName }),
+        body: JSON.stringify({ ...formData, amount: totalAmount, pricePerPerson, numberOfPeople, menuName }),
       });
 
       if (!res.ok) {
@@ -91,12 +93,24 @@ export default function GiftCardForm({ amount, menuName, onBack }: GiftCardFormP
 
         {/* Resumen del menú seleccionado */}
         <div className="bg-gray-50 border border-gray-200 p-6 mb-8">
-          <p className="text-xs tracking-widest uppercase text-gray-400 mb-2">Menú seleccionado</p>
-          <div className="flex items-center justify-between">
-            <span className="text-lg font-serif font-light">{menuName}</span>
-            <span className="text-2xl font-serif font-light">
-              {amount}€<span className="text-sm text-gray-400 ml-1">/persona</span>
-            </span>
+          <p className="text-xs tracking-widest uppercase text-gray-400 mb-3">Resumen del bono</p>
+          <div className="space-y-2 text-sm">
+            <div className="flex items-center justify-between">
+              <span className="text-gray-600">Menú</span>
+              <span className="font-serif font-light text-base">{menuName}</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-gray-600">Personas</span>
+              <span className="font-medium">{numberOfPeople} {numberOfPeople === 1 ? "persona" : "personas"}</span>
+            </div>
+            <div className="flex items-center justify-between text-gray-500">
+              <span>Precio por persona</span>
+              <span>{pricePerPerson}€</span>
+            </div>
+            <div className="flex items-center justify-between pt-2 border-t border-gray-200">
+              <span className="font-medium text-gray-700">Total del bono</span>
+              <span className="text-2xl font-serif font-light text-primary">{totalAmount}€</span>
+            </div>
           </div>
         </div>
 
@@ -143,7 +157,7 @@ export default function GiftCardForm({ amount, menuName, onBack }: GiftCardFormP
         {/* Aviso pago */}
         <div className="bg-blue-50 border border-blue-200 p-5 mb-8 text-sm text-blue-800">
           <p className="font-semibold mb-1">Pago seguro mediante Redsys/Sabadell</p>
-          <p>Al continuar serás redirigido al TPV Virtual del Banco Sabadell para realizar el pago de <strong>{amount}€</strong> de forma segura con 3D Secure. Una vez confirmado el pago, el bono se enviará automáticamente al destinatario con el PDF adjunto.</p>
+          <p>Al continuar serás redirigido al TPV Virtual del Banco Sabadell para realizar el pago de <strong>{totalAmount}€</strong> de forma segura con 3D Secure. Una vez confirmado el pago, el bono se enviará automáticamente al destinatario con el PDF adjunto.</p>
         </div>
 
         {/* Legal — exigido por TPV Sabadell */}
@@ -166,7 +180,7 @@ export default function GiftCardForm({ amount, menuName, onBack }: GiftCardFormP
             Atrás
           </button>
           <button type="submit" disabled={isProcessing} className="btn-primary flex-1 disabled:opacity-50">
-            {isProcessing ? "Redirigiendo al banco..." : `Pagar ${amount}€ y enviar bono`}
+            {isProcessing ? "Redirigiendo al banco..." : `Pagar ${totalAmount}€ y enviar bono`}
           </button>
         </div>
 
