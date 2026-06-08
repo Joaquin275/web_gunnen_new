@@ -24,6 +24,7 @@ interface GiftCardInfo {
   remaining: number;
   fullyCovered: boolean;
   menuName: string | null;
+  numberOfPeople: number;
   message: string;
 }
 
@@ -115,6 +116,8 @@ export default function Step5Details({ reservationData, onBack }: Step5DetailsPr
         body: JSON.stringify({
           code: formData.giftCardCode.trim().toUpperCase(),
           estimatedTotal: menuTotal,
+          menuName: reservationData.menuName,
+          numberOfPeople: reservationData.numberOfPeople,
         }),
       });
       const data = await res.json();
@@ -340,14 +343,22 @@ export default function Step5Details({ reservationData, onBack }: Step5DetailsPr
               Código de bono regalo
             </label>
             {giftCardApplied && giftCardInfo ? (
-              <div className="bg-green-50 border border-green-300 p-4 flex items-center justify-between">
-                <div>
+              <div className="bg-green-50 border border-green-300 p-4 flex items-start justify-between gap-4">
+                <div className="space-y-1">
                   <p className="text-sm font-semibold text-green-800">{giftCardInfo.message}</p>
                   {giftCardInfo.menuName && (
-                    <p className="text-xs text-green-600 mt-1">Menú: {giftCardInfo.menuName}</p>
+                    <p className="text-xs text-green-700">
+                      Menú: <strong>{giftCardInfo.menuName}</strong>
+                    </p>
+                  )}
+                  {giftCardInfo.numberOfPeople > 0 && (
+                    <p className="text-xs text-green-700">
+                      Cubre: <strong>{giftCardInfo.numberOfPeople} {giftCardInfo.numberOfPeople === 1 ? "persona" : "personas"}</strong>
+                      {" · "}Valor: <strong>{giftCardInfo.available.toFixed(2)}€</strong>
+                    </p>
                   )}
                 </div>
-                <button type="button" onClick={handleRemoveGiftCard} className="text-xs text-green-700 underline ml-4 hover:text-red-600">
+                <button type="button" onClick={handleRemoveGiftCard} className="text-xs text-green-700 underline whitespace-nowrap hover:text-red-600">
                   Quitar
                 </button>
               </div>
