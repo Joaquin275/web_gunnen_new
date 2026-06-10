@@ -3,10 +3,10 @@
 import { useState, useRef } from "react";
 
 interface GiftCard {
-  id: string; code: string; amount: number;
+  id: string; code: string; amount: number; numberOfPeople?: number;
   buyerName: string; buyerEmail: string;
   recipientName: string; recipientEmail: string;
-  message: string; status: string; sendDate: string;
+  message: string; status: string; menuName?: string; sendDate: string;
   redeemedAt: string | null; createdAt: string;
 }
 
@@ -423,6 +423,12 @@ GUNNEN-WXYZ-5678,150,María López,maria@email.com,Pedro López,pedro@email.com,
                     </div>
                     <div className="text-right ml-6 flex-shrink-0">
                       <p className="text-2xl font-serif font-light">{g.amount}€</p>
+                      {g.numberOfPeople && g.numberOfPeople > 1 && (
+                        <p className="text-xs text-gray-400">{g.numberOfPeople} personas</p>
+                      )}
+                      {g.menuName && g.status !== "AVAILABLE" && (
+                        <p className="text-xs text-gray-500 mt-0.5">{g.menuName}</p>
+                      )}
                       {g.status === "ACTIVE" && (
                         <button onClick={() => handleRedeem(g.id)}
                           className="mt-2 text-xs tracking-wider uppercase text-gray-400 hover:text-primary transition-colors">
