@@ -429,9 +429,18 @@ GUNNEN-WXYZ-5678,150,María López,maria@email.com,Pedro López,pedro@email.com,
                       {g.menuName && g.status !== "AVAILABLE" && (
                         <p className="text-xs text-gray-500 mt-0.5">{g.menuName}</p>
                       )}
+                      {g.status !== "AVAILABLE" && (
+                        <a
+                          href={`/api/admin/giftcards/${g.id}/pdf`}
+                          download={`Bono-${g.code}.pdf`}
+                          className="mt-2 block text-xs tracking-wider uppercase text-gray-400 hover:text-primary transition-colors"
+                        >
+                          ↓ Descargar PDF
+                        </a>
+                      )}
                       {g.status === "ACTIVE" && (
                         <button onClick={() => handleRedeem(g.id)}
-                          className="mt-2 text-xs tracking-wider uppercase text-gray-400 hover:text-primary transition-colors">
+                          className="mt-1 text-xs tracking-wider uppercase text-gray-400 hover:text-primary transition-colors">
                           Marcar canjeado
                         </button>
                       )}
