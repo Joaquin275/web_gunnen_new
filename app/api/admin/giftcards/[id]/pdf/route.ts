@@ -25,7 +25,7 @@ export async function GET(
     return NextResponse.json({ error: "No se pudo generar el PDF" }, { status: 500 });
   }
 
-  return new NextResponse(pdfBuffer, {
+  return new NextResponse(new Uint8Array(pdfBuffer), {
     status: 200,
     headers: {
       "Content-Type": "application/pdf",
