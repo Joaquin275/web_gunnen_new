@@ -581,11 +581,22 @@ export async function sendAdminGiftCardNotification(data: AdminGiftCardNotificat
     </div>
   `;
 
+  let attachments: { filename: string; content: Buffer }[] = [];
+  try {
+    const pdfBuffer = await generateGiftCardPdf(data.code);
+    if (pdfBuffer) {
+      attachments = [{ filename: `Bono-${data.code}.pdf`, content: pdfBuffer }];
+    }
+  } catch {
+    // Sin PDF adjunto, el email se envía igualmente
+  }
+
   return resend.emails.send({
     from: FROM_EMAIL,
     to: ADMIN_EMAILS,
     subject: `[Gunnen] Bono vendido — ${data.code} (${data.amount.toFixed(2)}€)`,
     html: template(content),
+    ...(attachments.length > 0 && { attachments }),
   });
 }
 
