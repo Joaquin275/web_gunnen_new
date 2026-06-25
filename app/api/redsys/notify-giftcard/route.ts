@@ -76,41 +76,46 @@ export async function POST(request: Request) {
       if (sendDate <= today) {
         const people = updated.numberOfPeople || 1;
         const totalAmount = Number(updated.amount);
-        const pricePerPerson = people > 1 ? Math.round((totalAmount / people) * 100) / 100 : totalAmount;
 
         await sendGiftCard({
           recipientEmail: updated.recipientEmail,
           recipientName: updated.recipientName || undefined,
           purchaserName: updated.purchaserName,
           amount: totalAmount,
-          pricePerPerson,
           numberOfPeople: people,
           menuName: updated.menuName || undefined,
+          harmonyNone: updated.harmonyNone,
+          harmonyVino: updated.harmonyVino,
+          harmonyNolo: updated.harmonyNolo,
           code: updated.code,
           message: updated.message || undefined,
           expiresAt: expiresLabel,
         });
 
-        // Copia al comprador
         await sendGiftCard({
           recipientEmail: updated.purchaserEmail,
           recipientName: updated.purchaserName,
           purchaserName: updated.purchaserName,
           amount: totalAmount,
-          pricePerPerson,
           numberOfPeople: people,
           menuName: updated.menuName || undefined,
+          harmonyNone: updated.harmonyNone,
+          harmonyVino: updated.harmonyVino,
+          harmonyNolo: updated.harmonyNolo,
           code: updated.code,
           message: `Copia de tu bono regalo para ${updated.recipientEmail}`,
           expiresAt: expiresLabel,
         });
       }
 
-      // Notificación interna a Gunnen
       await sendAdminGiftCardNotification({
         code: updated.code,
         amount: Number(updated.amount),
         menuName: updated.menuName || undefined,
+        numberOfPeople: updated.numberOfPeople || 1,
+        harmonyNone: updated.harmonyNone,
+        harmonyVino: updated.harmonyVino,
+        harmonyNolo: updated.harmonyNolo,
         purchaserName: updated.purchaserName,
         purchaserEmail: updated.purchaserEmail,
         recipientName: updated.recipientName || undefined,

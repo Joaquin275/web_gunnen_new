@@ -40,6 +40,9 @@ function toEmailData(r: {
   reservationTime: string;
   numberOfPeople: number;
   menuName: string | null;
+  harmonyNone: number;
+  harmonyVino: number;
+  harmonyNolo: number;
   estimatedTotal: unknown;
   depositAmount: unknown;
   attendanceToken: string | null;
@@ -53,6 +56,9 @@ function toEmailData(r: {
     reservationTime: r.reservationTime,
     numberOfPeople: r.numberOfPeople,
     menuName: r.menuName ?? undefined,
+    harmonyNone: r.harmonyNone,
+    harmonyVino: r.harmonyVino,
+    harmonyNolo: r.harmonyNolo,
     estimatedTotal: Number(r.estimatedTotal),
     depositAmount: Number(r.depositAmount),
     attendanceToken: r.attendanceToken ?? undefined,

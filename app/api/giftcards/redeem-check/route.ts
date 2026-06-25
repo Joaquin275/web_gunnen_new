@@ -1,24 +1,19 @@
 /**
  * POST /api/giftcards/redeem-check
  * Valida un código de bono regalo durante el proceso de reserva.
- * Verifica que el menú y el número de personas coincidan con el bono adquirido.
+ * Verifica menú base, personas y reparto de armonía.
  */
 
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-
-/** Extrae el menú base (TEMPO o IMPULSO) del nombre completo */
-function getMenuBase(menuName: string | null | undefined): string | null {
-  if (!menuName) return null;
-  const upper = menuName.toUpperCase();
-  if (upper.includes("TEMPO")) return "TEMPO";
-  if (upper.includes("IMPULSO")) return "IMPULSO";
-  return null;
-}
+import { getMenuBase } from "@/lib/menus";
 
 export async function POST(request: Request) {
   try {
-    const { code, estimatedTotal, menuName, numberOfPeople } = await request.json();
+    const {
+      code, estimatedTotal, menuName, menuId,
+      numberOfPeople, harmonyNone, harmonyVino, harmonyNolo,
+    } = await request.json();
 
     if (!code?.trim()) {
       return NextResponse.json({ valid: false, message: "Introduce un código de bono" }, { status: 400 });
@@ -48,18 +43,18 @@ export async function POST(request: Request) {
       return NextResponse.json({ valid: false, message: "Este bono ha caducado" });
     }
 
-    // ── Validar menú ────────────────────────────────────────────────────────
-    const bonoMenuBase = getMenuBase(giftCard.menuName);
-    const reservaMenuBase = getMenuBase(menuName);
+    const bonoMenuBase = giftCard.menuId || getMenuBase(giftCard.menuName);
+    const reservaMenuBase = menuId || getMenuBase(menuName);
 
     if (bonoMenuBase && reservaMenuBase && bonoMenuBase !== reservaMenuBase) {
+      const bonoLabel = bonoMenuBase === "tempo" ? "TEMPO" : "IMPULSO";
+      const reservaLabel = reservaMenuBase === "tempo" ? "TEMPO" : "IMPULSO";
       return NextResponse.json({
         valid: false,
-        message: `Este bono es para el Menú ${bonoMenuBase}. Tu reserva es para el Menú ${reservaMenuBase}. No es compatible.`,
+        message: `Este bono es para el Menú ${bonoLabel}. Tu reserva es para el Menú ${reservaLabel}. No es compatible.`,
       });
     }
 
-    // ── Validar número de personas ─────────────────────────────────────────
     const bonoPersonas = giftCard.numberOfPeople || 1;
     const reservaPersonas = Number(numberOfPeople) || 1;
 
@@ -70,15 +65,42 @@ export async function POST(request: Request) {
       });
     }
 
+    // Validar armonía si el bono tiene desglose (bonos nuevos)
+    const bonoHasHarmony = (giftCard.harmonyVino || 0) + (giftCard.harmonyNolo || 0) > 0
+      || giftCard.harmonyNone > 0;
+
+    if (bonoHasHarmony && giftCard.menuId) {
+      const reqVino = Number(harmonyVino) || 0;
+      const reqNolo = Number(harmonyNolo) || 0;
+      const reqNone = Number(harmonyNone) ?? reservaPersonas - reqVino - reqNolo;
+
+      if (reqVino > (giftCard.harmonyVino || 0)) {
+        return NextResponse.json({
+          valid: false,
+          message: `Este bono incluye armonía con vino para ${giftCard.harmonyVino} ${giftCard.harmonyVino === 1 ? "persona" : "personas"}. Has solicitado ${reqVino}.`,
+        });
+      }
+      if (reqNolo > (giftCard.harmonyNolo || 0)) {
+        return NextResponse.json({
+          valid: false,
+          message: `Este bono incluye armonía No/Low para ${giftCard.harmonyNolo} ${giftCard.harmonyNolo === 1 ? "persona" : "personas"}. Has solicitado ${reqNolo}.`,
+        });
+      }
+      if (reqNone > (giftCard.harmonyNone || 0)) {
+        return NextResponse.json({
+          valid: false,
+          message: `Este bono incluye solo menú para ${giftCard.harmonyNone} ${giftCard.harmonyNone === 1 ? "persona" : "personas"}. Has solicitado ${reqNone} sin armonía.`,
+        });
+      }
+    }
+
     const available = Number(giftCard.remainingAmount);
     const total = Number(estimatedTotal) || 0;
     const discount = Math.min(available, total);
     const remaining = Math.max(0, total - available);
     const fullyCovered = remaining === 0;
 
-    const personasInfo = bonoPersonas > 1
-      ? ` · ${bonoPersonas} personas`
-      : "";
+    const personasInfo = bonoPersonas > 1 ? ` · ${bonoPersonas} personas` : "";
 
     return NextResponse.json({
       valid: true,

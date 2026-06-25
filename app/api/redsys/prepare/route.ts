@@ -11,6 +11,12 @@ import {
   generateRedsysOrder,
   calcDeposit30pctCents,
 } from "@/lib/redsys";
+import {
+  calcOrderTotal,
+  getMenuById,
+  isHarmonyValid,
+  defaultHarmony,
+} from "@/lib/menus";
 
 export async function POST(request: Request) {
   try {
@@ -18,7 +24,10 @@ export async function POST(request: Request) {
     const {
       date, time, firstName, lastName, email, phone,
       numberOfPeople, observations, allergens, allergenNotes,
-      couponCode, menuName, menuPrice,
+      couponCode, menuId, menuName, menuPrice,
+      harmonyNone, harmonyVino, harmonyNolo,
+      estimatedTotal: clientEstimatedTotal,
+      giftCardDiscount,
     } = data;
 
     if (!date || !time || !firstName || !lastName || !email || !phone) {
@@ -35,27 +44,42 @@ export async function POST(request: Request) {
     }
 
     const people = Number(numberOfPeople) || 2;
-    const price = Number(menuPrice);
+    const menu = getMenuById(menuId);
 
-    console.log(`[Redsys Prepare] menuPrice recibido: ${menuPrice} (tipo: ${typeof menuPrice}) → price: ${price}`);
-    console.log(`[Redsys Prepare] numberOfPeople: ${numberOfPeople} → people: ${people}`);
-    console.log(`[Redsys Prepare] menuName: ${menuName}`);
+    if (!menu) {
+      return NextResponse.json(
+        { error: "Menú inválido. Vuelve atrás y selecciona un menú." },
+        { status: 400 }
+      );
+    }
 
-    if (!price || isNaN(price) || price <= 0) {
-      console.error(`[Redsys Prepare] PRECIO INVÁLIDO: menuPrice=${menuPrice}`);
+    const harmony = {
+      none: Number(harmonyNone ?? people),
+      vino: Number(harmonyVino ?? 0),
+      nolo: Number(harmonyNolo ?? 0),
+    };
+
+    if (!isHarmonyValid(people, harmony)) {
+      const fallback = defaultHarmony(people);
+      harmony.none = fallback.none;
+      harmony.vino = fallback.vino;
+      harmony.nolo = fallback.nolo;
+    }
+
+    const estimatedTotal = calcOrderTotal(menu.id, people, harmony);
+    const discount = Number(giftCardDiscount) || 0;
+    const totalAfterGift = Math.max(0, estimatedTotal - discount);
+    const depositEuros = totalAfterGift * 0.3;
+    const amountCents = calcDeposit30pctCents(totalAfterGift);
+
+    if (estimatedTotal <= 0) {
       return NextResponse.json(
         { error: "Precio del menú inválido. Vuelve atrás y selecciona un menú." },
         { status: 400 }
       );
     }
 
-    const estimatedTotal = price * people;
-    const depositEuros = estimatedTotal * 0.3;
-    const amountCents = calcDeposit30pctCents(estimatedTotal);
-
-    console.log(`[Redsys Prepare] estimatedTotal: ${estimatedTotal}€ | depositEuros: ${depositEuros}€ | amountCents: ${amountCents}`);
-
-    if (amountCents <= 0) {
+    if (amountCents <= 0 && totalAfterGift > 0) {
       return NextResponse.json(
         { error: "El importe de la retención no puede ser 0. Selecciona un menú." },
         { status: 400 }
@@ -79,8 +103,12 @@ export async function POST(request: Request) {
         couponCode: couponCode || "",
         estimatedTotal,
         depositAmount: depositEuros,
-        menuName: menuName || "",
-        menuPrice: price,
+        menuId: menu.id,
+        menuName: menuName || menu.displayName,
+        menuPrice: menu.basePrice,
+        harmonyNone: harmony.none,
+        harmonyVino: harmony.vino,
+        harmonyNolo: harmony.nolo,
         status: "PENDING_PAYMENT",
         redsysOrder,
         redsysStatus: "PENDING",
@@ -89,7 +117,6 @@ export async function POST(request: Request) {
       },
     });
 
-    // DS_MERCHANT_TRANSACTIONTYPE = "1" → PREAUTORIZACIÓN
     const redsysForm = buildRedsysForm(
       {
         DS_MERCHANT_AMOUNT: String(amountCents),
@@ -108,7 +135,15 @@ export async function POST(request: Request) {
       secretKey
     );
 
-    return NextResponse.json({ reservationId: reservation.id, redsysOrder, depositEuros, estimatedTotal, amountCents, redsysForm });
+    return NextResponse.json({
+      reservationId: reservation.id,
+      redsysOrder,
+      depositEuros,
+      estimatedTotal,
+      amountCents,
+      redsysForm,
+      clientEstimatedTotal,
+    });
   } catch (error: unknown) {
     const msg = error instanceof Error ? error.message : "Error preparando pago";
     console.error("Error en /api/redsys/prepare:", error);

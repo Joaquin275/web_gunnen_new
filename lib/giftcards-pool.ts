@@ -42,9 +42,12 @@ async function generateUniqueCode(): Promise<string> {
 
 export interface ClaimGiftCardData {
   amount: number;
-  pricePerPerson?: number;
-  numberOfPeople?: number;
+  menuId?: string;
   menuName?: string;
+  numberOfPeople?: number;
+  harmonyNone?: number;
+  harmonyVino?: number;
+  harmonyNolo?: number;
   purchaserName: string;
   purchaserEmail: string;
   recipientName?: string;
@@ -75,8 +78,12 @@ export async function claimAvailableGiftCard(
       where: { id, status: "AVAILABLE" },
       data: {
         status: "PENDING_PAYMENT",
+        menuId: data.menuId || null,
         menuName: data.menuName || null,
         numberOfPeople: data.numberOfPeople || 1,
+        harmonyNone: data.harmonyNone ?? data.numberOfPeople ?? 1,
+        harmonyVino: data.harmonyVino ?? 0,
+        harmonyNolo: data.harmonyNolo ?? 0,
         purchaserName: data.purchaserName,
         purchaserEmail: data.purchaserEmail,
         recipientName: data.recipientName || null,
@@ -103,8 +110,12 @@ export async function claimAvailableGiftCard(
       amount: data.amount,
       remainingAmount: data.amount,
       status: "PENDING_PAYMENT",
+      menuId: data.menuId || null,
       menuName: data.menuName || null,
       numberOfPeople: data.numberOfPeople || 1,
+      harmonyNone: data.harmonyNone ?? data.numberOfPeople ?? 1,
+      harmonyVino: data.harmonyVino ?? 0,
+      harmonyNolo: data.harmonyNolo ?? 0,
       purchaserName: data.purchaserName,
       purchaserEmail: data.purchaserEmail,
       recipientName: data.recipientName || null,

@@ -1,11 +1,15 @@
 "use client";
 
 import { useState } from "react";
+import { formatHarmonySummary, type HarmonyBreakdown } from "@/lib/menus";
 
 interface GiftCardFormProps {
-  pricePerPerson: number;
-  numberOfPeople: number;
+  menuId: string;
   menuName: string;
+  menuBasePrice: number;
+  numberOfPeople: number;
+  harmony: HarmonyBreakdown;
+  totalAmount: number;
   onBack: () => void;
 }
 
@@ -36,10 +40,17 @@ function submitRedsysForm(data: {
   form.submit();
 }
 
-export default function GiftCardForm({ pricePerPerson, numberOfPeople, menuName, onBack }: GiftCardFormProps) {
+export default function GiftCardForm({
+  menuId,
+  menuName,
+  menuBasePrice,
+  numberOfPeople,
+  harmony,
+  totalAmount,
+  onBack,
+}: GiftCardFormProps) {
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const totalAmount = pricePerPerson * numberOfPeople;
 
   const today = new Date().toISOString().split("T")[0];
   const maxDate = new Date();
@@ -65,11 +76,20 @@ export default function GiftCardForm({ pricePerPerson, numberOfPeople, menuName,
     setError(null);
 
     try {
-      // Llama al endpoint que crea el bono PENDING y devuelve parámetros Redsys
       const res = await fetch("/api/redsys/giftcard-prepare", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...formData, amount: totalAmount, pricePerPerson, numberOfPeople, menuName }),
+        body: JSON.stringify({
+          ...formData,
+          amount: totalAmount,
+          menuId,
+          menuName,
+          menuBasePrice,
+          numberOfPeople,
+          harmonyNone: harmony.none,
+          harmonyVino: harmony.vino,
+          harmonyNolo: harmony.nolo,
+        }),
       });
 
       if (!res.ok) {
@@ -91,7 +111,6 @@ export default function GiftCardForm({ pricePerPerson, numberOfPeople, menuName,
       <form onSubmit={handleSubmit}>
         <h2 className="text-3xl font-serif font-light mb-8">Datos del bono regalo</h2>
 
-        {/* Resumen del menú seleccionado */}
         <div className="bg-gray-50 border border-gray-200 p-6 mb-8">
           <p className="text-xs tracking-widest uppercase text-gray-400 mb-3">Resumen del bono</p>
           <div className="space-y-2 text-sm">
@@ -103,18 +122,23 @@ export default function GiftCardForm({ pricePerPerson, numberOfPeople, menuName,
               <span className="text-gray-600">Personas</span>
               <span className="font-medium">{numberOfPeople} {numberOfPeople === 1 ? "persona" : "personas"}</span>
             </div>
+            {(harmony.vino > 0 || harmony.nolo > 0) && (
+              <div className="flex items-start justify-between gap-4">
+                <span className="text-gray-600">Armonía</span>
+                <span className="font-medium text-right text-sm">{formatHarmonySummary(harmony)}</span>
+              </div>
+            )}
             <div className="flex items-center justify-between text-gray-500">
-              <span>Precio por persona</span>
-              <span>{pricePerPerson}€</span>
+              <span>Menú base</span>
+              <span>{menuBasePrice}€/persona</span>
             </div>
             <div className="flex items-center justify-between pt-2 border-t border-gray-200">
               <span className="font-medium text-gray-700">Total del bono</span>
-              <span className="text-2xl font-serif font-light text-primary">{totalAmount}€</span>
+              <span className="text-2xl font-serif font-light text-primary">{totalAmount.toFixed(2)}€</span>
             </div>
           </div>
         </div>
 
-        {/* Datos del comprador */}
         <div className="mb-8">
           <h3 className="text-xl font-serif font-light mb-6">Tus datos</h3>
           <div className="space-y-6">
@@ -129,7 +153,6 @@ export default function GiftCardForm({ pricePerPerson, numberOfPeople, menuName,
           </div>
         </div>
 
-        {/* Datos del destinatario */}
         <div className="mb-8">
           <h3 className="text-xl font-serif font-light mb-6">Datos del destinatario</h3>
           <div className="space-y-6">
@@ -154,13 +177,11 @@ export default function GiftCardForm({ pricePerPerson, numberOfPeople, menuName,
           </div>
         </div>
 
-        {/* Aviso pago */}
         <div className="bg-blue-50 border border-blue-200 p-5 mb-8 text-sm text-blue-800">
           <p className="font-semibold mb-1">Pago seguro mediante Redsys/Sabadell</p>
-          <p>Al continuar serás redirigido al TPV Virtual del Banco Sabadell para realizar el pago de <strong>{totalAmount}€</strong> de forma segura con 3D Secure. Una vez confirmado el pago, el bono se enviará automáticamente al destinatario con el PDF adjunto.</p>
+          <p>Al continuar serás redirigido al TPV Virtual del Banco Sabadell para realizar el pago de <strong>{totalAmount.toFixed(2)}€</strong> de forma segura con 3D Secure. Una vez confirmado el pago, el bono se enviará automáticamente al destinatario con el PDF adjunto.</p>
         </div>
 
-        {/* Legal — exigido por TPV Sabadell */}
         <div className="text-xs text-gray-500 mb-6 leading-relaxed">
           Al realizar el pago aceptas nuestra{" "}
           <a href="/politica-devolucion" target="_blank" className="text-primary underline">política de devolución</a>,
@@ -180,7 +201,7 @@ export default function GiftCardForm({ pricePerPerson, numberOfPeople, menuName,
             Atrás
           </button>
           <button type="submit" disabled={isProcessing} className="btn-primary flex-1 disabled:opacity-50">
-            {isProcessing ? "Redirigiendo al banco..." : `Pagar ${totalAmount}€ y enviar bono`}
+            {isProcessing ? "Redirigiendo al banco..." : `Pagar ${totalAmount.toFixed(2)}€ y enviar bono`}
           </button>
         </div>
 

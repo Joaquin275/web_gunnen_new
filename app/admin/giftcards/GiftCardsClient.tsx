@@ -4,6 +4,7 @@ import { useState, useRef } from "react";
 
 interface GiftCard {
   id: string; code: string; amount: number; numberOfPeople?: number;
+  harmonyNone?: number; harmonyVino?: number; harmonyNolo?: number;
   buyerName: string; buyerEmail: string;
   recipientName: string; recipientEmail: string;
   message: string; status: string; menuName?: string; sendDate: string;
@@ -429,6 +430,15 @@ GUNNEN-WXYZ-5678,150,María López,maria@email.com,Pedro López,pedro@email.com,
                       {g.menuName && g.status !== "AVAILABLE" && (
                         <p className="text-xs text-gray-500 mt-0.5">{g.menuName}</p>
                       )}
+                      {g.status !== "AVAILABLE" && (g.harmonyVino || g.harmonyNolo) ? (
+                        <p className="text-xs text-gray-400 mt-0.5">
+                          {[
+                            g.harmonyNone ? `${g.harmonyNone} solo menú` : null,
+                            g.harmonyVino ? `${g.harmonyVino} vino` : null,
+                            g.harmonyNolo ? `${g.harmonyNolo} No/Low` : null,
+                          ].filter(Boolean).join(" · ")}
+                        </p>
+                      ) : null}
                       {g.status !== "AVAILABLE" && (
                         <a
                           href={`/api/admin/giftcards/${g.id}/pdf`}

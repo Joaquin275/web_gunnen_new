@@ -7,6 +7,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { notifyReservationConfirmed } from "@/lib/email";
+import { calcOrderTotal, getMenuById, defaultHarmony, isHarmonyValid } from "@/lib/menus";
 
 export async function POST(request: Request) {
   try {
@@ -14,7 +15,9 @@ export async function POST(request: Request) {
     const {
       date, time, firstName, lastName, email, phone,
       numberOfPeople, observations, allergens, allergenNotes,
-      menuName, menuPrice, estimatedTotal, giftCardId, giftCardDiscount,
+      menuId, menuName, menuPrice,
+      harmonyNone, harmonyVino, harmonyNolo,
+      estimatedTotal, giftCardId, giftCardDiscount,
     } = data;
 
     if (!date || !time || !firstName || !lastName || !email || !phone) {
@@ -24,7 +27,6 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Se requiere un bono regalo válido" }, { status: 400 });
     }
 
-    // Verificar que el bono sigue activo
     const giftCard = await prisma.giftCard.findUnique({ where: { id: giftCardId } });
     if (!giftCard || giftCard.status !== "ACTIVE") {
       return NextResponse.json({ error: "El bono regalo no está disponible" }, { status: 400 });
@@ -34,12 +36,22 @@ export async function POST(request: Request) {
     }
 
     const people = numberOfPeople || 2;
-    const price = Number(menuPrice) || 0;
-    const total = Number(estimatedTotal) || price * people;
+    const menu = getMenuById(menuId);
+    const harmony = {
+      none: Number(harmonyNone ?? people),
+      vino: Number(harmonyVino ?? 0),
+      nolo: Number(harmonyNolo ?? 0),
+    };
+    if (!isHarmonyValid(people, harmony)) {
+      Object.assign(harmony, defaultHarmony(people));
+    }
+
+    const total = menu
+      ? calcOrderTotal(menu.id, people, harmony)
+      : Number(estimatedTotal) || Number(menuPrice) * people;
     const discount = Number(giftCardDiscount) || 0;
     const remaining = Math.max(0, Number(giftCard.remainingAmount) - discount);
 
-    // Crear reserva como CONFIRMED directamente
     const reservation = await prisma.reservation.create({
       data: {
         reservationDate: new Date(date + "T00:00:00"),
@@ -54,8 +66,12 @@ export async function POST(request: Request) {
         allergenNotes: allergenNotes || "",
         estimatedTotal: total,
         depositAmount: 0,
+        menuId: menu?.id || null,
         menuName: menuName || "",
-        menuPrice: price,
+        menuPrice: (menu?.basePrice ?? Number(menuPrice)) || 0,
+        harmonyNone: harmony.none,
+        harmonyVino: harmony.vino,
+        harmonyNolo: harmony.nolo,
         status: "CONFIRMED",
         redsysOrder: "",
         redsysStatus: "GIFT_CARD",
@@ -65,7 +81,6 @@ export async function POST(request: Request) {
       },
     });
 
-    // Marcar el bono como REDEEMED si se agota, o reducir el saldo
     await prisma.giftCard.update({
       where: { id: giftCardId },
       data: {
@@ -75,7 +90,6 @@ export async function POST(request: Request) {
       },
     });
 
-    // Enviar email de confirmación al cliente
     try {
       await notifyReservationConfirmed({
         firstName,
@@ -85,6 +99,9 @@ export async function POST(request: Request) {
         reservationTime: time,
         numberOfPeople: people,
         menuName: menuName || "",
+        harmonyNone: harmony.none,
+        harmonyVino: harmony.vino,
+        harmonyNolo: harmony.nolo,
         estimatedTotal: total,
         depositAmount: 0,
         reservationId: reservation.id,

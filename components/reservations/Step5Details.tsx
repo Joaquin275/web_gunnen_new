@@ -11,6 +11,7 @@
 
 import { useState } from "react";
 import type { ReservationState } from "@/app/reservas/ReservasClient";
+import { calcOrderTotal, formatHarmonySummary } from "@/lib/menus";
 
 interface Step5DetailsProps {
   reservationData: ReservationState;
@@ -87,7 +88,14 @@ export default function Step5Details({ reservationData, onBack }: Step5DetailsPr
   const [giftCardApplied, setGiftCardApplied] = useState(false);
 
   // ── Cálculo de importes ────────────────────────────────────────────────────
-  const menuTotal = reservationData.menuPrice * reservationData.numberOfPeople;
+  const harmony = {
+    none: reservationData.harmonyNone,
+    vino: reservationData.harmonyVino,
+    nolo: reservationData.harmonyNolo,
+  };
+  const menuTotal = reservationData.menuId
+    ? calcOrderTotal(reservationData.menuId, reservationData.numberOfPeople, harmony)
+    : 0;
   const giftDiscount = giftCardInfo?.discount ?? 0;
   const remainingAfterGift = Math.max(0, menuTotal - giftDiscount);
   const depositAmount = remainingAfterGift * 0.3; // 30% de lo que queda
@@ -118,6 +126,9 @@ export default function Step5Details({ reservationData, onBack }: Step5DetailsPr
           estimatedTotal: menuTotal,
           menuName: reservationData.menuName,
           numberOfPeople: reservationData.numberOfPeople,
+          harmonyNone: reservationData.harmonyNone,
+          harmonyVino: reservationData.harmonyVino,
+          harmonyNolo: reservationData.harmonyNolo,
         }),
       });
       const data = await res.json();
@@ -155,7 +166,7 @@ export default function Step5Details({ reservationData, onBack }: Step5DetailsPr
       setError("Debe aceptar la política de retención del 30%");
       return;
     }
-    if (reservationData.menuPrice <= 0) {
+    if (menuTotal <= 0) {
       setError("No se ha podido calcular el importe. Vuelve atrás y selecciona un menú.");
       return;
     }
@@ -168,8 +179,12 @@ export default function Step5Details({ reservationData, onBack }: Step5DetailsPr
       date: reservationData.date,
       time: reservationData.time,
       numberOfPeople: reservationData.numberOfPeople,
+      menuId: reservationData.menuId,
       menuName: reservationData.menuName,
-      menuPrice: reservationData.menuPrice,
+      menuPrice: reservationData.menuBasePrice,
+      harmonyNone: reservationData.harmonyNone,
+      harmonyVino: reservationData.harmonyVino,
+      harmonyNolo: reservationData.harmonyNolo,
       estimatedTotal: menuTotal,
       depositAmount: isFreeReservation ? 0 : depositAmount,
       giftCardId: giftCardInfo?.giftCardId ?? null,
@@ -250,14 +265,20 @@ export default function Step5Details({ reservationData, onBack }: Step5DetailsPr
             </div>
             <div className="flex justify-between pb-3 border-b border-gray-200">
               <span className="text-gray-600">Menú</span>
-              <span className="font-semibold">{reservationData.menuName || "No seleccionado"}</span>
+              <span className="font-semibold text-right">{reservationData.menuName || "No seleccionado"}</span>
             </div>
+            {(reservationData.harmonyVino > 0 || reservationData.harmonyNolo > 0) && (
+              <div className="flex justify-between pb-3 border-b border-gray-200">
+                <span className="text-gray-600">Armonía</span>
+                <span className="font-semibold text-right text-sm">{formatHarmonySummary(harmony)}</span>
+              </div>
+            )}
             <div className="flex justify-between pb-3 border-b border-gray-200">
               <span className="text-gray-600">Comensales</span>
               <span className="font-semibold">{reservationData.numberOfPeople} personas</span>
             </div>
             <div className="flex justify-between text-gray-600 pb-3 border-b border-gray-200">
-              <span>Total estimado ({reservationData.numberOfPeople} × {reservationData.menuPrice}€)</span>
+              <span>Total estimado</span>
               <span>{menuTotal.toFixed(2)}€</span>
             </div>
 

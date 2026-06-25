@@ -8,6 +8,7 @@ import Step2Time from "@/components/reservations/Step2Time";
 import Step3Menu from "@/components/reservations/Step3Menu";
 import Step4People from "@/components/reservations/Step4People";
 import Step5Details from "@/components/reservations/Step5Details";
+import { defaultHarmony, type HarmonyBreakdown } from "@/lib/menus";
 
 export interface ReservationState {
   date: string | null;
@@ -19,8 +20,13 @@ export interface ReservationState {
   depositPerPerson: number;
   menuId: string | null;
   menuName: string | null;
-  menuPrice: number;
+  menuBasePrice: number;
+  maridajePrice: number;
+  noloPrice: number;
   numberOfPeople: number;
+  harmonyNone: number;
+  harmonyVino: number;
+  harmonyNolo: number;
 }
 
 const initialState: ReservationState = {
@@ -33,22 +39,26 @@ const initialState: ReservationState = {
   depositPerPerson: 50,
   menuId: null,
   menuName: null,
-  menuPrice: 0,
+  menuBasePrice: 0,
+  maridajePrice: 45,
+  noloPrice: 30,
   numberOfPeople: 2,
+  harmonyNone: 2,
+  harmonyVino: 0,
+  harmonyNolo: 0,
 };
 
 export default function ReservasPage() {
   const [currentStep, setCurrentStep] = useState(1);
   const [reservationData, setReservationData] = useState<ReservationState>(initialState);
 
-  // Usar forma funcional de setState para evitar stale closure con menuPrice
   const handleStep1Complete = (date: string) => {
-    setReservationData(prev => ({ ...prev, date }));
+    setReservationData((prev) => ({ ...prev, date }));
     setCurrentStep(2);
   };
 
-  const handleStep2Complete = (timeSlotId: string, time: string, slotData: any) => {
-    setReservationData(prev => ({
+  const handleStep2Complete = (timeSlotId: string, time: string, slotData: { minPeople: number; maxPeople: number; depositPerPerson: number }) => {
+    setReservationData((prev) => ({
       ...prev,
       timeSlotId,
       time,
@@ -59,25 +69,48 @@ export default function ReservasPage() {
     setCurrentStep(3);
   };
 
-  const handleStep3Complete = (menuId: string, menuName: string, menuPrice: number) => {
-    setReservationData(prev => ({ ...prev, menuId, menuName, menuPrice }));
+  const handleStep3Complete = (menu: { id: string; displayName: string; basePrice: number; maridajePrice: number; noloPrice: number }) => {
+    setReservationData((prev) => {
+      const people = prev.numberOfPeople;
+      const harmony = defaultHarmony(people);
+      return {
+        ...prev,
+        menuId: menu.id,
+        menuName: menu.displayName,
+        menuBasePrice: menu.basePrice,
+        maridajePrice: menu.maridajePrice,
+        noloPrice: menu.noloPrice,
+        harmonyNone: harmony.none,
+        harmonyVino: harmony.vino,
+        harmonyNolo: harmony.nolo,
+      };
+    });
     setCurrentStep(4);
   };
 
-  const handleStep4Complete = (numberOfPeople: number) => {
-    setReservationData(prev => ({ ...prev, numberOfPeople }));
+  const handleStep4Complete = (numberOfPeople: number, harmony: HarmonyBreakdown) => {
+    setReservationData((prev) => ({
+      ...prev,
+      numberOfPeople,
+      harmonyNone: harmony.none,
+      harmonyVino: harmony.vino,
+      harmonyNolo: harmony.nolo,
+    }));
     setCurrentStep(5);
   };
 
   const handleBack = () => {
-    if (currentStep > 1) {
-      setCurrentStep(currentStep - 1);
-    }
+    if (currentStep > 1) setCurrentStep(currentStep - 1);
+  };
+
+  const harmony: HarmonyBreakdown = {
+    none: reservationData.harmonyNone,
+    vino: reservationData.harmonyVino,
+    nolo: reservationData.harmonyNolo,
   };
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Hero con imagen */}
       <section className="relative h-[75vh] min-h-[520px] overflow-hidden">
         <Image
           src="/images/heroes/reservas.jpg"
@@ -95,57 +128,42 @@ export default function ReservasPage() {
           >
             Reservas
           </h1>
-          <p className="text-white/75 mt-3 text-base font-light">
-            Tres mesas · Experiencia única
-          </p>
+          <p className="text-white/75 mt-3 text-base font-light">Tres mesas · Experiencia única</p>
         </div>
       </section>
 
       <div className="section-container">
         <div className="max-w-4xl mx-auto">
-          {/* Header */}
           <div className="text-center mb-8 sm:mb-12">
             <p className="text-base sm:text-lg text-gray-600">
               Complete el proceso de reserva en 5 sencillos pasos
             </p>
           </div>
 
-          {/* Step Indicator */}
           <StepIndicator currentStep={currentStep} />
 
-          {/* Steps */}
           <div className="bg-white p-4 sm:p-8 md:p-12 mt-6 sm:mt-12">
-            {currentStep === 1 && (
-              <Step1Date onComplete={handleStep1Complete} />
-            )}
+            {currentStep === 1 && <Step1Date onComplete={handleStep1Complete} />}
             {currentStep === 2 && reservationData.date && (
-              <Step2Time
-                date={reservationData.date}
-                onComplete={handleStep2Complete}
-                onBack={handleBack}
-              />
+              <Step2Time date={reservationData.date} onComplete={handleStep2Complete} onBack={handleBack} />
             )}
-            {currentStep === 3 && (
-              <Step3Menu
-                onComplete={handleStep3Complete}
-                onBack={handleBack}
-              />
-            )}
-            {currentStep === 4 && (
+            {currentStep === 3 && <Step3Menu onComplete={handleStep3Complete} onBack={handleBack} />}
+            {currentStep === 4 && reservationData.menuId && (
               <Step4People
                 minPeople={reservationData.minPeople}
                 maxPeople={reservationData.maxPeople}
                 initialPeople={reservationData.numberOfPeople}
+                initialHarmony={harmony}
+                menuId={reservationData.menuId}
+                menuDisplayName={reservationData.menuName || ""}
+                menuBasePrice={reservationData.menuBasePrice}
+                maridajePrice={reservationData.maridajePrice}
+                noloPrice={reservationData.noloPrice}
                 onComplete={handleStep4Complete}
                 onBack={handleBack}
               />
             )}
-            {currentStep === 5 && (
-              <Step5Details
-                reservationData={reservationData}
-                onBack={handleBack}
-              />
-            )}
+            {currentStep === 5 && <Step5Details reservationData={reservationData} onBack={handleBack} />}
           </div>
         </div>
       </div>

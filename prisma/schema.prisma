@@ -105,8 +105,12 @@ model Reservation {
   numberOfPeople    Int
   
   // Menu
+  menuId            String?
   menuName          String?
-  menuPrice         Decimal?          @db.Decimal(10, 2)
+  menuPrice         Decimal?          @db.Decimal(10, 2)  // Precio base del menú por persona
+  harmonyNone       Int               @default(0)
+  harmonyVino       Int               @default(0)
+  harmonyNolo       Int               @default(0)
   
   // Additional info
   observations      String?           @db.Text
@@ -256,8 +260,12 @@ model GiftCard {
   recipientEmail    String
   message           String?         @db.Text
   sendDate          DateTime        @db.Date
-  menuName          String?         // Nombre del menú regalado
+  menuName          String?         // Nombre del menú regalado (base)
+  menuId            String?
   numberOfPeople    Int             @default(1) // Personas incluidas en el bono
+  harmonyNone       Int             @default(0)
+  harmonyVino       Int             @default(0)
+  harmonyNolo       Int             @default(0)
 
   // Payment
   stripePaymentIntentId String?     @unique

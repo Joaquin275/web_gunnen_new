@@ -13,6 +13,7 @@
 
 import { generateIcs, googleCalendarLink, reservationIcsOptions, reservationStartDate } from "./ics";
 import { generateGiftCardPdf } from "./pdf";
+import { formatHarmonyHtml, formatHarmonySummary } from "./menus";
 
 const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || "reservas@gunnen.es";
 const ADMIN_EMAILS = [
@@ -96,6 +97,9 @@ export interface ReservationEmailData {
   reservationTime: string;
   numberOfPeople: number;
   menuName?: string;
+  harmonyNone?: number;
+  harmonyVino?: number;
+  harmonyNolo?: number;
   estimatedTotal?: number;
   depositAmount: number;
   redsysOrder?: string;
@@ -112,6 +116,9 @@ export interface GiftCardData {
   pricePerPerson?: number;
   numberOfPeople?: number;
   menuName?: string;
+  harmonyNone?: number;
+  harmonyVino?: number;
+  harmonyNolo?: number;
   code: string;
   message?: string;
   expiresAt: string;
@@ -121,6 +128,10 @@ export interface AdminGiftCardNotificationData {
   code: string;
   amount: number;
   menuName?: string;
+  numberOfPeople?: number;
+  harmonyNone?: number;
+  harmonyVino?: number;
+  harmonyNolo?: number;
   purchaserName: string;
   purchaserEmail: string;
   recipientName?: string;
@@ -158,6 +169,9 @@ function formatDate(d: Date | string) {
 
 function reservationBox(data: ReservationEmailData, extraRows = "") {
   const formattedDate = formatDate(data.reservationDate);
+  const harmonyRow = (data.harmonyVino || data.harmonyNolo)
+    ? formatHarmonyHtml({ none: data.harmonyNone || 0, vino: data.harmonyVino || 0, nolo: data.harmonyNolo || 0 })
+    : "";
   return `
     <div class="box">
       <div class="row"><span class="lbl">N.º Reserva</span><span class="val">#${data.reservationId.slice(-6).toUpperCase()}</span></div>
@@ -167,6 +181,7 @@ function reservationBox(data: ReservationEmailData, extraRows = "") {
       <div class="row"><span class="lbl">Hora</span><span class="val">${data.reservationTime}</span></div>
       <div class="row"><span class="lbl">Comensales</span><span class="val">${data.numberOfPeople} personas</span></div>
       ${data.menuName ? `<div class="row"><span class="lbl">Menú</span><span class="val">${data.menuName}</span></div>` : ""}
+      ${harmonyRow}
       ${data.estimatedTotal ? `<div class="row"><span class="lbl">Total estimado</span><span class="val">${Number(data.estimatedTotal).toFixed(2)}€</span></div>` : ""}
       <div class="row"><span class="lbl">Retención garantía</span><span class="val">${Number(data.depositAmount).toFixed(2)}€</span></div>
       ${extraRows}
@@ -561,6 +576,9 @@ export async function sendAdminGiftCardNotification(data: AdminGiftCardNotificat
   if (!resend) return;
 
   const menuLabel = data.menuName || "Experiencia gastronómica";
+  const harmonySummary = (data.harmonyVino || data.harmonyNolo)
+    ? formatHarmonySummary({ none: data.harmonyNone || 0, vino: data.harmonyVino || 0, nolo: data.harmonyNolo || 0 })
+    : "";
 
   const content = `
     <h2>Nueva venta de bono regalo</h2>
@@ -569,6 +587,8 @@ export async function sendAdminGiftCardNotification(data: AdminGiftCardNotificat
     <div class="box">
       <div class="row"><span class="lbl">Código asignado</span><span class="val" style="font-family:monospace;letter-spacing:2px">${data.code}</span></div>
       <div class="row"><span class="lbl">Menú</span><span class="val">${menuLabel}</span></div>
+      ${data.numberOfPeople ? `<div class="row"><span class="lbl">Personas</span><span class="val">${data.numberOfPeople}</span></div>` : ""}
+      ${harmonySummary ? `<div class="row"><span class="lbl">Armonía</span><span class="val">${harmonySummary}</span></div>` : ""}
       <div class="row"><span class="lbl">Importe</span><span class="val">${data.amount.toFixed(2)}€</span></div>
       <div class="row"><span class="lbl">Comprador</span><span class="val">${data.purchaserName} (${data.purchaserEmail})</span></div>
       <div class="row"><span class="lbl">Destinatario</span><span class="val">${data.recipientName || data.purchaserName} (${data.recipientEmail})</span></div>
@@ -605,6 +625,9 @@ export async function sendGiftCard(data: GiftCardData) {
   if (!resend) return;
 
   const menuLabel = data.menuName || "Experiencia gastronómica";
+  const harmonySummary = (data.harmonyVino || data.harmonyNolo)
+    ? formatHarmonySummary({ none: data.harmonyNone || 0, vino: data.harmonyVino || 0, nolo: data.harmonyNolo || 0 })
+    : "";
 
   const content = `
     <h2>Has recibido un bono regalo</h2>
@@ -615,6 +638,7 @@ export async function sendGiftCard(data: GiftCardData) {
     <div class="box">
       <div class="row"><span class="lbl">Menú</span><span class="val" style="font-weight:600">${menuLabel}</span></div>
       ${data.numberOfPeople ? `<div class="row"><span class="lbl">Personas</span><span class="val">${data.numberOfPeople} ${data.numberOfPeople === 1 ? "persona" : "personas"}</span></div>` : ""}
+      ${harmonySummary ? `<div class="row"><span class="lbl">Armonía</span><span class="val">${harmonySummary}</span></div>` : ""}
       ${data.pricePerPerson && data.numberOfPeople && data.numberOfPeople > 1
         ? `<div class="row"><span class="lbl">Precio por persona</span><span class="val">${data.pricePerPerson.toFixed(2)}€</span></div>`
         : ""}

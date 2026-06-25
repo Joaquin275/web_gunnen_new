@@ -7,12 +7,14 @@
 import { NextResponse } from "next/server";
 import { buildRedsysForm, generateRedsysOrder, eurToCents } from "@/lib/redsys";
 import { claimAvailableGiftCard } from "@/lib/giftcards-pool";
+import { calcOrderTotal, getMenuById, isHarmonyValid, defaultHarmony } from "@/lib/menus";
 
 export async function POST(request: Request) {
   try {
     const data = await request.json();
     const {
-      amount, pricePerPerson, numberOfPeople, menuName,
+      amount, menuId, menuName, menuBasePrice,
+      numberOfPeople, harmonyNone, harmonyVino, harmonyNolo,
       purchaserName, purchaserEmail,
       recipientName, recipientEmail,
       message, sendDate,
@@ -21,7 +23,7 @@ export async function POST(request: Request) {
     if (!amount || Number(amount) <= 0) {
       return NextResponse.json({ error: "Importe inválido" }, { status: 400 });
     }
-    if (!menuName) {
+    if (!menuName || !menuId) {
       return NextResponse.json({ error: "Debes seleccionar un menú" }, { status: 400 });
     }
 
@@ -34,21 +36,38 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Pasarela de pago no configurada" }, { status: 500 });
     }
 
+    const people = Number(numberOfPeople) || 1;
+    const menu = getMenuById(menuId);
+    const harmony = {
+      none: Number(harmonyNone ?? people),
+      vino: Number(harmonyVino ?? 0),
+      nolo: Number(harmonyNolo ?? 0),
+    };
+    if (!isHarmonyValid(people, harmony)) {
+      Object.assign(harmony, defaultHarmony(people));
+    }
+
+    const serverTotal = menu ? calcOrderTotal(menu.id, people, harmony) : Number(amount);
+    if (Math.abs(serverTotal - Number(amount)) > 0.02) {
+      return NextResponse.json({ error: "El importe no coincide con la selección. Recarga la página e inténtalo de nuevo." }, { status: 400 });
+    }
+
     const redsysOrder = generateRedsysOrder();
-    const amountCents = eurToCents(Number(amount));
+    const amountCents = eurToCents(serverTotal);
 
     const expiresAt = new Date();
     expiresAt.setMonth(expiresAt.getMonth() + 6);
 
     const parsedSendDate = sendDate ? new Date(sendDate) : new Date();
 
-    // Asignar un código aleatorio del inventario pre-cargado por el admin
-    const people = Number(numberOfPeople) || 1;
     const giftCard = await claimAvailableGiftCard({
-      amount: Number(amount),
-      pricePerPerson: Number(pricePerPerson) || Number(amount),
-      numberOfPeople: people,
+      amount: serverTotal,
+      menuId,
       menuName,
+      numberOfPeople: people,
+      harmonyNone: harmony.none,
+      harmonyVino: harmony.vino,
+      harmonyNolo: harmony.nolo,
       purchaserName: purchaserName || "—",
       purchaserEmail: purchaserEmail || "—",
       recipientName: recipientName || undefined,
@@ -90,6 +109,7 @@ export async function POST(request: Request) {
       redsysOrder,
       amountCents,
       redsysForm,
+      menuBasePrice,
     });
   } catch (error: unknown) {
     const msg = error instanceof Error ? error.message : "Error preparando el pago";

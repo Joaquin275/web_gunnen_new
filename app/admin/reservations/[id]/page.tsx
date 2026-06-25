@@ -77,8 +77,20 @@ export default async function ReservationDetailPage({ params }: { params: Promis
           </div>
           <div>
             <p className="text-xs text-gray-400">Menú</p>
-            <p>{r.menuName || "—"} {r.menuPrice ? `· ${r.menuPrice}€/persona` : ""}</p>
+            <p>{r.menuName || "—"} {r.menuPrice ? `· ${r.menuPrice}€ base/persona` : ""}</p>
           </div>
+          {(r.harmonyVino > 0 || r.harmonyNolo > 0) && (
+            <div>
+              <p className="text-xs text-gray-400">Armonía</p>
+              <p className="text-sm">
+                {[
+                  r.harmonyNone > 0 ? `Solo menú: ${r.harmonyNone}` : null,
+                  r.harmonyVino > 0 ? `Vino: ${r.harmonyVino}` : null,
+                  r.harmonyNolo > 0 ? `No/Low: ${r.harmonyNolo}` : null,
+                ].filter(Boolean).join(" · ")}
+              </p>
+            </div>
+          )}
           <div>
             <p className="text-xs text-gray-400">Total estimado</p>
             <p className="font-medium">{Number(r.estimatedTotal).toFixed(2)}€</p>
