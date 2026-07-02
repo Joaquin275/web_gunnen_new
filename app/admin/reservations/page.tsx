@@ -35,7 +35,17 @@ interface Reservation {
   depositAmount: number;
   status: string;
   redsysStatus: string | null;
+  confirmedAt: string | null;
   attendanceConfirmedAt: string | null;
+}
+
+const PREAUTH_WARN_DAYS = 5;  // aviso a partir de 5 días
+const PREAUTH_EXPIRY_DAYS = 7; // caduca a los 7 días
+
+function preauthAgeInfo(r: Reservation): { days: number; warn: boolean; expired: boolean } | null {
+  if (r.redsysStatus !== "PREAUTHORIZED" || !r.confirmedAt) return null;
+  const days = Math.floor((Date.now() - new Date(r.confirmedAt).getTime()) / (24 * 60 * 60 * 1000));
+  return { days, warn: days >= PREAUTH_WARN_DAYS, expired: days >= PREAUTH_EXPIRY_DAYS };
 }
 
 function statusLabel(status: string) {
@@ -243,12 +253,16 @@ export default function AdminReservationsPage() {
               <tbody className="divide-y divide-gray-100">
                 {reservations.map((r) => {
                   const { label, cls } = statusLabel(r.status);
+                  const preauth = preauthAgeInfo(r);
                   const redsysCls =
+                    preauth?.expired ? "text-orange-600 font-semibold" :
+                    preauth?.warn ? "text-amber-600 font-semibold" :
                     r.redsysStatus === "PREAUTHORIZED" ? "text-blue-700" :
                     r.redsysStatus === "CAPTURED" ? "text-green-700" :
-                    r.redsysStatus === "REJECTED" ? "text-red-600" : "text-gray-400";
+                    r.redsysStatus === "REJECTED" ? "text-red-600" :
+                    r.redsysStatus === "PREAUTH_EXPIRED" ? "text-orange-500" : "text-gray-400";
                   return (
-                    <tr key={r.id} className="hover:bg-gray-50 transition-colors">
+                    <tr key={r.id} className={`hover:bg-gray-50 transition-colors ${preauth?.expired ? "bg-orange-50" : preauth?.warn ? "bg-amber-50" : ""}`}>
                       <td className="px-4 py-3 whitespace-nowrap">
                         <span className="font-medium">
                           {new Date(r.reservationDate).toLocaleDateString("es-ES", { day: "2-digit", month: "2-digit", year: "numeric" })}
@@ -266,7 +280,12 @@ export default function AdminReservationsPage() {
                         <span className={`text-xs px-2 py-1 tracking-wider uppercase ${cls}`}>{label}</span>
                       </td>
                       <td className={`px-4 py-3 text-center text-xs font-medium ${redsysCls}`}>
-                        {r.redsysStatus || "—"}
+                        {preauth?.expired
+                          ? <span title={`${preauth.days} días — retención caducada`}>⚠️ CADUCADA ({preauth.days}d)</span>
+                          : preauth?.warn
+                            ? <span title={`${preauth.days} días — caduca pronto`}>⏳ {preauth.days}d</span>
+                            : r.redsysStatus || "—"
+                        }
                       </td>
                       <td className="px-4 py-3 text-center">
                         {r.status === "CONFIRMED" ? (
