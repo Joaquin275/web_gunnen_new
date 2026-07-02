@@ -124,6 +124,7 @@ export default function Step5Details({ reservationData, onBack }: Step5DetailsPr
         body: JSON.stringify({
           code: formData.giftCardCode.trim().toUpperCase(),
           estimatedTotal: menuTotal,
+          menuId: reservationData.menuId,
           menuName: reservationData.menuName,
           numberOfPeople: reservationData.numberOfPeople,
           harmonyNone: reservationData.harmonyNone,

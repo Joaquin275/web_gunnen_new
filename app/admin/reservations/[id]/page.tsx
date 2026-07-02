@@ -5,6 +5,10 @@ import CancelButton from "./CancelButton";
 import CaptureButton from "./CaptureButton";
 import VoidButton from "./VoidButton";
 import RefundButton from "./RefundButton";
+import MarkExpiredButton from "./MarkExpiredButton";
+
+// Las preautorizaciones Redsys caducan a los 7 días
+const PREAUTH_EXPIRY_DAYS = 7;
 
 export default async function ReservationDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -24,11 +28,21 @@ export default async function ReservationDetailPage({ params }: { params: Promis
     REJECTED: { label: "Rechazado", cls: "bg-red-100 text-red-700" },
     REFUNDED: { label: "Liberado", cls: "bg-gray-100 text-gray-500" },
     GIFT_CARD: { label: "Bono regalo", cls: "bg-purple-100 text-purple-700" },
+    PREAUTH_EXPIRED: { label: "Retención caducada", cls: "bg-orange-100 text-orange-700" },
   };
 
   const { label, cls } = statusMap[r.status] ?? { label: r.status, cls: "bg-gray-100 text-gray-700" };
   const redsysStatusKey = (r.redsysStatus as string) || "NONE";
   const redsysStatusInfo = redsysStatusMap[redsysStatusKey] ?? { label: redsysStatusKey, cls: "bg-gray-100 text-gray-700" };
+
+  // Calcular si la preautorización ha superado los 7 días
+  const confirmedAt = r.confirmedAt;
+  const preauthExpired = redsysStatusKey === "PREAUTHORIZED" && confirmedAt
+    ? (Date.now() - new Date(confirmedAt).getTime()) > PREAUTH_EXPIRY_DAYS * 24 * 60 * 60 * 1000
+    : false;
+  const preauthAgeDays = confirmedAt
+    ? Math.floor((Date.now() - new Date(confirmedAt).getTime()) / (24 * 60 * 60 * 1000))
+    : null;
 
   return (
     <div className="space-y-6 max-w-3xl">
@@ -150,8 +164,29 @@ export default async function ReservationDetailPage({ params }: { params: Promis
 
       {/* ── Acciones Redsys ──────────────────────────────────────── */}
 
+      {/* Aviso: preautorización caducada (>7 días) */}
+      {redsysStatusKey === "PREAUTHORIZED" && preauthExpired && (
+        <div className="bg-orange-50 border-2 border-orange-400 p-5">
+          <p className="font-semibold text-orange-900 mb-2">
+            ⚠️ Preautorización caducada — {preauthAgeDays} días desde la retención
+          </p>
+          <p className="text-sm text-orange-800 mb-3">
+            Las retenciones Redsys caducan a los <strong>{PREAUTH_EXPIRY_DAYS} días</strong>. Esta preautorización fue creada hace <strong>{preauthAgeDays} días</strong>, por lo que Redsys ya no puede procesarla y devolverá el código <strong>9999</strong>.
+          </p>
+          <p className="text-sm text-orange-800 mb-4">
+            La retención habrá quedado <strong>liberada automáticamente por el banco</strong> del cliente tras esos 7 días. No es necesario ninguna acción adicional — el cliente no ha sido cobrado.
+          </p>
+          <p className="text-sm text-orange-700">
+            Puedes marcar esta reserva como &ldquo;Retención caducada&rdquo; para reflejar su estado real en el panel.
+          </p>
+          <div className="mt-4">
+            <MarkExpiredButton id={id} />
+          </div>
+        </div>
+      )}
+
       {/* Type 2: Cobrar garantía — preautorización activa, cliente no se presentó */}
-      {redsysStatusKey === "PREAUTHORIZED" && Number(r.depositAmount) > 0 && (
+      {redsysStatusKey === "PREAUTHORIZED" && !preauthExpired && Number(r.depositAmount) > 0 && (
         <div className="bg-amber-50 border border-amber-300 p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
             <p className="font-medium text-amber-900">
@@ -167,7 +202,7 @@ export default async function ReservationDetailPage({ params }: { params: Promis
       )}
 
       {/* Type 9: Liberar retención — preautorización activa, cliente se presentó o canceló en plazo */}
-      {redsysStatusKey === "PREAUTHORIZED" && Number(r.depositAmount) > 0 && (
+      {redsysStatusKey === "PREAUTHORIZED" && !preauthExpired && Number(r.depositAmount) > 0 && (
         <div className="bg-green-50 border border-green-300 p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
             <p className="font-medium text-green-900">
