@@ -64,7 +64,7 @@ export default async function PrensaPage() {
                     {post.coverImage && (
                       <div className="mb-6 aspect-[16/9] overflow-hidden bg-gray-100">
                         <img
-                          src={post.coverImage}
+                          src={`/api/image-proxy?url=${encodeURIComponent(post.coverImage)}`}
                           alt={post.title}
                           className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
                         />

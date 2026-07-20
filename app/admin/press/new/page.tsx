@@ -96,15 +96,38 @@ export default function NewPressPage() {
         <div>
           <label className="block text-xs tracking-wider uppercase text-gray-500 mb-1">Imagen de portada</label>
           <input
-            type="url"
+            type="text"
             value={form.coverImage}
             onChange={(e) => setForm((f) => ({ ...f, coverImage: e.target.value }))}
             className="input-premium w-full border border-gray-200 px-3 py-2 focus:outline-none focus:border-primary text-sm"
             placeholder="https://..."
           />
           <p className="text-xs text-gray-400 mt-1">
-            Pega la URL de la imagen de la noticia. Si la dejas vacía, la noticia se mostrará sin portada.
+            Pega la URL directa de la imagen (debe terminar en .jpg, .png, .webp…). Las URLs de páginas de noticias no funcionan — busca la URL directa de la imagen.
           </p>
+          {form.coverImage && (
+            <div className="mt-3 border border-gray-200 p-2 bg-gray-50">
+              <p className="text-xs text-gray-400 mb-2">Vista previa:</p>
+              <img
+                src={form.coverImage}
+                alt="Vista previa"
+                className="max-h-48 w-auto object-contain"
+                onError={(e) => {
+                  (e.currentTarget as HTMLImageElement).style.display = "none";
+                  const msg = e.currentTarget.nextSibling as HTMLElement;
+                  if (msg) msg.style.display = "block";
+                }}
+                onLoad={(e) => {
+                  (e.currentTarget as HTMLImageElement).style.display = "block";
+                  const msg = e.currentTarget.nextSibling as HTMLElement;
+                  if (msg) msg.style.display = "none";
+                }}
+              />
+              <p className="text-xs text-red-500 mt-1" style={{ display: "none" }}>
+                ⚠️ Esta URL no carga ninguna imagen. Prueba con la URL directa del archivo de imagen (termina en .jpg, .png, .webp…).
+              </p>
+            </div>
+          )}
         </div>
 
         <div>

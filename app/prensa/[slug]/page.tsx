@@ -37,7 +37,7 @@ export default async function PressDetailPage({ params }: { params: Promise<{ sl
           {post.coverImage && (
             <div className="mb-12 overflow-hidden bg-gray-100">
               <img
-                src={post.coverImage}
+                src={`/api/image-proxy?url=${encodeURIComponent(post.coverImage)}`}
                 alt={post.title}
                 className="w-full h-auto"
               />
