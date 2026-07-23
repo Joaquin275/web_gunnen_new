@@ -54,11 +54,16 @@ export default function Header() {
               alt="Gunnen"
               className="h-10 sm:h-14 md:h-16 w-auto"
             />
-            <div className={`border-l pl-2 sm:pl-3 transition-colors duration-300 ${isWhite ? "border-gray-200" : "border-white/40"}`}>
+            <div className={`border-l pl-2 sm:pl-3 flex items-center gap-2 sm:gap-3 transition-colors duration-300 ${isWhite ? "border-gray-200" : "border-white/40"}`}>
               <img
-                src="/images/logo/premio-sol-repsol.jpg"
-                alt="Premio Sol Repsol"
-                className="h-14 sm:h-20 md:h-24 w-auto"
+                src="/images/logo/michelin-seleccionado.png"
+                alt="Michelin Seleccionado"
+                className="h-10 sm:h-14 md:h-16 w-auto"
+              />
+              <img
+                src="/images/logo/sol-guia-repsol-2026.jpeg"
+                alt="1 Sol Guía Repsol 2026"
+                className="h-10 sm:h-14 md:h-16 w-auto"
               />
             </div>
           </Link>
@@ -106,11 +111,16 @@ export default function Header() {
               alt="Gunnen"
               className="h-12 w-auto brightness-0 invert"
             />
-            <div className="border-l border-white/30 pl-3">
+            <div className="border-l border-white/30 pl-3 flex items-center gap-2 sm:gap-3">
               <img
-                src="/images/logo/premio-sol-repsol.jpg"
-                alt="Premio Sol Repsol"
-                className="h-10 w-auto"
+                src="/images/logo/michelin-seleccionado.png"
+                alt="Michelin Seleccionado"
+                className="h-9 w-auto"
+              />
+              <img
+                src="/images/logo/sol-guia-repsol-2026.jpeg"
+                alt="1 Sol Guía Repsol 2026"
+                className="h-9 w-auto"
               />
             </div>
           </div>
