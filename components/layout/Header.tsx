@@ -61,7 +61,7 @@ export default function Header() {
                 className="h-12 sm:h-16 md:h-20 w-auto"
               />
               <img
-                src="/images/logo/sol-guia-repsol-2026.jpeg"
+                src="/images/logo/sol-guia-repsol-2026-curva.png"
                 alt="1 Sol Guía Repsol 2026"
                 className="h-10 sm:h-14 md:h-16 w-auto"
               />
@@ -118,7 +118,7 @@ export default function Header() {
                 className="h-11 w-auto"
               />
               <img
-                src="/images/logo/sol-guia-repsol-2026.jpeg"
+                src="/images/logo/sol-guia-repsol-2026-curva.png"
                 alt="1 Sol Guía Repsol 2026"
                 className="h-9 w-auto"
               />
