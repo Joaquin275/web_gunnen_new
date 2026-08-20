@@ -201,7 +201,6 @@ export default function Step1Date({ onComplete }: Step1DateProps) {
       <div className="mt-4 text-xs text-gray-400 space-y-1">
         <p>• Dom–Lun cerrado</p>
         <p>• El punto indica disponibilidad</p>
-        <p>• Reservas con hasta 6 meses de antelación</p>
       </div>
     </div>
   );

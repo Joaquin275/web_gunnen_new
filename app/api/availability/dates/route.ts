@@ -1,9 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getWeeklySchedule, getOpenDayNumbers } from "@/lib/schedule";
-import { addDaysToDateKey, madridDateKey } from "@/lib/timezone";
-
-const BOOKING_WINDOW_DAYS = 180;
+import { addDaysToDateKey, getMadridParts, madridDateKey } from "@/lib/timezone";
 
 export async function GET() {
   try {
@@ -15,10 +13,14 @@ export async function GET() {
     const schedule = await getWeeklySchedule();
     const openDays = getOpenDayNumbers(schedule);
 
+    // Abierto el resto del año en curso y los dos siguientes (sin tope de 6 meses)
+    const { year } = getMadridParts();
+    const lastDate = `${year + 2}-12-31`;
+
     const dates: string[] = [];
     let cursor = madridDateKey();
 
-    for (let i = 0; i < BOOKING_WINDOW_DAYS; i++) {
+    while (cursor < lastDate) {
       cursor = addDaysToDateKey(cursor, 1);
       const [y, m, d] = cursor.split("-").map(Number);
       const dayOfWeek = new Date(Date.UTC(y, m - 1, d)).getUTCDay();
