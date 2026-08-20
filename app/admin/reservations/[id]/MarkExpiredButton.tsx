@@ -3,14 +3,14 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-export default function MarkExpiredButton({ id }: { id: string }) {
+export default function MarkExpiredButton({ id, expiryDays = 30 }: { id: string; expiryDays?: number }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(false);
 
   const handleMark = async () => {
     const confirmed = window.confirm(
-      "¿Marcar esta retención como caducada?\n\nConfirmas que la preautorización lleva más de 7 días y Redsys ya no puede operarla. El banco habrá liberado la retención automáticamente.\n\nEsta acción solo actualiza el estado en el panel — no realiza ninguna llamada a Redsys."
+      `¿Marcar esta retención como caducada?\n\nConfirmas que la preautorización lleva más de ${expiryDays} días y Redsys ya no puede operarla. El banco habrá liberado la retención automáticamente.\n\nEsta acción solo actualiza el estado en el panel — no realiza ninguna llamada a Redsys.`
     );
     if (!confirmed) return;
 

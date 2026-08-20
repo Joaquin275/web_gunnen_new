@@ -6,7 +6,8 @@ import { authOptions } from "@/lib/auth";
 /**
  * POST /api/admin/reservations/[id]/mark-expired
  * Marca manualmente una preautorización como caducada.
- * Usado cuando la preautorización lleva más de 7 días y Redsys ya no puede operarla.
+ * Usado cuando la preautorización ha superado su plazo (7 días antes de agosto 2026, 30 días a partir de agosto)
+ * y Redsys ya no puede operarla.
  * La retención habrá sido liberada automáticamente por el banco.
  */
 export async function POST(

@@ -6,9 +6,7 @@ import CaptureButton from "./CaptureButton";
 import VoidButton from "./VoidButton";
 import RefundButton from "./RefundButton";
 import MarkExpiredButton from "./MarkExpiredButton";
-
-// Las preautorizaciones Redsys caducan a los 7 días
-const PREAUTH_EXPIRY_DAYS = 7;
+import { getPreauthAgeInfo } from "@/lib/preauth";
 
 export default async function ReservationDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -35,14 +33,16 @@ export default async function ReservationDetailPage({ params }: { params: Promis
   const redsysStatusKey = (r.redsysStatus as string) || "NONE";
   const redsysStatusInfo = redsysStatusMap[redsysStatusKey] ?? { label: redsysStatusKey, cls: "bg-gray-100 text-gray-700" };
 
-  // Calcular si la preautorización ha superado los 7 días
+  // Plazo de caducidad: 7 días antes de agosto 2026, 30 días a partir de agosto
   const confirmedAt = r.confirmedAt;
-  const preauthExpired = redsysStatusKey === "PREAUTHORIZED" && confirmedAt
-    ? (Date.now() - new Date(confirmedAt).getTime()) > PREAUTH_EXPIRY_DAYS * 24 * 60 * 60 * 1000
-    : false;
-  const preauthAgeDays = confirmedAt
-    ? Math.floor((Date.now() - new Date(confirmedAt).getTime()) / (24 * 60 * 60 * 1000))
+  const preauth = confirmedAt && redsysStatusKey === "PREAUTHORIZED"
+    ? getPreauthAgeInfo(confirmedAt)
     : null;
+  const preauthExpired = !!preauth?.expired;
+  const preauthAgeDays = preauth?.days ?? (confirmedAt
+    ? Math.floor((Date.now() - new Date(confirmedAt).getTime()) / (24 * 60 * 60 * 1000))
+    : null);
+  const expiryDays = preauth?.expiryDays ?? 30;
 
   return (
     <div className="space-y-6 max-w-3xl">
@@ -164,23 +164,36 @@ export default async function ReservationDetailPage({ params }: { params: Promis
 
       {/* ── Acciones Redsys ──────────────────────────────────────── */}
 
-      {/* Aviso: preautorización caducada (>7 días) */}
+      {/* Aviso: preautorización próxima a caducar */}
+      {redsysStatusKey === "PREAUTHORIZED" && preauth?.warn && (
+        <div className="bg-amber-50 border border-amber-300 p-5">
+          <p className="font-semibold text-amber-900 mb-2">
+            ⏳ Retención próxima a caducar — {preauthAgeDays} de {expiryDays} días
+          </p>
+          <p className="text-sm text-amber-800">
+            Quedan <strong>{expiryDays - (preauthAgeDays ?? 0)} días</strong> para cobrar o liberar esta preautorización.
+            A partir del día {expiryDays} Redsys ya no podrá operarla.
+          </p>
+        </div>
+      )}
+
+      {/* Aviso: preautorización caducada */}
       {redsysStatusKey === "PREAUTHORIZED" && preauthExpired && (
         <div className="bg-orange-50 border-2 border-orange-400 p-5">
           <p className="font-semibold text-orange-900 mb-2">
             ⚠️ Preautorización caducada — {preauthAgeDays} días desde la retención
           </p>
           <p className="text-sm text-orange-800 mb-3">
-            Las retenciones Redsys caducan a los <strong>{PREAUTH_EXPIRY_DAYS} días</strong>. Esta preautorización fue creada hace <strong>{preauthAgeDays} días</strong>, por lo que Redsys ya no puede procesarla y devolverá el código <strong>9999</strong>.
+            Las retenciones Redsys de esta reserva caducan a los <strong>{expiryDays} días</strong>. Esta preautorización fue creada hace <strong>{preauthAgeDays} días</strong>, por lo que Redsys ya no puede procesarla y devolverá el código <strong>9999</strong>.
           </p>
           <p className="text-sm text-orange-800 mb-4">
-            La retención habrá quedado <strong>liberada automáticamente por el banco</strong> del cliente tras esos 7 días. No es necesario ninguna acción adicional — el cliente no ha sido cobrado.
+            La retención habrá quedado <strong>liberada automáticamente por el banco</strong> del cliente tras esos {expiryDays} días. No es necesario ninguna acción adicional — el cliente no ha sido cobrado.
           </p>
           <p className="text-sm text-orange-700">
             Puedes marcar esta reserva como &ldquo;Retención caducada&rdquo; para reflejar su estado real en el panel.
           </p>
           <div className="mt-4">
-            <MarkExpiredButton id={id} />
+            <MarkExpiredButton id={id} expiryDays={expiryDays} />
           </div>
         </div>
       )}

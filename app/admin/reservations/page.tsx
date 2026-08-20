@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
+import { getPreauthAgeInfo } from "@/lib/preauth";
 
 const HORARIOS = [
   "13:30", "13:45", "14:00",
@@ -39,13 +40,9 @@ interface Reservation {
   attendanceConfirmedAt: string | null;
 }
 
-const PREAUTH_WARN_DAYS = 5;  // aviso a partir de 5 días
-const PREAUTH_EXPIRY_DAYS = 7; // caduca a los 7 días
-
-function preauthAgeInfo(r: Reservation): { days: number; warn: boolean; expired: boolean } | null {
+function preauthAgeInfo(r: Reservation) {
   if (r.redsysStatus !== "PREAUTHORIZED" || !r.confirmedAt) return null;
-  const days = Math.floor((Date.now() - new Date(r.confirmedAt).getTime()) / (24 * 60 * 60 * 1000));
-  return { days, warn: days >= PREAUTH_WARN_DAYS, expired: days >= PREAUTH_EXPIRY_DAYS };
+  return getPreauthAgeInfo(r.confirmedAt);
 }
 
 function statusLabel(status: string) {
@@ -281,9 +278,9 @@ export default function AdminReservationsPage() {
                       </td>
                       <td className={`px-4 py-3 text-center text-xs font-medium ${redsysCls}`}>
                         {preauth?.expired
-                          ? <span title={`${preauth.days} días — retención caducada`}>⚠️ CADUCADA ({preauth.days}d)</span>
+                          ? <span title={`${preauth.days} días de ${preauth.expiryDays} — retención caducada`}>⚠️ CADUCADA ({preauth.days}d)</span>
                           : preauth?.warn
-                            ? <span title={`${preauth.days} días — caduca pronto`}>⏳ {preauth.days}d</span>
+                            ? <span title={`${preauth.days} de ${preauth.expiryDays} días — caduca pronto`}>⏳ {preauth.days}/{preauth.expiryDays}d</span>
                             : r.redsysStatus || "—"
                         }
                       </td>

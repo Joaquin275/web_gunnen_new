@@ -42,7 +42,15 @@ export default function Step1Date({ onComplete }: Step1DateProps) {
     if (newMonth >= new Date(new Date().setDate(1))) setCurrentMonth(newMonth);
   };
 
+  const lastAvailable = availableDates.length > 0 ? availableDates[availableDates.length - 1] : null;
+  const canGoNext = !lastAvailable || (
+    currentMonth.getFullYear() < Number(lastAvailable.slice(0, 4)) ||
+    (currentMonth.getFullYear() === Number(lastAvailable.slice(0, 4)) &&
+      currentMonth.getMonth() < Number(lastAvailable.slice(5, 7)) - 1)
+  );
+
   const goToNextMonth = () => {
+    if (!canGoNext) return;
     const newMonth = new Date(currentMonth);
     newMonth.setMonth(currentMonth.getMonth() + 1);
     setCurrentMonth(newMonth);
@@ -91,7 +99,11 @@ export default function Step1Date({ onComplete }: Step1DateProps) {
           </svg>
         </button>
         <h3 className="text-base sm:text-xl font-serif font-light capitalize">{monthName}</h3>
-        <button onClick={goToNextMonth} className="p-2 hover:bg-gray-100 rounded transition-colors">
+        <button
+          onClick={goToNextMonth}
+          disabled={!canGoNext}
+          className="p-2 hover:bg-gray-100 rounded disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+        >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
           </svg>
@@ -189,6 +201,7 @@ export default function Step1Date({ onComplete }: Step1DateProps) {
       <div className="mt-4 text-xs text-gray-400 space-y-1">
         <p>• Dom–Lun cerrado</p>
         <p>• El punto indica disponibilidad</p>
+        <p>• Reservas con hasta 6 meses de antelación</p>
       </div>
     </div>
   );
