@@ -3,6 +3,7 @@
 import { usePathname } from "next/navigation";
 import Header from "./Header";
 import Footer from "./Footer";
+import VacationBanner from "./VacationBanner";
 
 const WHATSAPP_NUMBER = "34613739550";
 const WHATSAPP_MESSAGE = "Hola, me gustaría hacer una reserva en Gunnen.";
@@ -13,6 +14,7 @@ export default function LayoutShell({ children }: { children: React.ReactNode })
 
   return (
     <>
+      {!isAdmin && <VacationBanner />}
       {!isAdmin && <Header />}
       <main className="min-h-screen">
         {children}
