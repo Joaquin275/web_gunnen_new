@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 
 const VACATION_START = "2026-08-21";
-const VACATION_END   = "2026-09-08";
+const VACATION_END   = "2026-09-07";
 const STORAGE_KEY    = "gunnen_vacation_banner_dismissed";
 
 function todayStr() {
