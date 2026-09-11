@@ -23,6 +23,15 @@ export async function GET(request: Request) {
       where: {
         reservationDate: new Date(dateParam + "T00:00:00"),
         status: { in: ["CONFIRMED", "PENDING_PAYMENT"] },
+        // Las reservas PENDING_PAYMENT de más de 30 min se consideran abandonadas
+        // y no bloquean la franja (el cliente cerró Redsys sin pagar)
+        OR: [
+          { status: "CONFIRMED" },
+          {
+            status: "PENDING_PAYMENT",
+            createdAt: { gte: new Date(Date.now() - 30 * 60 * 1000) },
+          },
+        ],
       },
       select: { reservationTime: true },
     });

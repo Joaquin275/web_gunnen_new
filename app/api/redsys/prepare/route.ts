@@ -88,6 +88,18 @@ export async function POST(request: Request) {
 
     const redsysOrder = generateRedsysOrder();
 
+    // Limpiar reservas PENDING_PAYMENT previas del mismo cliente para esta fecha/hora
+    // (el cliente intentó pagar antes y cerró Redsys sin completarlo)
+    await prisma.reservation.updateMany({
+      where: {
+        email,
+        reservationDate: new Date(date + "T00:00:00"),
+        reservationTime: time,
+        status: "PENDING_PAYMENT",
+      },
+      data: { status: "CANCELLED" },
+    });
+
     const reservation = await prisma.reservation.create({
       data: {
         reservationDate: new Date(date + "T00:00:00"),
