@@ -4,7 +4,13 @@ import GiftCardsClient from "./GiftCardsClient";
 export const dynamic = "force-dynamic";
 
 export default async function AdminGiftCardsPage() {
-  const giftCards = await prisma.giftCard.findMany({ orderBy: { createdAt: "desc" } });
+  const giftCards = await prisma.giftCard.findMany({
+    where: {
+      // Solo mostrar bonos con pago completado — los PENDING_PAYMENT son intentos abandonados
+      status: { not: "PENDING_PAYMENT" },
+    },
+    orderBy: { createdAt: "desc" },
+  });
 
   const serialized = giftCards.map((g) => ({
     id: g.id,

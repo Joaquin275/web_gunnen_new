@@ -21,7 +21,6 @@ interface BulkRow {
 function statusLabel(status: string) {
   if (status === "AVAILABLE") return { label: "Disponible", cls: "bg-blue-100 text-blue-700" };
   if (status === "ACTIVE") return { label: "Activo", cls: "bg-green-100 text-green-700" };
-  if (status === "PENDING_PAYMENT") return { label: "Pendiente pago", cls: "bg-yellow-100 text-yellow-700" };
   if (status === "REDEEMED") return { label: "Canjeado", cls: "bg-gray-100 text-gray-500" };
   if (status === "CANCELLED") return { label: "Cancelado", cls: "bg-red-100 text-red-600" };
   return { label: "Expirado", cls: "bg-red-100 text-red-700" };
