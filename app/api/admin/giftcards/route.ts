@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { inventoryDefaults } from "@/lib/giftcards-pool";
+import { sendGiftCard } from "@/lib/email";
 
 const CODE_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 function generateCode(): string {
@@ -29,7 +30,10 @@ function serialize(g: Awaited<ReturnType<typeof prisma.giftCard.findMany>>[numbe
 }
 
 export async function GET() {
-  const giftCards = await prisma.giftCard.findMany({ orderBy: { createdAt: "desc" } });
+  const giftCards = await prisma.giftCard.findMany({
+    where: { status: { not: "PENDING_PAYMENT" } },
+    orderBy: { createdAt: "desc" },
+  });
   return NextResponse.json(giftCards.map(serialize));
 }
 
@@ -51,6 +55,9 @@ export async function POST(req: NextRequest) {
 
     const defaults = inventoryDefaults(Number(amount), code);
 
+    const destEmail = (recipientEmail || buyerEmail || "").trim();
+    const destName = (recipientName || buyerName || "").trim();
+
     const giftCard = await prisma.giftCard.create({
       data: {
         ...defaults,
@@ -60,8 +67,8 @@ export async function POST(req: NextRequest) {
               status: "ACTIVE" as const,
               purchaserName: buyerName,
               purchaserEmail: buyerEmail,
-              recipientName: recipientName || buyerName,
-              recipientEmail: recipientEmail || buyerEmail,
+              recipientName: destName || buyerName,
+              recipientEmail: destEmail || buyerEmail,
               message: message || null,
               sendDate: sendDate ? new Date(sendDate) : new Date(),
               paidAt: new Date(),
@@ -70,7 +77,63 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    return NextResponse.json(serialize(giftCard));
+    let emailSent = false;
+    let emailError = "";
+    const isRealRecipient =
+      giftCard.status === "ACTIVE" &&
+      giftCard.recipientEmail &&
+      !giftCard.recipientEmail.includes("inventario@gunnen.local");
+
+    if (isRealRecipient) {
+      const expiresLabel = giftCard.expiresAt.toLocaleDateString("es-ES", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      });
+      const common = {
+        amount: Number(giftCard.amount),
+        numberOfPeople: giftCard.numberOfPeople || 1,
+        menuName: giftCard.menuName || undefined,
+        harmonyNone: giftCard.harmonyNone,
+        harmonyVino: giftCard.harmonyVino,
+        harmonyNolo: giftCard.harmonyNolo,
+        code: giftCard.code,
+        expiresAt: expiresLabel,
+      };
+
+      try {
+        await sendGiftCard({
+          ...common,
+          recipientEmail: giftCard.recipientEmail,
+          recipientName: giftCard.recipientName || undefined,
+          purchaserName: giftCard.purchaserName,
+          message: giftCard.message || undefined,
+        });
+        emailSent = true;
+      } catch (err) {
+        console.error("[Admin GiftCard] Error enviando al destinatario:", err);
+        emailError = "El bono se creó, pero el email al destinatario falló.";
+      }
+
+      if (
+        giftCard.purchaserEmail !== giftCard.recipientEmail &&
+        !giftCard.purchaserEmail.includes("inventario@gunnen.local")
+      ) {
+        try {
+          await sendGiftCard({
+            ...common,
+            recipientEmail: giftCard.purchaserEmail,
+            recipientName: giftCard.purchaserName,
+            purchaserName: giftCard.purchaserName,
+            message: `Copia de tu bono regalo para ${giftCard.recipientEmail}`,
+          });
+        } catch (err) {
+          console.error("[Admin GiftCard] Error enviando copia al comprador:", err);
+        }
+      }
+    }
+
+    return NextResponse.json({ ...serialize(giftCard), emailSent, emailError });
   } catch (error) {
     console.error("Error creating gift card:", error);
     return NextResponse.json({ error: "Error creando bono regalo" }, { status: 500 });

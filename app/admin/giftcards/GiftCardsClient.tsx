@@ -91,6 +91,11 @@ export default function GiftCardsClient({ initialGiftCards }: { initialGiftCards
       setGiftCards(all);
       setTab("list");
       setForm({ amount: 100, customAmount: "", useCustom: false, customCode: "", buyerName: "", buyerEmail: "", recipientName: "", recipientEmail: "", message: "", sendDate: new Date().toISOString().split("T")[0] });
+      if (data.emailSent) {
+        alert(`Bono ${data.code} creado y enviado por email a ${form.recipientEmail || form.buyerEmail}`);
+      } else if (data.emailError) {
+        alert(`Bono ${data.code} creado, pero no se pudo enviar el email.\n${data.emailError}`);
+      }
     } else {
       alert(data.error || "Error al crear el bono");
     }
@@ -102,6 +107,28 @@ export default function GiftCardsClient({ initialGiftCards }: { initialGiftCards
     if (!confirm("¿Marcar este bono como canjeado?")) return;
     const res = await fetch(`/api/admin/giftcards/${id}/redeem`, { method: "POST" });
     if (res.ok) setGiftCards((g) => g.map((x) => x.id === id ? { ...x, status: "REDEEMED", redeemedAt: new Date().toISOString() } : x));
+  };
+
+  const handleCancel = async (id: string, code: string) => {
+    if (!confirm(`¿Anular el bono ${code}?\n\nQuedará cancelado y no se podrá canjear.`)) return;
+    const res = await fetch(`/api/admin/giftcards/${id}`, { method: "DELETE" });
+    const data = await res.json().catch(() => ({}));
+    if (res.ok) {
+      setGiftCards((g) => g.map((x) => x.id === id ? { ...x, status: "CANCELLED" } : x));
+    } else {
+      alert(data.error || "No se pudo anular el bono");
+    }
+  };
+
+  const handleResend = async (id: string, code: string) => {
+    if (!confirm(`¿Reenviar el bono ${code} por email al destinatario?`)) return;
+    const res = await fetch(`/api/admin/giftcards/${id}/resend`, { method: "POST" });
+    const data = await res.json().catch(() => ({}));
+    if (res.ok) {
+      alert(`Bono enviado a: ${data.sentTo?.join(", ") || "destinatario"}`);
+    } else {
+      alert(data.error || "No se pudo reenviar el email");
+    }
   };
 
   // ── Bulk CSV parse ────────────────────────────────────────────────────────────
@@ -198,7 +225,7 @@ export default function GiftCardsClient({ initialGiftCards }: { initialGiftCards
       {tab === "new" && (
         <form onSubmit={handleSubmit} className="bg-white border border-gray-200 p-6 space-y-6">
           <h2 className="font-serif font-light text-xl border-b border-gray-100 pb-4">Añadir código al inventario</h2>
-          <p className="text-sm text-gray-500">Introduce el código y el importe. Los datos del comprador son opcionales — si los dejas vacíos, el código queda disponible para asignarse automáticamente cuando alguien compre en la web.</p>
+          <p className="text-sm text-gray-500">Introduce el código y el importe. Si rellenas el email del destinatario, se enviará automáticamente el bono PDF por correo. Si dejas los datos vacíos, el código queda en inventario para venta web.</p>
 
           {/* Importe */}
           <div>
@@ -258,7 +285,7 @@ export default function GiftCardsClient({ initialGiftCards }: { initialGiftCards
               </div>
             </div>
             <div>
-              <p className="text-xs tracking-wider uppercase text-gray-400 mb-3">Destinatario <span className="normal-case text-gray-300">(si es diferente)</span></p>
+              <p className="text-xs tracking-wider uppercase text-gray-400 mb-3">Destinatario <span className="normal-case text-gray-300">(recibirá el PDF por email)</span></p>
               <div className="space-y-3">
                 <div>
                   <label className="block text-xs text-gray-500 mb-1">Nombre</label>
@@ -447,10 +474,22 @@ GUNNEN-WXYZ-5678,150,María López,maria@email.com,Pedro López,pedro@email.com,
                           ↓ Descargar PDF
                         </a>
                       )}
+                      {g.status === "ACTIVE" && g.recipientEmail && !g.recipientEmail.includes("inventario@gunnen.local") && (
+                        <button onClick={() => handleResend(g.id, g.code)}
+                          className="mt-1 block text-xs tracking-wider uppercase text-gray-400 hover:text-primary transition-colors">
+                          Reenviar email
+                        </button>
+                      )}
                       {g.status === "ACTIVE" && (
                         <button onClick={() => handleRedeem(g.id)}
-                          className="mt-1 text-xs tracking-wider uppercase text-gray-400 hover:text-primary transition-colors">
+                          className="mt-1 block text-xs tracking-wider uppercase text-gray-400 hover:text-primary transition-colors">
                           Marcar canjeado
+                        </button>
+                      )}
+                      {(g.status === "ACTIVE" || g.status === "AVAILABLE") && (
+                        <button onClick={() => handleCancel(g.id, g.code)}
+                          className="mt-1 block text-xs tracking-wider uppercase text-red-400 hover:text-red-600 transition-colors">
+                          Anular bono
                         </button>
                       )}
                     </div>
