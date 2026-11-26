@@ -255,12 +255,24 @@ export default function AnalyticsClient() {
   function prevMonth() {
     const [y, m] = month.split("-").map(Number);
     const d = new Date(y, m - 2, 1);
+    setSelectedDay(null);
     setMonth(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`);
   }
   function nextMonth() {
     const [y, m] = month.split("-").map(Number);
     const d = new Date(y, m, 1);
+    setSelectedDay(null);
     setMonth(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`);
+  }
+
+  function applyDateFilter(iso: string) {
+    if (!iso) {
+      setSelectedDay(null);
+      return;
+    }
+    const ym = iso.slice(0, 7);
+    if (ym !== month) setMonth(ym);
+    setSelectedDay(iso);
   }
 
   const [year, mo] = month.split("-").map(Number);
@@ -280,12 +292,29 @@ export default function AnalyticsClient() {
     return { day: i + 1, covers: d?.covers ?? 0, reservas: d?.reservations ?? 0 };
   });
 
-  // Datos para el pie de menús
-  const pieData = data
-    ? Object.entries(data.menuTotals).map(([name, value]) => ({ name, value }))
-    : [];
-
   const selectedDayData = selectedDay ? data?.days[selectedDay] : null;
+
+  const pieData = selectedDayData
+    ? Object.entries(selectedDayData.menus).map(([name, value]) => ({ name, value }))
+    : data
+      ? Object.entries(data.menuTotals).map(([name, value]) => ({ name, value }))
+      : [];
+
+  const kpis = selectedDay
+    ? {
+        reservations: selectedDayData?.reservations ?? 0,
+        covers: selectedDayData?.covers ?? 0,
+        deposit: selectedDayData?.list.reduce((s, r) => s + Number(r.depositAmount), 0) ?? 0,
+        lunch: selectedDayData?.list.filter((r) => r.reservationTime.startsWith("13") || r.reservationTime.startsWith("14")).reduce((s, r) => s + r.numberOfPeople, 0) ?? 0,
+        dinner: selectedDayData?.list.filter((r) => !(r.reservationTime.startsWith("13") || r.reservationTime.startsWith("14"))).reduce((s, r) => s + r.numberOfPeople, 0) ?? 0,
+      }
+    : {
+        reservations: data?.totalReservations ?? 0,
+        covers: data?.totalCovers ?? 0,
+        deposit: data?.depositTotal ?? 0,
+        lunch: data?.command?.lunchCovers ?? 0,
+        dinner: data?.command?.dinnerCovers ?? 0,
+      };
 
   return (
     <div className="space-y-6">
@@ -333,15 +362,35 @@ export default function AnalyticsClient() {
         </div>
       </div>
 
-      {/* ── NAVEGACIÓN DE MES ── */}
-      <div className="flex items-center justify-between bg-white border border-gray-200 px-5 py-3">
-        <button onClick={prevMonth} className="p-2 hover:bg-gray-50 rounded transition-colors">
-          <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
-        </button>
-        <h2 className="text-lg font-serif font-light tracking-wide">{monthLabelCap}</h2>
-        <button onClick={nextMonth} className="p-2 hover:bg-gray-50 rounded transition-colors">
-          <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
-        </button>
+      {/* ── NAVEGACIÓN DE MES + FILTRO FECHA ── */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-white border border-gray-200 px-5 py-3">
+        <div className="flex items-center justify-between sm:justify-start gap-2 flex-1">
+          <button onClick={prevMonth} className="p-2 hover:bg-gray-50 rounded transition-colors">
+            <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+          </button>
+          <h2 className="text-lg font-serif font-light tracking-wide">{monthLabelCap}</h2>
+          <button onClick={nextMonth} className="p-2 hover:bg-gray-50 rounded transition-colors">
+            <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+          </button>
+        </div>
+        <div className="flex items-center gap-2">
+          <label className="text-xs tracking-wider uppercase text-gray-400">Filtrar día</label>
+          <input
+            type="date"
+            value={selectedDay ?? ""}
+            onChange={(e) => applyDateFilter(e.target.value)}
+            className="border border-gray-200 px-3 py-1.5 text-sm"
+          />
+          {selectedDay && (
+            <button
+              type="button"
+              onClick={() => setSelectedDay(null)}
+              className="text-xs tracking-wider uppercase text-gray-500 hover:text-primary"
+            >
+              Ver mes
+            </button>
+          )}
+        </div>
       </div>
 
       {/* ── KPIs ── */}
@@ -351,30 +400,101 @@ export default function AnalyticsClient() {
         </div>
       ) : (
         <>
+          {/* ── LEYENDA OCUPACIÓN ── */}
+          <div className="flex flex-wrap gap-3 text-xs text-gray-500">
+            <span className="flex items-center gap-1"><span className="w-4 h-4 rounded-sm bg-white border border-gray-200 inline-block" /> Sin reservas</span>
+            <span className="flex items-center gap-1"><span className="w-4 h-4 rounded-sm bg-green-100 border border-green-300 inline-block" /> Baja (&lt;30%)</span>
+            <span className="flex items-center gap-1"><span className="w-4 h-4 rounded-sm bg-amber-100 border border-amber-300 inline-block" /> Media (30–60%)</span>
+            <span className="flex items-center gap-1"><span className="w-4 h-4 rounded-sm bg-orange-200 border border-orange-400 inline-block" /> Alta (60–85%)</span>
+            <span className="flex items-center gap-1"><span className="w-4 h-4 rounded-sm bg-red-200 border border-red-500 inline-block" /> Lleno (&gt;85%)</span>
+          </div>
+
+          {/* ── CALENDARIO ── */}
+          <div className="bg-white border border-gray-200 overflow-hidden">
+            <div className="grid grid-cols-7 border-b border-gray-100">
+              {["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"].map((d) => (
+                <div key={d} className="py-2 text-center text-xs tracking-wider uppercase text-gray-400 font-medium">
+                  {d}
+                </div>
+              ))}
+            </div>
+            <div className="grid grid-cols-7">
+              {Array.from({ length: startOffset }).map((_, i) => (
+                <div key={`empty-${i}`} className="min-h-[80px] border-r border-b border-gray-100 bg-gray-50/50" />
+              ))}
+              {Array.from({ length: daysInMonth }, (_, i) => {
+                const dayNum = i + 1;
+                const key = `${month}-${String(dayNum).padStart(2, "0")}`;
+                const d = data?.days[key];
+                const isSelected = selectedDay === key;
+                const isToday = key === new Date().toISOString().split("T")[0];
+
+                return (
+                  <button
+                    key={key}
+                    onClick={() => setSelectedDay(isSelected ? null : key)}
+                    className={`min-h-[80px] border-r border-b border-gray-100 p-2 text-left transition-all hover:ring-2 hover:ring-accent/40 focus:outline-none
+                      ${d ? occupancyColor(d.covers) : "bg-white"}
+                      ${d ? occupancyBorder(d.covers) : "border-gray-100"}
+                      ${isSelected ? "ring-2 ring-accent" : ""}
+                    `}
+                  >
+                    <span className={`text-xs font-medium ${isToday ? "bg-primary text-white rounded-full w-5 h-5 flex items-center justify-center" : "text-gray-600"}`}>
+                      {dayNum}
+                    </span>
+                    {d && (
+                      <div className="mt-1 space-y-0.5">
+                        <div className="text-[11px] font-semibold text-gray-800">
+                          {d.covers} 🍽 · {d.reservations} res.
+                        </div>
+                        {Object.entries(d.menus).map(([menu, count]) => (
+                          <div key={menu} className="flex items-center gap-1">
+                            <span
+                              className="w-2 h-2 rounded-full shrink-0"
+                              style={{ backgroundColor: menuColor(menu) }}
+                            />
+                            <span className="text-[10px] text-gray-600 truncate">{menu}: {count}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {selectedDay && (
+            <p className="text-sm text-gray-600">
+              Filtrando el <strong>{fmtDate(selectedDay)}</strong>
+              {selectedDayData ? ` · ${selectedDayData.covers} comensales · ${selectedDayData.reservations} reservas` : " · sin reservas"}
+            </p>
+          )}
+
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             <div className="bg-white border border-gray-200 p-5">
-              <div className="text-3xl font-serif font-light">{data?.totalReservations ?? 0}</div>
+              <div className="text-3xl font-serif font-light">{kpis.reservations}</div>
               <div className="text-xs tracking-wider uppercase text-gray-500 mt-1">Reservas</div>
             </div>
             <div className="bg-white border border-gray-200 p-5">
-              <div className="text-3xl font-serif font-light">{data?.totalCovers ?? 0}</div>
+              <div className="text-3xl font-serif font-light">{kpis.covers}</div>
               <div className="text-xs tracking-wider uppercase text-gray-500 mt-1">Comensales</div>
             </div>
             <div className="bg-white border border-gray-200 p-5">
               <div className="text-3xl font-serif font-light text-accent">
-                {data ? (data.totalCovers / Math.max(data.totalReservations, 1)).toFixed(1) : "—"}
+                {(kpis.covers / Math.max(kpis.reservations, 1)).toFixed(1)}
               </div>
               <div className="text-xs tracking-wider uppercase text-gray-500 mt-1">Media / reserva</div>
             </div>
             <div className="bg-white border border-gray-200 p-5">
               <div className="text-3xl font-serif font-light text-green-700">
-                {data ? `${data.depositTotal.toFixed(0)}€` : "—"}
+                {kpis.deposit.toFixed(0)}€
               </div>
               <div className="text-xs tracking-wider uppercase text-gray-500 mt-1">Retenciones</div>
             </div>
           </div>
 
-          {data?.command && (
+          {data?.command && !selectedDay && (
             <>
               <div>
                 <h2 className="text-xs tracking-wider uppercase text-gray-500 mb-3">Cuadro de mando</h2>
@@ -404,11 +524,11 @@ export default function AnalyticsClient() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                 <div className="bg-white border border-gray-200 p-5">
                   <h3 className="text-xs tracking-wider uppercase text-gray-500 mb-4">Servicio</h3>
-                  <p className="text-sm flex justify-between py-1 border-b border-gray-50"><span className="text-gray-500">Comida</span><strong>{data.command.lunchCovers} comensales</strong></p>
-                  <p className="text-sm flex justify-between py-1"><span className="text-gray-500">Cena</span><strong>{data.command.dinnerCovers} comensales</strong></p>
+                  <p className="text-sm flex justify-between py-1 border-b border-gray-50"><span className="text-gray-500">Comida</span><strong>{kpis.lunch} comensales</strong></p>
+                  <p className="text-sm flex justify-between py-1"><span className="text-gray-500">Cena</span><strong>{kpis.dinner} comensales</strong></p>
                 </div>
                 <div className="bg-white border border-gray-200 p-5">
-                  <h3 className="text-xs tracking-wider uppercase text-gray-500 mb-4">Reservas del mes</h3>
+                  <h3 className="text-xs tracking-wider uppercase text-gray-500 mb-4">{selectedDay ? "Reservas del día" : "Reservas del mes"}</h3>
                   <p className="text-sm flex justify-between py-1 border-b border-gray-50"><span className="text-gray-500">Confirmadas</span><strong>{data.command.statusCount.confirmed}</strong></p>
                   <p className="text-sm flex justify-between py-1 border-b border-gray-50"><span className="text-gray-500">Canceladas</span><strong>{data.command.statusCount.cancelled}</strong></p>
                   <p className="text-sm flex justify-between py-1 border-b border-gray-50"><span className="text-gray-500">Pago rechazado</span><strong>{data.command.statusCount.rejected}</strong></p>
@@ -422,7 +542,7 @@ export default function AnalyticsClient() {
                 </div>
               </div>
 
-              {data.command.occupancy.some((d) => d.covers > 0) && (
+              {!selectedDay && data.command.occupancy.some((d) => d.covers > 0) && (
                 <div className="bg-white border border-gray-200 p-5">
                   <h3 className="text-xs tracking-wider uppercase text-gray-500 mb-5">Ocupación por día</h3>
                   <div className="grid grid-cols-5 gap-2">
@@ -474,77 +594,6 @@ export default function AnalyticsClient() {
               )}
             </>
           )}
-
-          {/* ── LEYENDA OCUPACIÓN ── */}
-          <div className="flex flex-wrap gap-3 text-xs text-gray-500">
-            <span className="flex items-center gap-1"><span className="w-4 h-4 rounded-sm bg-white border border-gray-200 inline-block" /> Sin reservas</span>
-            <span className="flex items-center gap-1"><span className="w-4 h-4 rounded-sm bg-green-100 border border-green-300 inline-block" /> Baja (&lt;30%)</span>
-            <span className="flex items-center gap-1"><span className="w-4 h-4 rounded-sm bg-amber-100 border border-amber-300 inline-block" /> Media (30–60%)</span>
-            <span className="flex items-center gap-1"><span className="w-4 h-4 rounded-sm bg-orange-200 border border-orange-400 inline-block" /> Alta (60–85%)</span>
-            <span className="flex items-center gap-1"><span className="w-4 h-4 rounded-sm bg-red-200 border border-red-500 inline-block" /> Lleno (&gt;85%)</span>
-          </div>
-
-          {/* ── CALENDARIO ── */}
-          <div className="bg-white border border-gray-200 overflow-hidden">
-            {/* Cabeceras días */}
-            <div className="grid grid-cols-7 border-b border-gray-100">
-              {["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"].map((d) => (
-                <div key={d} className="py-2 text-center text-xs tracking-wider uppercase text-gray-400 font-medium">
-                  {d}
-                </div>
-              ))}
-            </div>
-
-            {/* Celdas */}
-            <div className="grid grid-cols-7">
-              {/* Celdas vacías iniciales */}
-              {Array.from({ length: startOffset }).map((_, i) => (
-                <div key={`empty-${i}`} className="min-h-[80px] border-r border-b border-gray-100 bg-gray-50/50" />
-              ))}
-
-              {/* Días del mes */}
-              {Array.from({ length: daysInMonth }, (_, i) => {
-                const dayNum = i + 1;
-                const key = `${month}-${String(dayNum).padStart(2, "0")}`;
-                const d = data?.days[key];
-                const isSelected = selectedDay === key;
-                const isToday =
-                  key === new Date().toISOString().split("T")[0];
-
-                return (
-                  <button
-                    key={key}
-                    onClick={() => setSelectedDay(isSelected ? null : key)}
-                    className={`min-h-[80px] border-r border-b border-gray-100 p-2 text-left transition-all hover:ring-2 hover:ring-accent/40 focus:outline-none
-                      ${d ? occupancyColor(d.covers) : "bg-white"}
-                      ${d ? occupancyBorder(d.covers) : "border-gray-100"}
-                      ${isSelected ? "ring-2 ring-accent" : ""}
-                    `}
-                  >
-                    <span className={`text-xs font-medium ${isToday ? "bg-primary text-white rounded-full w-5 h-5 flex items-center justify-center" : "text-gray-600"}`}>
-                      {dayNum}
-                    </span>
-                    {d && (
-                      <div className="mt-1 space-y-0.5">
-                        <div className="text-[11px] font-semibold text-gray-800">
-                          {d.covers} 🍽 · {d.reservations} res.
-                        </div>
-                        {Object.entries(d.menus).map(([menu, count]) => (
-                          <div key={menu} className="flex items-center gap-1">
-                            <span
-                              className="w-2 h-2 rounded-full shrink-0"
-                              style={{ backgroundColor: menuColor(menu) }}
-                            />
-                            <span className="text-[10px] text-gray-600 truncate">{menu}: {count}</span>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
 
           {/* ── PANEL DE DÍA SELECCIONADO ── */}
           {selectedDay && selectedDayData && (
@@ -658,7 +707,7 @@ export default function AnalyticsClient() {
                   ))}
                   <div className="border-t border-gray-100 pt-2 flex justify-between text-sm font-medium">
                     <span>Total</span>
-                    <span>{data?.totalCovers} pers.</span>
+                    <span>{kpis.covers} pers.</span>
                   </div>
                 </div>
               </div>
