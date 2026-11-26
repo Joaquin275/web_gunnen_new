@@ -37,6 +37,43 @@ interface DayData {
   }[];
 }
 
+interface RepeatCustomer {
+  email: string;
+  name: string;
+  visits: number;
+  covers: number;
+  spent: number;
+  lastVisit: string;
+}
+
+interface CommandData {
+  newCustomers: number;
+  returningCustomers: number;
+  uniqueCustomers: number;
+  repeatRate: number;
+  avgTicket: number;
+  avgTicketCover: number;
+  revenue: number;
+  lunchCovers: number;
+  dinnerCovers: number;
+  occupancy: { day: string; covers: number; reservations: number }[];
+  statusCount: {
+    confirmed: number;
+    cancelled: number;
+    pending: number;
+    rejected: number;
+    withGiftCard: number;
+  };
+  topRepeat: RepeatCustomer[];
+  giftCards: {
+    sold: number;
+    soldValue: number;
+    redeemed: number;
+    circulating: number;
+    circulatingValue: number;
+  };
+}
+
 interface AnalyticsData {
   month: string;
   totalCovers: number;
@@ -44,6 +81,7 @@ interface AnalyticsData {
   depositTotal: number;
   menuTotals: Record<string, number>;
   days: Record<string, DayData>;
+  command?: CommandData;
 }
 
 const MAX_COVERS_PER_DAY = 20; // para calcular % de ocupación
@@ -335,6 +373,107 @@ export default function AnalyticsClient() {
               <div className="text-xs tracking-wider uppercase text-gray-500 mt-1">Retenciones</div>
             </div>
           </div>
+
+          {data?.command && (
+            <>
+              <div>
+                <h2 className="text-xs tracking-wider uppercase text-gray-500 mb-3">Cuadro de mando</h2>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  <div className="bg-white border border-gray-200 p-5">
+                    <div className="text-3xl font-serif font-light">{data.command.newCustomers}</div>
+                    <div className="text-xs tracking-wider uppercase text-gray-500 mt-1">Clientes nuevos</div>
+                  </div>
+                  <div className="bg-white border border-gray-200 p-5">
+                    <div className="text-3xl font-serif font-light">{data.command.returningCustomers}</div>
+                    <div className="text-xs tracking-wider uppercase text-gray-500 mt-1">Recurrentes</div>
+                    <p className="text-xs text-gray-400 mt-1">{data.command.repeatRate}% de repetición</p>
+                  </div>
+                  <div className="bg-white border border-gray-200 p-5">
+                    <div className="text-3xl font-serif font-light">{data.command.avgTicket.toFixed(0)}€</div>
+                    <div className="text-xs tracking-wider uppercase text-gray-500 mt-1">Ticket medio</div>
+                    <p className="text-xs text-gray-400 mt-1">{data.command.avgTicketCover.toFixed(0)}€ / comensal</p>
+                  </div>
+                  <div className="bg-white border border-gray-200 p-5">
+                    <div className="text-3xl font-serif font-light">{data.command.revenue.toFixed(0)}€</div>
+                    <div className="text-xs tracking-wider uppercase text-gray-500 mt-1">Total estimado</div>
+                    <p className="text-xs text-gray-400 mt-1">{data.command.uniqueCustomers} clientes únicos</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <div className="bg-white border border-gray-200 p-5">
+                  <h3 className="text-xs tracking-wider uppercase text-gray-500 mb-4">Servicio</h3>
+                  <p className="text-sm flex justify-between py-1 border-b border-gray-50"><span className="text-gray-500">Comida</span><strong>{data.command.lunchCovers} comensales</strong></p>
+                  <p className="text-sm flex justify-between py-1"><span className="text-gray-500">Cena</span><strong>{data.command.dinnerCovers} comensales</strong></p>
+                </div>
+                <div className="bg-white border border-gray-200 p-5">
+                  <h3 className="text-xs tracking-wider uppercase text-gray-500 mb-4">Reservas del mes</h3>
+                  <p className="text-sm flex justify-between py-1 border-b border-gray-50"><span className="text-gray-500">Confirmadas</span><strong>{data.command.statusCount.confirmed}</strong></p>
+                  <p className="text-sm flex justify-between py-1 border-b border-gray-50"><span className="text-gray-500">Canceladas</span><strong>{data.command.statusCount.cancelled}</strong></p>
+                  <p className="text-sm flex justify-between py-1 border-b border-gray-50"><span className="text-gray-500">Pago rechazado</span><strong>{data.command.statusCount.rejected}</strong></p>
+                  <p className="text-sm flex justify-between py-1"><span className="text-gray-500">Con bono</span><strong>{data.command.statusCount.withGiftCard}</strong></p>
+                </div>
+                <div className="bg-white border border-gray-200 p-5">
+                  <h3 className="text-xs tracking-wider uppercase text-gray-500 mb-4">Bonos</h3>
+                  <p className="text-sm flex justify-between py-1 border-b border-gray-50"><span className="text-gray-500">Vendidos este mes</span><strong>{data.command.giftCards.sold} · {data.command.giftCards.soldValue.toFixed(0)}€</strong></p>
+                  <p className="text-sm flex justify-between py-1 border-b border-gray-50"><span className="text-gray-500">Canjeados este mes</span><strong>{data.command.giftCards.redeemed}</strong></p>
+                  <p className="text-sm flex justify-between py-1"><span className="text-gray-500">En circulación</span><strong>{data.command.giftCards.circulating} · {data.command.giftCards.circulatingValue.toFixed(0)}€</strong></p>
+                </div>
+              </div>
+
+              {data.command.occupancy.some((d) => d.covers > 0) && (
+                <div className="bg-white border border-gray-200 p-5">
+                  <h3 className="text-xs tracking-wider uppercase text-gray-500 mb-5">Ocupación por día</h3>
+                  <div className="grid grid-cols-5 gap-2">
+                    {data.command.occupancy.map((d) => (
+                      <div key={d.day} className="text-center border border-gray-100 p-3">
+                        <p className="text-[10px] tracking-wider uppercase text-gray-400">{d.day.slice(0, 3)}</p>
+                        <p className="text-xl font-serif font-light mt-1">{d.covers}</p>
+                        <p className="text-[10px] text-gray-400">{d.reservations} res.</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {data.command.topRepeat.length > 0 && (
+                <div className="bg-white border border-gray-200 overflow-hidden">
+                  <div className="px-5 py-4 border-b border-gray-100">
+                    <h3 className="text-xs tracking-wider uppercase text-gray-500">Clientes que repiten</h3>
+                    <p className="text-xs text-gray-400 mt-1">Historial completo · 2 o más visitas confirmadas</p>
+                  </div>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead className="bg-gray-50 border-b border-gray-100">
+                        <tr>
+                          <th className="px-4 py-3 text-left text-xs tracking-wider uppercase text-gray-500">Cliente</th>
+                          <th className="px-4 py-3 text-center text-xs tracking-wider uppercase text-gray-500">Visitas</th>
+                          <th className="px-4 py-3 text-center text-xs tracking-wider uppercase text-gray-500">Comensales</th>
+                          <th className="px-4 py-3 text-right text-xs tracking-wider uppercase text-gray-500">Estimado</th>
+                          <th className="px-4 py-3 text-right text-xs tracking-wider uppercase text-gray-500">Última visita</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-100">
+                        {data.command.topRepeat.map((c) => (
+                          <tr key={c.email} className="hover:bg-gray-50">
+                            <td className="px-4 py-3">
+                              <p className="font-medium">{c.name}</p>
+                              <p className="text-xs text-gray-400">{c.email}</p>
+                            </td>
+                            <td className="px-4 py-3 text-center font-medium">{c.visits}</td>
+                            <td className="px-4 py-3 text-center">{c.covers}</td>
+                            <td className="px-4 py-3 text-right">{c.spent.toFixed(0)}€</td>
+                            <td className="px-4 py-3 text-right text-gray-500">{fmtDate(c.lastVisit)}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
 
           {/* ── LEYENDA OCUPACIÓN ── */}
           <div className="flex flex-wrap gap-3 text-xs text-gray-500">
