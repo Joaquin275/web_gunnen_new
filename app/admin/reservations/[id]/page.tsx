@@ -6,11 +6,16 @@ import CaptureButton from "./CaptureButton";
 import VoidButton from "./VoidButton";
 import RefundButton from "./RefundButton";
 import MarkExpiredButton from "./MarkExpiredButton";
+import EditReservationForm from "./EditReservationForm";
 import { getPreauthAgeInfo } from "@/lib/preauth";
+import { getMenuBase } from "@/lib/menus";
 
 export default async function ReservationDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const r = await prisma.reservation.findUnique({ where: { id } });
+  const r = await prisma.reservation.findUnique({
+    where: { id },
+    include: { giftCard: true },
+  });
   if (!r) notFound();
 
   const statusMap: Record<string, { label: string; cls: string }> = {
@@ -56,7 +61,37 @@ export default async function ReservationDetailPage({ params }: { params: Promis
         </span>
       </div>
 
-      <h1 className="text-3xl font-serif font-light">Reserva #{r.id.slice(-6).toUpperCase()}</h1>
+      <div className="flex items-center justify-between gap-4 flex-wrap">
+        <h1 className="text-3xl font-serif font-light">Reserva #{r.id.slice(-6).toUpperCase()}</h1>
+        {r.status !== "CANCELLED" && (
+          <EditReservationForm
+            id={id}
+            initial={{
+              firstName: r.firstName,
+              lastName: r.lastName,
+              email: r.email,
+              phone: r.phone,
+              reservationDate: r.reservationDate.toISOString().slice(0, 10),
+              reservationTime: r.reservationTime,
+              numberOfPeople: r.numberOfPeople,
+              menuId: r.menuId || getMenuBase(r.menuName) || "tempo",
+              harmonyNone: r.harmonyNone,
+              harmonyVino: r.harmonyVino,
+              harmonyNolo: r.harmonyNolo,
+              allergens: r.allergens,
+              allergenNotes: r.allergenNotes || "",
+              observations: r.observations || "",
+              depositAmount: Number(r.depositAmount),
+            }}
+            giftCard={r.giftCard ? {
+              amount: Number(r.giftCard.amount),
+              numberOfPeople: r.giftCard.numberOfPeople,
+              menuId: r.giftCard.menuId,
+              menuName: r.giftCard.menuName,
+            } : null}
+          />
+        )}
+      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Cliente */}
@@ -113,6 +148,12 @@ export default async function ReservationDetailPage({ params }: { params: Promis
             <p className="text-xs text-gray-400">Retención Redsys (30%)</p>
             <p className="font-medium text-blue-700">{Number(r.depositAmount).toFixed(2)}€</p>
           </div>
+          {r.giftCard && (
+            <div>
+              <p className="text-xs text-gray-400">Bono aplicado</p>
+              <p className="text-sm">{r.giftCard.code} · {Number(r.giftCard.amount).toFixed(2)}€ · {r.giftCard.menuName || "—"}</p>
+            </div>
+          )}
         </div>
 
         {/* Info Redsys */}

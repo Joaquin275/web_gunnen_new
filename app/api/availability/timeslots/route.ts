@@ -6,6 +6,7 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const dateParam = searchParams.get("date");
+    const excludeId = searchParams.get("excludeId");
 
     if (!dateParam) return NextResponse.json({ error: "Fecha requerida" }, { status: 400 });
 
@@ -22,9 +23,7 @@ export async function GET(request: Request) {
     const dateReservations = await prisma.reservation.findMany({
       where: {
         reservationDate: new Date(dateParam + "T00:00:00"),
-        status: { in: ["CONFIRMED", "PENDING_PAYMENT"] },
-        // Las reservas PENDING_PAYMENT de más de 30 min se consideran abandonadas
-        // y no bloquean la franja (el cliente cerró Redsys sin pagar)
+        ...(excludeId ? { id: { not: excludeId } } : {}),
         OR: [
           { status: "CONFIRMED" },
           {
