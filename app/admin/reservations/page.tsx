@@ -31,6 +31,7 @@ interface Reservation {
   firstName: string;
   lastName: string;
   email: string;
+  phone: string;
   numberOfPeople: number;
   menuName: string | null;
   depositAmount: number;
@@ -62,6 +63,7 @@ export default function AdminReservationsPage() {
   const [form, setForm] = useState(EMPTY_FORM);
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState("");
+  const [query, setQuery] = useState("");
 
   const fetchReservations = useCallback(async (silent = false) => {
     if (!silent) setLoading(true);
@@ -104,6 +106,21 @@ export default function AdminReservationsPage() {
     setSaving(false);
   };
 
+  const q = query.trim().toLowerCase();
+  const filtered = q
+    ? reservations.filter((r) => {
+        const date = new Date(r.reservationDate).toLocaleDateString("es-ES", {
+          day: "2-digit", month: "2-digit", year: "numeric",
+        });
+        const haystack = [
+          r.firstName, r.lastName, `${r.firstName} ${r.lastName}`,
+          r.email, r.phone, r.menuName, r.reservationTime, date,
+          r.id.slice(-6),
+        ].join(" ").toLowerCase();
+        return haystack.includes(q);
+      })
+    : reservations;
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-48">
@@ -121,7 +138,7 @@ export default function AdminReservationsPage() {
             <span className={`w-2 h-2 rounded-full ${refreshing ? "bg-amber-400 animate-pulse" : "bg-green-500"}`} />
             <p className="text-gray-500 text-sm">
               {refreshing ? "Actualizando…" : lastUpdated
-                ? `${reservations.length} reservas · actualizado ${lastUpdated.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}`
+                ? `${filtered.length}${q ? ` de ${reservations.length}` : ""} reservas · actualizado ${lastUpdated.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}`
                 : ""}
             </p>
             <button
@@ -228,9 +245,21 @@ export default function AdminReservationsPage() {
         </form>
       )}
 
+      <div className="bg-white border border-gray-200 px-4 py-3">
+        <input
+          type="search"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Buscar por nombre, email, teléfono, fecha o menú…"
+          className="w-full border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:border-primary"
+        />
+      </div>
+
       <div className="bg-white border border-gray-200 overflow-hidden">
         {reservations.length === 0 ? (
           <p className="px-6 py-12 text-center text-gray-400">No hay reservas aún</p>
+        ) : filtered.length === 0 ? (
+          <p className="px-6 py-12 text-center text-gray-400">Ninguna reserva coincide con “{query}”</p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
@@ -248,7 +277,7 @@ export default function AdminReservationsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
-                {reservations.map((r) => {
+                {filtered.map((r) => {
                   const { label, cls } = statusLabel(r.status);
                   const preauth = preauthAgeInfo(r);
                   const redsysCls =
@@ -268,7 +297,7 @@ export default function AdminReservationsPage() {
                       </td>
                       <td className="px-4 py-3">
                         <p className="font-medium">{r.firstName} {r.lastName}</p>
-                        <p className="text-gray-400 text-xs">{r.email}</p>
+                        <p className="text-gray-400 text-xs">{r.email}{r.phone ? ` · ${r.phone}` : ""}</p>
                       </td>
                       <td className="px-4 py-3 text-gray-600">{r.menuName || "—"}</td>
                       <td className="px-4 py-3 text-center">{r.numberOfPeople}</td>
